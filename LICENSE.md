@@ -76,9 +76,9 @@ By downloading and or installing the Software and associated files on your compu
 
 #### A.1 Description of the Software:
 
-The Software constitutes any software distributed as part of or pertaining to the MATLAB code as made available online at https://github.com/CemMusluoglu/DTROcodes.
+The Software constitutes any software distributed as part of or pertaining to the MATLAB code as made available online at https://github.com/CemMusluoglu/DSFO.
 
 
 #### A.2 References:
 
-[1] C. A. Musluoglu and A. Bertrand "Distributed Adaptive Trace Ratio Optimization in Wireless Sensor Networks", Internal Report KU Leuven, 2020.
+[1] C. A. Musluoglu and A. Bertrand "A Unified Framework for Distributed Signal and Feature Fusion Problems", Internal Report KU Leuven, 2021.
