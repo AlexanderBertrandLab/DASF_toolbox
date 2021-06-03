@@ -1,17 +1,24 @@
 function f=tro_eval(X,data)
 
-Y_cell=data.Y_cell;
+% Evaluate the TRO objective trace(X'*Ryy*X)/trace(X'*Rvv*X);
 
-Y=Y_cell{1};
-V=Y_cell{2};
+% Author: Cem Musluoglu, KU Leuven, Department of Electrical Engineering
+% (ESAT), STADIUS Center for Dynamical Systems, Signal Processing and Data
+% Analytics
+% Correspondence: cemates.musluoglu@esat.kuleuven.be
 
-N=size(Y,2);
+    Y_cell=data.Y_cell;
 
-Ryy=1/N*conj(Y*Y');
-Rvv=1/N*conj(V*V');
-Ryy=make_sym(Ryy);
-Rvv=make_sym(Rvv);
+    Y=Y_cell{1};
+    V=Y_cell{2};
 
-f=trace(X'*Ryy*X)/trace(X'*Rvv*X);
+    N=size(Y,2);
+
+    Ryy=1/N*conj(Y*Y');
+    Rvv=1/N*conj(V*V');
+    Ryy=make_sym(Ryy);
+    Rvv=make_sym(Rvv);
+
+    f=trace(X'*Ryy*X)/trace(X'*Rvv*X);
 
 end

@@ -1,5 +1,5 @@
 function [X,f_track,norm_track,norm_star_track]=ti_dsfo(prob_params,...
-    data,obj_eval,prob_solver,prob_resolve_uniqueness,conv,X_star)
+    data,conv,obj_eval,prob_solver,prob_resolve_uniqueness,X_star)
 
 % Function running the TI-DSFO for a given problem.
 % INPUTS :
@@ -28,8 +28,13 @@ function [X,f_track,norm_track,norm_star_track]=ti_dsfo(prob_params,...
 % condition (OR). One of the criteria can be chosen explicitly by
 % initializing the other to a negative value.
 %
-% debug       : If debug equals 1, dynamically plot first projection vector
-%               across iterations
+% obj_eval    : Function evaluating the objective of the problem
+%
+% prob_solver : Function solving the centralozed problem
+%
+% prob_resolve_uniqueness : (Optional) Function resolving the uniqueness
+%                           ambiguity
+%
 % X_star      : (Optional) True projection matrix, computed for example
 %               with the centralized algorithm. Allows to compare 
 %               convergence, if it is not provided, there might be a 
@@ -42,6 +47,11 @@ function [X,f_track,norm_track,norm_star_track]=ti_dsfo(prob_params,...
 % norm_track      : Sequence of ||X^(i+1)-X^(i)||_F^2
 % norm_star_track : Sequence of ||X^(i)-X^*||_F^2/||X^*||_F^2
 %
+
+% Author: Cem Musluoglu, KU Leuven, Department of Electrical Engineering
+% (ESAT), STADIUS Center for Dynamical Systems, Signal Processing and Data
+% Analytics
+% Correspondence: cemates.musluoglu@esat.kuleuven.be
 
 
 Q=prob_params.Q;
@@ -91,11 +101,13 @@ while (tol_f>0 && abs(f-f_old)>tol_f) || (i<nbiter)
     X=C_q*X_tilde;
     
     if i>0
-        X=prob_resolve_uniqueness(X_old,X);
+        if(nargin>5)
+            X=prob_resolve_uniqueness(X_old,X);
+        end
         norm_track=[norm_track,norm(X-X_old,'fro').^2/numel(X)];
     end
     
-    if(compare_opt==1)
+    if(nargin>6 && compare_opt==1)
         X=prob_resolve_uniqueness(X_star,X);
         norm_star_track=[norm_star_track,norm(X-X_star,'fro')^2/norm(X_star,'fro')^2];
         if(plot_dynamic==1)

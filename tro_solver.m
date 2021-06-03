@@ -1,5 +1,12 @@
 function [X,f]=tro_solver(prob_params,data)
 
+% Solve the TRO problem max trace(X'*Ryy*X)/trace(X'*Rvv*X) s.t. X'*Gamma*X=I
+
+% Author: Cem Musluoglu, KU Leuven, Department of Electrical Engineering
+% (ESAT), STADIUS Center for Dynamical Systems, Signal Processing and Data
+% Analytics
+% Correspondence: cemates.musluoglu@esat.kuleuven.be
+
     i=0;
     M=size(data.Y_cell{1},1);
     Q=prob_params.Q;
