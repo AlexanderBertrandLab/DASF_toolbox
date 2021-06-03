@@ -1,13 +1,14 @@
-function [X,f_track,norm_track,norm_star_track]=ti_dsfo(prob_params,data,obj_eval,prob_solver,conv,debug,X_star)
+function [X,f_track,norm_track,norm_star_track]=ti_dsfo(prob_params,...
+    data,obj_eval,prob_solver,prob_resolve_uniqueness,conv,X_star)
 
 % Function running the TI-DSFO for a given problem.
 % INPUTS :
 % prob_params : Structure containing the following fields:
 %            Q : Number of filters to use (dimension of projected space)
 %            nbnodes : Number of nodes in the network.
-%            nbsensnode : Vector containing the number of sensors for each
+%            nbsensors_vec : Vector containing the number of sensors for each
 %                         node.
-%            nbsens : Sum of the number of sensors for each node 
+%            nbsensors : Sum of the number of sensors for each node 
 %                     (dimension of the network-wide signals). Is equal to
 %                     sum(nbsensnode).
 %            graph_adj : Adjacency (binary) matrix, with graph_adj(i,j)=1  
@@ -44,27 +45,19 @@ function [X,f_track,norm_track,norm_star_track]=ti_dsfo(prob_params,data,obj_eva
 
 
 Q=prob_params.Q;
-nbsens=prob_params.nbsens;
+nbsensors=prob_params.nbsensors;
 nbnodes=prob_params.nbnodes;
-nbsensnode=prob_params.nbsensnode;
+nbsensors_vec=prob_params.nbsensors_vec;
 adj=prob_params.graph_adj;
-sgn_sync=prob_params.sgn_sync;
-efficient=prob_params.efficient;
+compare_opt=prob_params.compare_opt;
+plot_dynamic=prob_params.plot_dynamic;
 
 tol_f=conv.tol_f;
 nbiter=conv.nbiter;
 
-Xinit=randn(nbsens,Q);
-Xinit=normc(Xinit);
-f=obj_eval(Xinit,data);
-
-inter_node=1;
-X_cell=cell(nbnodes,1);
-for k=1:nbnodes
-    X_cell{k}=Xinit(inter_node:inter_node+nbsensnode(k)-1,:);
-    X=Xinit;
-    inter_node=inter_node+nbsensnode(k);
-end
+X=randn(nbsensors,Q);
+X=normc(X);
+f=obj_eval(X,data);
 
 i=0;
 f_old=f+1;
@@ -78,7 +71,6 @@ rand_path=path(randperm(length(path)));
 
 while (tol_f>0 && abs(f-f_old)>tol_f) || (i<nbiter)
     
-    X_old=X;
     
     q=rand_path(rem(i,nbnodes)+1);
     
@@ -86,7 +78,7 @@ while (tol_f>0 && abs(f-f_old)>tol_f) || (i<nbiter)
     
     Nu=constr_Nu(neighbors,path);
     
-    C_q=constr_C(X_cell,Q,q,nbsensnode,nbnodes,neighbors,Nu);
+    C_q=constr_C(X,Q,q,nbsensors_vec,nbnodes,neighbors,Nu);
 
     data_compressed=compress(data,C_q);
 
@@ -96,47 +88,24 @@ while (tol_f>0 && abs(f-f_old)>tol_f) || (i<nbiter)
     f=obj_eval(X_tilde,data_compressed);
     f_track=[f_track,f];
     
-    if efficient==0
-        X_cell=update_X(X_cell,X_tilde,Q,q,nbsensnode,nbnodes,neighbors,Nu);
-    else
-        X_cell=update_X_efficient(X_cell,X_tilde,Q,q,nbsensnode,nbnodes,neighbors,Nu);
-    end
+    X=C_q*X_tilde;
     
-    X=form_mat(X_cell,X,Q,nbsensnode,nbnodes);
-
-    i=i+1;
-    
-    if(debug==1)
-        for l=1:Q
-            if sum(sum((X_star(:,l)-X(:,l)).^2))>sum(sum((-X_star(:,l)-X(:,l)).^2))
-                X(:,l)=-X(:,l);
-            end
-        end
-    
-        plot(X_star(:,1),'r')
-        hold on
-        plot(X(:,1),'b')
-        ylim([1.2*min(real(X_star(:,1))) 1.2*max(real(X_star(:,1)))]);
-        hold off
-        drawnow
-    end
-    
-    if i>1
+    if i>0
+        X=prob_resolve_uniqueness(X_old,X);
         norm_track=[norm_track,norm(X-X_old,'fro').^2/numel(X)];
     end
     
-    if nargin>5
-        
-        if(sgn_sync==1)
-            for l=1:Q
-                if sum(sum((X_star(:,l)-X(:,l)).^2))>sum(sum((-X_star(:,l)-X(:,l)).^2))
-                    X(:,l)=-X(:,l);
-                end
-            end
-        end
-
+    if(compare_opt==1)
+        X=prob_resolve_uniqueness(X_star,X);
         norm_star_track=[norm_star_track,norm(X-X_star,'fro')^2/norm(X_star,'fro')^2];
+        if(plot_dynamic==1)
+            dynamic_plot(X,X_star)
+        end
     end
+    
+    X_old=X;
+    
+    i=i+1;
 
 end
 
@@ -158,23 +127,23 @@ function Nu=constr_Nu(neighbors,path)
     
 end
 
-
-function C_q=constr_C(X_cell,Q,q,nbsensnode,nbnodes,neighbors,Nu)
-   
+function C_q=constr_C(x,Q,q,nbsensors_vec,nbnodes,neighbors,Nu)
+  
     nb_neighbors=length(neighbors);
 
     ind=0:nb_neighbors-1;
     
-    C_q=zeros(sum(nbsensnode),nbsensnode(q)+nb_neighbors*Q);
-    C_q(:,1:nbsensnode(q))=[zeros(sum(nbsensnode(1:q-1)),nbsensnode(q));...
-        eye(nbsensnode(q)); zeros(sum(nbsensnode(q+1:nbnodes)),nbsensnode(q))];
+    C_q=zeros(sum(nbsensors_vec),nbsensors_vec(q)+nb_neighbors*Q);
+    C_q(:,1:nbsensors_vec(q))=[zeros(sum(nbsensors_vec(1:q-1)),nbsensors_vec(q));...
+        eye(nbsensors_vec(q)); zeros(sum(nbsensors_vec(q+1:nbnodes)),nbsensors_vec(q))];
     for k=1:nb_neighbors
         ind_k=ind(k);
         for n=1:length(Nu{k})
             Nu_k=Nu{k};
             l=Nu_k(n);
-            C_q(sum(nbsensnode(1:l-1))+1:sum(nbsensnode(1:l)),...
-                nbsensnode(q)+ind_k*Q+1:nbsensnode(q)+ind_k*Q+Q)=X_cell{l};
+            X_curr=x(sum(nbsensors_vec(1:l-1))+1:sum(nbsensors_vec(1:l)),:);
+            C_q(sum(nbsensors_vec(1:l-1))+1:sum(nbsensors_vec(1:l)),...
+                nbsensors_vec(q)+ind_k*Q+1:nbsensors_vec(q)+ind_k*Q+Q)=X_curr;
         end
     end
     
@@ -220,6 +189,43 @@ function data_compressed=compress(data,C_q)
         data_compressed.Gamma_cell=Gamma_cell_compressed;
     else
         data_compressed.Gamma_cell={};
+    end
+    
+end
+
+function dynamic_plot(X,X_star)
+
+    plot(X_star(:,1),'r')
+    hold on
+    plot(X(:,1),'b')
+    ylim([1.2*min(real(X_star(:,1))) 1.2*max(real(X_star(:,1)))]);
+    hold off
+    drawnow
+    
+end
+
+
+%
+% Old functions
+%
+
+function C_q=constr_C_cell(X_cell,Q,q,nbsensnode,nbnodes,neighbors,Nu)
+   
+    nb_neighbors=length(neighbors);
+
+    ind=0:nb_neighbors-1;
+    
+    C_q=zeros(sum(nbsensnode),nbsensnode(q)+nb_neighbors*Q);
+    C_q(:,1:nbsensnode(q))=[zeros(sum(nbsensnode(1:q-1)),nbsensnode(q));...
+        eye(nbsensnode(q)); zeros(sum(nbsensnode(q+1:nbnodes)),nbsensnode(q))];
+    for k=1:nb_neighbors
+        ind_k=ind(k);
+        for n=1:length(Nu{k})
+            Nu_k=Nu{k};
+            l=Nu_k(n);
+            C_q(sum(nbsensnode(1:l-1))+1:sum(nbsensnode(1:l)),...
+                nbsensnode(q)+ind_k*Q+1:nbsensnode(q)+ind_k*Q+Q)=X_cell{l};
+        end
     end
     
 end
