@@ -8,8 +8,7 @@
 clear all
 close all
 
-addpath('../');
-addpath('../Utility/');
+addpath('../DSFO/');
 
 % Number of Monte-Carlo runs
 mc_runs=5;
@@ -76,7 +75,7 @@ for n_runs=1:mc_runs
     prob_params.graph_adj=graph_adj;
     
     % Solve the TRO problem using TI-DSFO
-    [X_est,f_track,norm_track,norm_star_track]=ti_dsfo(data,prob_params,...
+    [X_est,f_track,norm_track,norm_star_track]=dsfo(data,prob_params,...
         conv,@tro_eval,@tro_solver,@tro_resolve_uniqueness,X_star);
     
     norm_error{n_runs}=norm_star_track;

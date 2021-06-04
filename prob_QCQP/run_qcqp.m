@@ -8,8 +8,7 @@
 clear all
 close all
 
-addpath('../');
-addpath('../Utility/');
+addpath('../DSFO/');
 
 % Number of Monte-Carlo runs
 mc_runs=5;
@@ -77,7 +76,7 @@ while n_runs<=mc_runs
     prob_params.graph_adj=graph_adj;
     
     try
-        [X_est,f_track,norm_track,norm_star_track]=ti_dsfo(data,prob_params,...
+        [X_est,f_track,norm_track,norm_star_track]=dsfo(data,prob_params,...
                                 conv,@qcqp_eval,@qcqp_solver,[],X_star);
         norm_error{n_runs}=norm_star_track;
         n_runs=n_runs+1;
