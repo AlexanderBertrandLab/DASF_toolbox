@@ -1,4 +1,4 @@
-function [X,f]=tro_solver(prob_params,data)
+function [X_star,f_star]=tro_solver(data,prob_params)
 
 % Solve the TRO problem max trace(X'*Ryy*X)/trace(X'*Rvv*X) s.t. X'*Gamma*X=I
 
@@ -22,7 +22,7 @@ function [X,f]=tro_solver(prob_params,data)
     V=data.Y_cell{2};
     Gamma=data.Gamma_cell{1};
 
-    N=size(Y,2);
+    N=prob_params.nbsamples;
 
     Ryy=1/N*conj(Y*Y');
     Rvv=1/N*conj(V*V');
@@ -57,7 +57,8 @@ function [X,f]=tro_solver(prob_params,data)
 
     end
 
-    X=U_c*sqrt(inv(S_c))*X;
+    X_star=U_c*sqrt(inv(S_c))*X;
+    f_star=tro_eval(X_star,data);
 
 end
 

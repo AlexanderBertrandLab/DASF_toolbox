@@ -1,5 +1,5 @@
-function [X,f_track,norm_track,norm_star_track]=ti_dsfo(prob_params,...
-    data,conv,obj_eval,prob_solver,prob_resolve_uniqueness,X_star)
+function [X,f_track,norm_track,norm_star_track]=ti_dsfo(data,...
+    prob_params,conv,obj_eval,prob_solver,prob_resolve_uniqueness,X_star)
 
 % Function running the TI-DSFO for a given problem.
 % INPUTS :
@@ -21,6 +21,8 @@ function [X,f_track,norm_track,norm_star_track]=ti_dsfo(prob_params,...
 %                     representing the parameters.
 %            Gamma_cell : Cell containing D matrices of size M x M
 %                         representing the quadratic parameters.
+%            Glob_Const_cell : Cell containing the global constants which
+%                         are not filtered through X.
 % conv        : Parameters concerning the stopping criteria of the algorithm
 %            tol_f : Tolerance in objective: |f^(i+1)-f^(i)|>tol_f
 %            nbiter : Max. nb. of iterations.
@@ -77,38 +79,49 @@ norm_track=[];
 norm_star_track=[];
 
 path=1:nbnodes;
+% Random updating order
 rand_path=path(randperm(length(path)));
 
 while (tol_f>0 && abs(f-f_old)>tol_f) || (i<nbiter)
     
-    
+    % Select updating node
     q=rand_path(rem(i,nbnodes)+1);
     
+    % Prune the network
+    % Find shortest path
     [neighbors,path]=find_path(q,adj);
     
+    % Neighborhood clusters
     Nu=constr_Nu(neighbors,path);
     
+    % Global - local transition matrix
     C_q=constr_C(X,Q,q,nbsensors_vec,nbnodes,neighbors,Nu);
 
+    % Compute compressed data
     data_compressed=compress(data,C_q);
 
-    X_tilde=comp_X_tilde(prob_params,data_compressed,prob_solver);
+    % Compute the local variable
+    X_tilde=comp_X_tilde(data_compressed,prob_params,prob_solver);
     
+    % Evaluate objective
     f_old=f;
     f=obj_eval(X_tilde,data_compressed);
     f_track=[f_track,f];
     
+    % Global variable
     X=C_q*X_tilde;
     
     if i>0
-        if(nargin>5)
+        if(~isempty(prob_resolve_uniqueness))
             X=prob_resolve_uniqueness(X_old,X);
         end
         norm_track=[norm_track,norm(X-X_old,'fro').^2/numel(X)];
     end
     
-    if(nargin>6 && compare_opt==1)
-        X=prob_resolve_uniqueness(X_star,X);
+    if(~isempty(X_star) && compare_opt==1)
+        if(~isempty(prob_resolve_uniqueness))
+            X=prob_resolve_uniqueness(X_star,X);
+        end
         norm_star_track=[norm_star_track,norm(X-X_star,'fro')^2/norm(X_star,'fro')^2];
         if(plot_dynamic==1)
             dynamic_plot(X,X_star)
@@ -124,9 +137,11 @@ end
 end
 
 function [neighbors,path]=find_path(q,adj)
+
     [dist,path]=shortest_path(adj,q);
     neighbors=find(cell2mat(cellfun(@(c) length(c), path, 'uniform', false))==2);
     neighbors=sort(neighbors);
+    
 end
 
 function Nu=constr_Nu(neighbors,path)
@@ -166,14 +181,15 @@ function data_compressed=compress(data,C_q)
     Y_cell=data.Y_cell;
     B_cell=data.B_cell;
     Gamma_cell=data.Gamma_cell;
+    Glob_Const_cell=data.Glob_Const_cell;
     
     data_compressed=struct;
 
     if(~isempty(data.Y_cell))
-        S=length(Y_cell);
-        Y_cell_compressed=cell(S,1);
-        for s=1:S
-            Y_cell_compressed{s}=C_q'*Y_cell{s};
+        nbsignals=length(Y_cell);
+        Y_cell_compressed=cell(nbsignals,1);
+        for ind=1:nbsignals
+            Y_cell_compressed{ind}=C_q'*Y_cell{ind};
         end
         data_compressed.Y_cell=Y_cell_compressed;
     else
@@ -181,10 +197,10 @@ function data_compressed=compress(data,C_q)
     end
     
     if(~isempty(data.B_cell))
-        P=length(B_cell);
-        B_cell_compressed=cell(P,1);
-        for p=1:P
-            B_cell_compressed{p}=C_q'*B_cell{p};
+        nbparams=length(B_cell);
+        B_cell_compressed=cell(nbparams,1);
+        for ind=1:nbparams
+            B_cell_compressed{ind}=C_q'*B_cell{ind};
         end
         data_compressed.B_cell=B_cell_compressed;
     else
@@ -192,16 +208,30 @@ function data_compressed=compress(data,C_q)
     end
     
     if(~isempty(data.Gamma_cell))
-        D=length(Gamma_cell);
-        Gamma_cell_compressed=cell(D,1);
-        for d=1:D
-            Gamma_cell_compressed{d}=C_q'*Gamma_cell{d}*C_q;
-            Gamma_cell_compressed{d}=make_sym(Gamma_cell_compressed{d});
+        nbquadr=length(Gamma_cell);
+        Gamma_cell_compressed=cell(nbquadr,1);
+        for ind=1:nbquadr
+            Gamma_cell_compressed{ind}=C_q'*Gamma_cell{ind}*C_q;
+            Gamma_cell_compressed{ind}=make_sym(Gamma_cell_compressed{ind});
         end
         data_compressed.Gamma_cell=Gamma_cell_compressed;
     else
         data_compressed.Gamma_cell={};
     end
+    
+    if(~isempty(data.Glob_Const_cell))
+        data_compressed.Glob_Const_cell=Glob_Const_cell;
+    else
+        data_compressed.Glob_Const_cell={};
+    end
+    
+end
+
+function X_tilde=comp_X_tilde(data_compressed,prob_params,prob_solver)
+
+    % Solve the local problem using the algorithm for the global problem
+    % using compressed data
+    [X_tilde,~]=prob_solver(data_compressed,prob_params);
     
 end
 
@@ -239,12 +269,6 @@ function C_q=constr_C_cell(X_cell,Q,q,nbsensnode,nbnodes,neighbors,Nu)
                 nbsensnode(q)+ind_k*Q+1:nbsensnode(q)+ind_k*Q+Q)=X_cell{l};
         end
     end
-    
-end
-
-function X_tilde=comp_X_tilde(prob_params,data_compressed,prob_solver)
-
-    [X_tilde,~]=prob_solver(prob_params,data_compressed);
     
 end
 
