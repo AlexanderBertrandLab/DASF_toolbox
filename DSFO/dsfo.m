@@ -1,5 +1,5 @@
-function [X,f_track,norm_track,norm_star_track]=dsfo(data,...
-    prob_params,conv,obj_eval,prob_solver,prob_resolve_uniqueness,X_star)
+function [X,f_diff,diff_err,norm_err]=dsfo(data,prob_params,conv,...
+    obj_eval,prob_solver,prob_resolve_uniqueness,X_star)
 
 % Function running the TI-DSFO for a given problem.
 % INPUTS :
@@ -45,9 +45,9 @@ function [X,f_track,norm_track,norm_star_track]=dsfo(data,...
 %
 % OUTPUTS : 
 % X               : Projection matrix
-% f_track         : Sequence of objective values across iterations
-% norm_track      : Sequence of ||X^(i+1)-X^(i)||_F^2
-% norm_star_track : Sequence of ||X^(i)-X^*||_F^2/||X^*||_F^2
+% f_diff          : Sequence of objective values across iterations
+% diff_err        : Sequence of ||X^(i+1)-X^(i)||_F^2
+% norm_err        : Sequence of ||X^(i)-X^*||_F^2/||X^*||_F^2
 %
 
 % Author: Cem Musluoglu, KU Leuven, Department of Electrical Engineering
@@ -74,9 +74,9 @@ f=obj_eval(X,data);
 i=0;
 f_old=f+1;
 
-f_track=[];
-norm_track=[];
-norm_star_track=[];
+f_diff=[];
+diff_err=[];
+norm_err=[];
 
 path=1:nbnodes;
 % Random updating order
@@ -106,7 +106,7 @@ while (tol_f>0 && abs(f-f_old)>tol_f) || (i<nbiter)
     % Evaluate objective
     f_old=f;
     f=obj_eval(X_tilde,data_compressed);
-    f_track=[f_track,f];
+    f_diff=[f_diff,f];
     
     % Global variable
     X=C_q*X_tilde;
@@ -115,14 +115,14 @@ while (tol_f>0 && abs(f-f_old)>tol_f) || (i<nbiter)
         if(~isempty(prob_resolve_uniqueness))
             X=prob_resolve_uniqueness(X_old,X);
         end
-        norm_track=[norm_track,norm(X-X_old,'fro').^2/numel(X)];
+        diff_err=[diff_err,norm(X-X_old,'fro').^2/numel(X)];
     end
     
     if(~isempty(X_star) && compare_opt==1)
         if(~isempty(prob_resolve_uniqueness))
             X=prob_resolve_uniqueness(X_star,X);
         end
-        norm_star_track=[norm_star_track,norm(X-X_star,'fro')^2/norm(X_star,'fro')^2];
+        norm_err=[norm_err,norm(X-X_star,'fro')^2/norm(X_star,'fro')^2];
         if(plot_dynamic==1)
             dynamic_plot(X,X_star)
         end

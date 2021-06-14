@@ -31,18 +31,17 @@ norm_error=cell(mc_runs,1);
 for n_runs=1:mc_runs
 
     % Create the data
-    [Y,V]=create_data(nbsamples,nbsensors_vec,nbnodes);
+    [Y,V]=create_data(nbsensors_vec,nbnodes,nbsamples);
     
     % Structure related to the data
     Y_cell=cell(2,1);
     Y_cell{1}=Y;
     Y_cell{2}=V;
     Gamma_cell{1}=eye(nbsensors);
-    B_cell={};
     
     data=struct;
     data.Y_cell=Y_cell;
-    data.B_cell=B_cell;
+    data.B_cell={};
     data.Gamma_cell=Gamma_cell;
     data.Glob_Const_cell={};
 
@@ -75,10 +74,10 @@ for n_runs=1:mc_runs
     prob_params.graph_adj=graph_adj;
     
     % Solve the TRO problem using TI-DSFO
-    [X_est,f_track,norm_track,norm_star_track]=dsfo(data,prob_params,...
+    [X_est,f_diff,diff_err,norm_err]=dsfo(data,prob_params,...
         conv,@tro_eval,@tro_solver,@tro_resolve_uniqueness,X_star);
     
-    norm_error{n_runs}=norm_star_track;
+    norm_error{n_runs}=norm_err;
     
 end
 
@@ -106,44 +105,29 @@ grid on
 
 %%
 
-function [Y,V]=create_data(nbsamples,nbsensors_vec,nbnodes)
-% Function to create synthetic signals.
-% INPUTS:
-% nbsamples: Number of time samples.
-% nbsensnode (nbsamples x 1): Vector of length nbnodes containing the number of channels per node.
-% nbnodes: Number of nodes in the network.
-% nbsources: Number of sources.
-%
-% CONSTANTS:
-% latent_dim: Dimension of the latent random process.
-% noisepower: Variance of the white noise.
-% signalvar: Variance of the source and interference signals.
-%
-% OUTPUTS:
-% Y, V (sum(nbsensnode) x nbsamples): Matrices containing
-%               the desired and interfering signals respectively.
-%
-% Author: Cem Musluoglu, KU Leuven, Department of Electrical Engineering
-% (ESAT), STADIUS Center for Dynamical Systems, Signal Processing and Data
-% Analytics
-% Correspondence: cemates.musluoglu@esat.kuleuven.be
-   
+function [Y,V]=create_data(nbsensors_vec,nbnodes,nbsamples)
+
     noisepower=0.1; 
     signalvar=0.5;
     nbsources=5;
     latent_dim=10;
 
     rng('shuffle');
-    d=randn(nbsamples,nbsources); %random latent process
+    d=randn(nbsamples,nbsources);
     d=sqrt(signalvar)./(sqrt(var(d))).*(d-ones(nbsamples,1)*mean(d));
-    s=randn(nbsamples,latent_dim-nbsources); %same random latent process, but new observations
+    s=randn(nbsamples,latent_dim-nbsources);
     s=sqrt(signalvar)./(sqrt(var(s))).*(s-ones(nbsamples,1)*mean(s));
+    
+%     Ainit=rand(nbsources,sum(nbsensors_vec))-0.5;
+%     Binit=rand(latent_dim-nbsources,sum(nbsensors_vec))-0.5;
+%     noise=randn(nbsamples,sum(nbsensors_vec)); 
+%     noise=sqrt(noisepower)./sqrt(var(noise)).*(noise-ones(nbsamples,1)*mean(noise)); 
 
     for k=1:nbnodes
         Ainit{k}=rand(nbsources,nbsensors_vec(k))-0.5;
         Binit{k}=rand(latent_dim-nbsources,nbsensors_vec(k))-0.5;
         noise{k}=randn(nbsamples,nbsensors_vec(k)); 
-        noise{k}=sqrt(noisepower)./sqrt(var(noise{k})).*(noise{k}-ones(nbsamples,1)*mean(noise{k}));
+        noise{k}=sqrt(noisepower)./sqrt(var(noise{k})).*(noise{k}-ones(nbsamples,1)*mean(noise{k})); 
     end
 
     column_blk=0;
@@ -159,6 +143,9 @@ function [Y,V]=create_data(nbsamples,nbsensors_vec,nbnodes)
         V(1:nbsamples,column_blk+1:column_blk+nbsensors_vec(k))=V_cell{k};
         column_blk=column_blk+nbsensors_vec(k);
     end
+    
+    %V=s*Binit+noise;
+    %Y=d*Ainit+V;
     
     Y=Y';
     V=V';

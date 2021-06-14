@@ -1,6 +1,6 @@
 function [X_star,f_star]=qcqp_solver(data,prob_params)
 
-% Solve min 0.5*trace(X'*Ryy*X)-trace(B'*X) s.t. trace(X'*Gamma*X)<= alpha^2; X'*c=d.
+% Solve min 0.5*trace(X'*Ryy*X)-trace(X'*B) s.t. trace(X'*Gamma*X)<= alpha^2; X'*c=d.
 
 % Author: Cem Musluoglu, KU Leuven, Department of Electrical Engineering
 % (ESAT), STADIUS Center for Dynamical Systems, Signal Processing and Data
