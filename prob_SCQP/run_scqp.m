@@ -16,7 +16,7 @@ mc_runs=5;
 % Number of nodes
 nbnodes=30;
 % Number of channels per node
-nbsensors_vec=15*ones(1,nbnodes);
+nbsensors_vec=15*ones(nbnodes,1);
 % Number of channels in total
 nbsensors=sum(nbsensors_vec);
 
@@ -53,7 +53,7 @@ for n_runs=1:mc_runs
     prob_params.nbsamples=nbsamples;
 
     % Estimate filter using the centralized algorithm
-    [X_star,f_star]=scqp_solver(data,prob_params);
+    [X_star,f_star]=scqp_solver(prob_params,data);
     prob_params.X_star=X_star;
     % Compute the distance to X^* if equal to 1 
     prob_params.compare_opt=1;
@@ -72,7 +72,7 @@ for n_runs=1:mc_runs
     graph_adj=triu(adj,1)+tril(adj',-1);
     prob_params.graph_adj=graph_adj;
 
-    [X_est,f_seq,norm_diff,norm_err]=dsfo(data,prob_params,...
+    [X_est,f_seq,norm_diff,norm_err]=dsfo(prob_params,data,...
                                 conv,@scqp_eval,@scqp_solver,[]);
     
     norm_error{n_runs}=norm_err;

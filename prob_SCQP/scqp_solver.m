@@ -1,4 +1,4 @@
-function [X_star,f_star]=scqp_solver(data,prob_params)
+function [X_star,f_star]=scqp_solver(prob_params,data)
 % Solve:
 % min_X f(X)=0.5*trace(X'*Ryy*X)+trace(X'*B) s.t. trace(X'*Gamma*X)=1
 

@@ -1,4 +1,4 @@
-function [X_star,f_star]=tro_solver(data,prob_params)
+function [X_star,f_star]=tro_solver(prob_params,data)
 
 % Solve the TRO problem max trace(X'*Ryy*X)/trace(X'*Rvv*X) s.t. X'*Gamma*X=I
 
