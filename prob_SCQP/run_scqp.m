@@ -72,7 +72,7 @@ for n_runs=1:mc_runs
     graph_adj=triu(adj,1)+tril(adj',-1);
     prob_params.graph_adj=graph_adj;
 
-    [X_est,f_diff,norm_diff,norm_err]=dsfo(data,prob_params,...
+    [X_est,f_seq,norm_diff,norm_err]=dsfo(data,prob_params,...
                                 conv,@scqp_eval,@scqp_solver,[]);
     
     norm_error{n_runs}=norm_err;

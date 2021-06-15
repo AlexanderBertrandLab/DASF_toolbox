@@ -1,4 +1,4 @@
-function [X,f_diff,norm_diff,norm_err]=dsfo(data,prob_params,conv,...
+function [X,f_seq,norm_diff,norm_err]=dsfo(data,prob_params,conv,...
     obj_eval,prob_solver,prob_resolve_uniqueness)
 
 % Function running the TI-DSFO for a given problem.
@@ -40,7 +40,7 @@ function [X,f_diff,norm_diff,norm_err]=dsfo(data,prob_params,conv,...
 %
 % OUTPUTS : 
 % X               : Projection matrix
-% f_diff          : Sequence of objective values across iterations
+% f_seq           : Sequence of objective values across iterations
 % norm_diff       : Sequence of ||X^(i+1)-X^(i)||_F^2/(nbsensors*Q)
 % norm_err        : Sequence of ||X^(i)-X^*||_F^2/||X^*||_F^2
 %
@@ -70,7 +70,7 @@ f=obj_eval(X,data);
 i=0;
 f_old=f+1;
 
-f_diff=[];
+f_seq=[];
 norm_diff=[];
 norm_err=[];
 
@@ -102,7 +102,7 @@ while (tol_f>0 && abs(f-f_old)>tol_f) || (i<nbiter)
     % Evaluate objective
     f_old=f;
     f=obj_eval(X_tilde,data_compressed);
-    f_diff=[f_diff,f];
+    f_seq=[f_seq,f];
     
     % Global variable
     X=C_q*X_tilde;

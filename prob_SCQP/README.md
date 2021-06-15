@@ -14,3 +14,9 @@ where ``R_yy=E[yy']``, in a distributed setting using the the DSFO framework (mo
 `run_scqp:` Script to run the DSFO algorithm to solve the SCQP in a randomly generated network.
 
 `SCQP_script:` Matlab live script example.
+
+
+**Note:** Requires the Manopt toolbox:
+
+Boumal, Nicolas, et al. "Manopt, a Matlab toolbox for optimization on manifolds." The Journal of Machine Learning Research 15.1 (2014): 1455-1459.
+https://www.manopt.org

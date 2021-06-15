@@ -3,7 +3,7 @@
 
  Given an optimization problem fitting the DSFO framework, the `dsfo` algorithm solves the problem using the DSFO algorithm and is called in the following way:
 
-        [X_est,f_diff,norm_diff,norm_err]=dsfo(data,prob_params,conv,...
+        [X_est,f_seq,norm_diff,norm_err]=dsfo(data,prob_params,conv,...
         @obj_eval,@prob_solver,@prob_resolve_uniqueness)
 
 ### I - Inputs
@@ -107,9 +107,9 @@ where `data` and `prob_params` are the structures defined above.
 
 `X_est:` Estimate of the optimal argument `X_star` obtained using the DSFO framework.
 
-#### 2) Difference of objectives
+#### 2) Sequence of objectives
 
-`f_diff:` Vector containing the absolute difference between consecutive objective values, i.e., `|f(X^(i+1))-f(X^i)|`.
+`f_seq:` Vector of the sequence of objectives, i.e., `f(X^i)`.
 
 #### 3) Norm of difference of arguments
 

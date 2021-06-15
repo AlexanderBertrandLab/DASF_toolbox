@@ -74,7 +74,7 @@ for n_runs=1:mc_runs
     prob_params.graph_adj=graph_adj;
     
     % Solve the TRO problem using TI-DSFO
-    [X_est,f_diff,norm_diff,norm_err]=dsfo(data,prob_params,...
+    [X_est,f_seq,norm_diff,norm_err]=dsfo(data,prob_params,...
         conv,@tro_eval,@tro_solver,@tro_resolve_uniqueness);
     
     norm_error{n_runs}=norm_err;

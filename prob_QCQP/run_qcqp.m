@@ -77,7 +77,7 @@ while n_runs<=mc_runs
     prob_params.graph_adj=graph_adj;
     
     try
-        [X_est,f_diff,norm_diff,norm_err]=dsfo(data,prob_params,...
+        [X_est,f_seq,norm_diff,norm_err]=dsfo(data,prob_params,...
                                 conv,@qcqp_eval,@qcqp_solver,[]);
         norm_error{n_runs}=norm_err;
         n_runs=n_runs+1;
