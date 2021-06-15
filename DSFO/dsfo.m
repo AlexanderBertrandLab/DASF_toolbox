@@ -1,5 +1,5 @@
-function [X,f_diff,diff_err,norm_err]=dsfo(data,prob_params,conv,...
-    obj_eval,prob_solver,prob_resolve_uniqueness,X_star)
+function [X,f_diff,norm_diff,norm_err]=dsfo(data,prob_params,conv,...
+    obj_eval,prob_solver,prob_resolve_uniqueness)
 
 % Function running the TI-DSFO for a given problem.
 % INPUTS :
@@ -37,16 +37,11 @@ function [X,f_diff,diff_err,norm_err]=dsfo(data,prob_params,conv,...
 % prob_resolve_uniqueness : (Optional) Function resolving the uniqueness
 %                           ambiguity
 %
-% X_star      : (Optional) True projection matrix, computed for example
-%               with the centralized algorithm. Allows to compare 
-%               convergence, if it is not provided, there might be a 
-%               difference in the signs of the columns of the output of 
-%               this algorithm and X_star.
 %
 % OUTPUTS : 
 % X               : Projection matrix
 % f_diff          : Sequence of objective values across iterations
-% diff_err        : Sequence of ||X^(i+1)-X^(i)||_F^2
+% norm_diff       : Sequence of ||X^(i+1)-X^(i)||_F^2/(nbsensors*Q)
 % norm_err        : Sequence of ||X^(i)-X^*||_F^2/||X^*||_F^2
 %
 
@@ -63,6 +58,7 @@ nbsensors_vec=prob_params.nbsensors_vec;
 adj=prob_params.graph_adj;
 compare_opt=prob_params.compare_opt;
 plot_dynamic=prob_params.plot_dynamic;
+X_star=prob_params.X_star;
 
 tol_f=conv.tol_f;
 nbiter=conv.nbiter;
@@ -75,7 +71,7 @@ i=0;
 f_old=f+1;
 
 f_diff=[];
-diff_err=[];
+norm_diff=[];
 norm_err=[];
 
 path=1:nbnodes;
@@ -113,14 +109,18 @@ while (tol_f>0 && abs(f-f_old)>tol_f) || (i<nbiter)
     
     if i>0
         if(~isempty(prob_resolve_uniqueness))
-            X=prob_resolve_uniqueness(X_old,X);
+            Xq=block_q(X,q,nbsensors_vec);
+            Xq_old=block_q(X_old,q,nbsensors_vec);
+            X=prob_resolve_uniqueness(Xq_old,Xq,X);
         end
-        diff_err=[diff_err,norm(X-X_old,'fro').^2/numel(X)];
+        norm_diff=[norm_diff,norm(X-X_old,'fro').^2/numel(X)];
     end
     
     if(~isempty(X_star) && compare_opt==1)
         if(~isempty(prob_resolve_uniqueness))
-            X=prob_resolve_uniqueness(X_star,X);
+            Xq=block_q(X,q,nbsensors_vec);
+            Xq_star=block_q(X_star,q,nbsensors_vec);
+            X=prob_resolve_uniqueness(Xq_star,Xq,X);
         end
         norm_err=[norm_err,norm(X-X_star,'fro')^2/norm(X_star,'fro')^2];
         if(plot_dynamic==1)
@@ -232,6 +232,16 @@ function X_tilde=comp_X_tilde(data_compressed,prob_params,prob_solver)
     % Solve the local problem using the algorithm for the global problem
     % using compressed data
     [X_tilde,~]=prob_solver(data_compressed,prob_params);
+    
+end
+
+function Xq=block_q(X,q,nbsensors_vec)
+
+    M_q=nbsensors_vec(q);
+    row_blk=cumsum(nbsensors_vec);
+    row_blk=[0;row_blk(1:end-1)]+1;
+    row_blk_q=row_blk(q);
+    Xq=X(row_blk_q:row_blk_q+M_q-1,:);
     
 end
 

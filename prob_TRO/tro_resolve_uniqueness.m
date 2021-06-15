@@ -1,4 +1,4 @@
-function X=tro_resolve_uniqueness(X_old,X)
+function X=tro_resolve_uniqueness(Xq_old,Xq,X)
 
 % Resolve the sign ambiguity for the TRO problem
 
@@ -7,10 +7,10 @@ function X=tro_resolve_uniqueness(X_old,X)
 % Analytics
 % Correspondence: cemates.musluoglu@esat.kuleuven.be
 
-    Q=size(X_old,2);
+    Q=size(Xq_old,2);
 
     for l=1:Q
-        if sum(sum((X_old(:,l)-X(:,l)).^2))>sum(sum((-X_old(:,l)-X(:,l)).^2))
+        if sum(sum((Xq_old(:,l)-Xq(:,l)).^2))>sum(sum((-Xq_old(:,l)-Xq(:,l)).^2))
             X(:,l)=-X(:,l);
         end
     end

@@ -55,13 +55,14 @@ while n_runs<=mc_runs
     prob_params.nbnodes=nbnodes;
     prob_params.nbsensors_vec=nbsensors_vec;
     prob_params.nbsamples=nbsamples;
+    
+    % Estimate filter using the centralized algorithm
+    [X_star,f_star]=qcqp_solver(data,prob_params);
+    prob_params.X_star=X_star;
     % Compute the distance to X^* if equal to 1 
     prob_params.compare_opt=1;
     % Show a dynamic plot if equal to 1
     prob_params.plot_dynamic=0;
-    
-    % Estimate filter using the centralized algorithm
-    [X_star,f_star]=qcqp_solver(data,prob_params);
 
     % Structure related to stopping conditions. The last to be
     % achieved stops the algorihtm (To choose only one condition, set the
@@ -76,8 +77,8 @@ while n_runs<=mc_runs
     prob_params.graph_adj=graph_adj;
     
     try
-        [X_est,f_diff,diff_err,norm_err]=dsfo(data,prob_params,...
-                                conv,@qcqp_eval,@qcqp_solver,[],X_star);
+        [X_est,f_diff,norm_diff,norm_err]=dsfo(data,prob_params,...
+                                conv,@qcqp_eval,@qcqp_solver,[]);
         norm_error{n_runs}=norm_err;
         n_runs=n_runs+1;
     catch

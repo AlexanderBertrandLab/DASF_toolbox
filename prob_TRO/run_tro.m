@@ -52,14 +52,14 @@ for n_runs=1:mc_runs
     prob_params.nbnodes=nbnodes;
     prob_params.nbsensors_vec=nbsensors_vec;
     prob_params.nbsamples=nbsamples;
+    
+    % Estimate filter using the centralized algorithm
+    [X_star,f_star]=tro_solver(data,prob_params);
+    prob_params.X_star=X_star;
     % Compute the distance to X^* if equal to 1 
     prob_params.compare_opt=1;
     % Show a dynamic plot if equal to 1
     prob_params.plot_dynamic=0;
-    
-    % Estimate filter using the centralized algorithm
-    [X_star,f_star]=tro_solver(data,prob_params);
-
 
     % Structure related to stopping conditions. The last to be
     % achieved stops the algorihtm (To choose only one condition, set the
@@ -74,8 +74,8 @@ for n_runs=1:mc_runs
     prob_params.graph_adj=graph_adj;
     
     % Solve the TRO problem using TI-DSFO
-    [X_est,f_diff,diff_err,norm_err]=dsfo(data,prob_params,...
-        conv,@tro_eval,@tro_solver,@tro_resolve_uniqueness,X_star);
+    [X_est,f_diff,norm_diff,norm_err]=dsfo(data,prob_params,...
+        conv,@tro_eval,@tro_solver,@tro_resolve_uniqueness);
     
     norm_error{n_runs}=norm_err;
     
