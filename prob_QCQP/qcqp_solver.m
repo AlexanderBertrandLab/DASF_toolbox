@@ -1,4 +1,4 @@
-function [X_star,f_star]=qcqp_solver(data,prob_params)
+function [X_star,f_star]=qcqp_solver(prob_params,data)
 
 % Solve min 0.5*trace(X'*Ryy*X)-trace(X'*B) s.t. trace(X'*Gamma*X)<= alpha^2; X'*c=d.
 

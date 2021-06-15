@@ -16,7 +16,7 @@ mc_runs=5;
 % Number of nodes
 nbnodes=30;
 % Number of channels per node
-nbsensors_vec=15*ones(1,nbnodes);
+nbsensors_vec=15*ones(nbnodes,1);
 % Number of channels in total
 nbsensors=sum(nbsensors_vec);
 
@@ -54,7 +54,7 @@ for n_runs=1:mc_runs
     prob_params.nbsamples=nbsamples;
     
     % Estimate filter using the centralized algorithm
-    [X_star,f_star]=tro_solver(data,prob_params);
+    [X_star,f_star]=tro_solver(prob_params,data);
     prob_params.X_star=X_star;
     % Compute the distance to X^* if equal to 1 
     prob_params.compare_opt=1;
@@ -74,7 +74,7 @@ for n_runs=1:mc_runs
     prob_params.graph_adj=graph_adj;
     
     % Solve the TRO problem using TI-DSFO
-    [X_est,f_seq,norm_diff,norm_err]=dsfo(data,prob_params,...
+    [X_est,f_seq,norm_diff,norm_err]=dsfo(prob_params,data,...
         conv,@tro_eval,@tro_solver,@tro_resolve_uniqueness);
     
     norm_error{n_runs}=norm_err;
@@ -95,7 +95,7 @@ hold on
 fill([x_int,fliplr(x_int)],[q_5,fliplr(q_75)],'b','FaceAlpha','0.2','LineStyle','none')
 fill([x_int,fliplr(x_int)],[q_5,fliplr(q_25)],'b','FaceAlpha','0.2','LineStyle','none')
 xlim([1,inf])
-ylim([1e-6,inf])
+ylim([1e-8,inf])
 
 ax=gca;
 ax.FontSize=14;
