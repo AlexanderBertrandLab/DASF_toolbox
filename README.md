@@ -3,17 +3,15 @@
 
  Given an optimization problem fitting the DSFO framework:
 
-        P: min_X f_C ( X'*y(t), X'*B, X'*Gamma*X ) = f(X)
-           s.t.  h_j ( X'*y(t), X'*B, X'*Gamma*X ) <= 0 for inequalities j
-                 h_j ( X'*y(t), X'*B, X'*Gamma*X ) = 0 for equalities j
+        P: min_X f_hat ( X'*y(t), X'*B, X'*Gamma*X ) = f(X)
+           s.t.  h_j ( X'*y(t), X'*B, X'*Gamma*X ) <= 0 for inequalities j,
+                 h_j ( X'*y(t), X'*B, X'*Gamma*X ) = 0 for equalities j,
 
-the DSFO algorithm solves the problem in a distributed setting such as a wireless sensor network consisting of nodes connected to each other in a certain way. More specifically, at each iteration an updating node `q` is designated to solve a **parameterized** version of problem `P` locally.
-
-**Note:** The algorithm therefore requires a solver for problem `P`, named `prob_solver` (see I-5) below).
+the DSFO algorithm solves the problem in a distributed setting such as a wireless sensor network consisting of nodes connected to each other in a certain way. This is done by creating a local problem at node `q` and iteration `i` and has the advantage that the local problem is a **parameterized** version of problem `P`. Therefore, a solver for problem `P` is used for the distributed implementation.
 
 **Note:** There can be more than one `y(t)`, `B` and `Gamma` which are not represented for conciseness. 
 
-The `dsfo` function implements a solution and is called in the following way:
+The `dsfo` function implements the DSFO algorithm and is called in the following way:
 
         [X_est,f_seq,norm_diff,norm_err]=dsfo(prob_params,data,conv,...
         @obj_eval,@prob_solver,@prob_resolve_uniqueness)
@@ -53,7 +51,7 @@ If one or more of these do not appear in the problem, set their corresponding ce
 
 | Field | Description |
 | ---- | --- |
-| `tol_f`| Tolerance on the difference between consecutive objectives, i.e., `|f(X^(i+1))-f(X^i)|`. If the difference is smaller than this variable, stop the algorithm. |
+| `tol_f`| Tolerance on the difference between consecutive objectives, i.e., `| f(X^(i+1))-f(X^i) |`. If the difference is smaller than this variable, stop the algorithm. |
 | `nbiter` | Maximum number of iterations. Stop the algorithm whenever it is achieved. |
 
 The condition achieved last between the two arguments will stop the algorithm. If only one argument is preferred, the other can be given a negative value, e.g. `-1`.
@@ -99,7 +97,7 @@ where `data` and `prob_params` are the structures defined above.
 
 #### 3) Norm of difference of arguments
 
-`norm_diff:` Vector containing the scaled norm of the difference between consecutive arguments, i.e., `||X^(i+1)-X^i||_F^2/(nbsensors x Q)`.
+`norm_diff:` Vector containing the scaled norm of the difference between consecutive arguments, i.e., `||X^(i+1)-X^i||_F^2/(nbsensors*Q)`.
 
 #### 4) Normalized error
 
