@@ -42,7 +42,7 @@ The `dsfo` function implements the DSFO algorithm and is called in the following
 | **Quadratic terms:** `Gamma_cell` | Cell for deterministic quadratic block-diagonal terms, where each term is a `nbsensors x nbsensors` matrix. There is one cell for each different term. <br />**Example:** If the problem depends on `X'*X`, `X'*Gamma_1*X` and `X'*Gamma_2*X` then we have `Gamma_cell{1}=eye(nbsensors)`, `Gamma_cell{2}=Gamma_1` and `Gamma_cell{3}=Gamma_2`. |
 | **Global constants:** `Glob_Const_cell` | Cell for global constants, i.e., terms that do not appear in the form `X'*...`. There is one cell for each different term. <br />**Example:** If the problem depends on `X'*X-A` and `X'*b-c` then we have `Glob_Const_cell{1}=A` and `Glob_Const_cell{2}=c`. |
 
-If one or more of these do not appear in the problem, set their corresponding cell to the empty.
+If one or more of these do not appear in the problem, set their corresponding cell to an empty one.
 
 **Example:** `Gamma_cell={}` if no quadratic term `X'*Gamma'*X` appears in the problem.
 

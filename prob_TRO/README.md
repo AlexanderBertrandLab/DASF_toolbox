@@ -43,7 +43,7 @@ taking as input the following data:
 | **Quadratic terms:** `Gamma_cell` | Cell for deterministic quadratic block-diagonal terms, where each term is a `nbsensors x nbsensors` matrix. There is one cell for each different term. <br />**Example:** If the problem depends on `X'*X`, `X'*Gamma_1*X` and `X'*Gamma_2*X` then we have `Gamma_cell{1}=eye(nbsensors)`, `Gamma_cell{2}=Gamma_1` and `Gamma_cell{3}=Gamma_2`. |
 | **Global constants:** `Glob_Const_cell` | Cell for global constants, i.e., terms that do not appear in the form `X'*...`. There is one cell for each different term. <br />**Example:** If the problem depends on `X'*X-A` and `X'*b-c` then we have `Glob_Const_cell{1}=A` and `Glob_Const_cell{2}=c`. |
 
-If one or more of these do not appear in the problem, set their corresponding cell to the empty.
+If one or more of these do not appear in the problem, set their corresponding cell to an empty one.
 
 The function `tro_solver` depends on the signals `y1(t)` and `y2(t)`, and the quadratic term `Gamma1`. There is no linear term or global constants.
 

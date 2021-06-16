@@ -10,9 +10,9 @@ Folder with the DSFO implementation and utility functions (more details inside t
 
         - conv: Structure related the stopping criterion.
 
-        - prob_solver: Function handle to the solver of the problem.
-
         - obj_eval: Function handle to the objective function evaluation. 
+
+        - prob_solver: Function handle to the solver of the problem.
 
         - prob_resolve_uniqueness: (Optional) Function handle to the method for resolving uniqueness ambiguities.
 
