@@ -1,6 +1,7 @@
 function Cq=constr_Cq(X,q,prob_params,neighbors,Nu)
 
-% Function to compress the data.
+% Function to construct the transition matrix between the local data and
+% variables and the global ones.
 %
 % INPUTS:
 % X (nbsensors x Q): Global variable equal to [X1;...;Xq;...;XK].

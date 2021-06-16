@@ -14,7 +14,7 @@ with the following data:
 
 The functions and files in this folder are:
 
-`scqp_solver:` Centralized algorithm for solving the SCQP:
+`scqp_solver.m:` Centralized algorithm for solving the SCQP:
 
         min_X 0.5*|| E[X'*y1(t)] ||^2+trace(X'*B1) s.t. trace(X'*Gamma1*X)=1.
 
@@ -31,7 +31,7 @@ taking as input the following data:
 Boumal, Nicolas, et al. "Manopt, a Matlab toolbox for optimization on manifolds." The Journal of Machine Learning Research 15.1 (2014): 1455-1459.
 https://www.manopt.org
 
-`scqp_eval:`  Evaluate the SCQP objective function.
+`scqp_eval.m:`  Evaluate the SCQP objective function.
 
 `run_scqp.m:` Script to run the DSFO algorithm to solve the SCQP in a randomly generated network.
 
@@ -56,3 +56,4 @@ Looking at problem `P`, the relationship between the data in `P` and the solver 
 | `y(t)==y1(t)` | `Y=[y(1),...,y(nbsamples)]`<br />`data.Y_cell{1}=Y` |
 | `B==B1` | `data.B_cell{1}=B` |
 | `I==Gamma1` | `data.Gamma_cell{1}=I` |
+| | `data.Glob_Const_cell={}` |

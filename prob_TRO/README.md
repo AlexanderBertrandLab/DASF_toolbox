@@ -15,7 +15,7 @@ with the following data:
 
 The functions and files in this folder are:
 
-`tro_solver:` Centralized algorithm for solving the TRO problem: 
+`tro_solver.m:` Centralized algorithm for solving the TRO problem: 
         
         max_X || E[X'*y1(t)] ||^2 / || E[X'*y2(t)] ||^2 s.t. X'*Gamma1*X=I.
 
@@ -27,9 +27,9 @@ taking as input the following data:
 | `y1(t)` | `nbsensors x 1` for every `t` | Signal |
 | `Gamma1` | `nbsensors x nbsensors` | Quadratic term |
 
-`tro_eval:`  Evaluate the TRO objective function.
+`tro_eval.m:`  Evaluate the TRO objective function.
 
-`tro_resolve_uniqueness:`  Resolve the uniqueness ambiguity of the TRO problem, i.e., invariance of the problem to the sign of the columns of `X`.
+`tro_resolve_uniqueness.m:`  Resolve the uniqueness ambiguity of the TRO problem, i.e., invariance of the problem to the sign of the columns of `X`.
 
 `run_tro.m:` Script to run the DSFO algorithm to solve the TRO problem in a randomly generated network.
 

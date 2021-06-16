@@ -1,6 +1,6 @@
 function sym=make_sym(A)
 
-% Function to force symmetry
+% Function to force symmetry.
 %
 % Author: Cem Musluoglu, KU Leuven, Department of Electrical Engineering
 % (ESAT), STADIUS Center for Dynamical Systems, Signal Processing and Data

@@ -19,7 +19,7 @@ with the following data:
 
 The functions and files in this folder are:
 
-`qcqp_solver:` Centralized algorithm for solving the QCQP:
+`qcqp_solver.m:` Centralized algorithm for solving the QCQP:
 
         min_X 0.5*|| E[X'*y1(t)] ||^2-trace(X'*B1) s.t. trace(X'*Gamma1*X)<=gc1^2, X'*b2=gc2.
 
@@ -34,7 +34,7 @@ taking as input the following data:
 | `gc1` | Scalar | Global constant |
 | `gc2` | Scalar | Global constant |
 
-`qcqp_eval:`  Evaluate the QCQP objective function.
+`qcqp_eval.m:`  Evaluate the QCQP objective function.
 
 `run_qcqp.m:` Script to run the DSFO algorithm to solve the QCQP in a randomly generated network.
 
