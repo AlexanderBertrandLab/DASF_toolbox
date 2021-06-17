@@ -80,7 +80,7 @@ By default the algorithm stops at maximum 200 iterations. If one or more fields 
 
 `X` is the current global variable, i.e., the one chosen by `prob_solver` before resolving the ambiguity.
 
-**Note:** `dsfo` takes the function handle `@prob_resolve_uniqueness` as an argument, not the function itself.
+**Note:** `dsfo` takes the function handle `@prob_select_sol` as an argument, not the function itself.
 
 #### 6) The problem objective evaluator
 
@@ -90,7 +90,7 @@ By default the algorithm stops at maximum 200 iterations. If one or more fields 
 
 where `data` is the structure defined above.
 
-**Note:** `dsfo` takes the function handle `@obj_eval` as an argument, not the function itself.
+**Note:** `dsfo` takes the function handle `@prob_eval` as an argument, not the function itself.
 
 ### II - Outputs
 #### 1) Estimation of the optimal argument
