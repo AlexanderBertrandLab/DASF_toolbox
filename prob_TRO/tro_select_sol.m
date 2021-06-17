@@ -1,6 +1,6 @@
-function X=tro_resolve_uniqueness(Xq_old,Xq,X)
+function X=tro_select_sol(Xq_old,Xq,X)
 
-% Resolve the sign ambiguity for the TRO problem
+% Resolve the sign ambiguity for the TRO problem.
 
 % Author: Cem Musluoglu, KU Leuven, Department of Electrical Engineering
 % (ESAT), STADIUS Center for Dynamical Systems, Signal Processing and Data

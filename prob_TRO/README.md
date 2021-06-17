@@ -29,7 +29,7 @@ taking as input the following data:
 
 `tro_eval.m:`  Evaluate the TRO objective function.
 
-`tro_resolve_uniqueness.m:`  Resolve the uniqueness ambiguity of the TRO problem, i.e., invariance of the problem to the sign of the columns of `X`.
+`tro_select_sol.m:`  Resolve the uniqueness ambiguity of the TRO problem, i.e., invariance of the problem to the sign of the columns of `X`.
 
 `run_tro.m:` Script to run the DSFO algorithm to solve the TRO problem in a randomly generated network.
 

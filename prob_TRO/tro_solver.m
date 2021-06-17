@@ -1,6 +1,7 @@
 function [X_star,f_star]=tro_solver(prob_params,data)
 
-% Solve the TRO problem max trace(X'*Ryy*X)/trace(X'*Rvv*X) s.t. X'*Gamma*X=I
+% Solve the TRO problem max trace(X'*Ryy*X)/trace(X'*Rvv*X) s.t.
+% X'*Gamma*X=I.
 
 % Author: Cem Musluoglu, KU Leuven, Department of Electrical Engineering
 % (ESAT), STADIUS Center for Dynamical Systems, Signal Processing and Data
@@ -14,7 +15,7 @@ function [X_star,f_star]=tro_solver(prob_params,data)
     Xinit=normc(Xinit);
     f=tro_eval(Xinit,data);
     f_old=f+1;
-    tol_f=1e-10;
+    tol_f=1e-6;
     nbiter=-1;
     X=Xinit;
 

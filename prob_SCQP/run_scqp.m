@@ -10,20 +10,20 @@ close all
 
 addpath('../DSFO/');
 
-% Number of Monte-Carlo runs
+% Number of Monte-Carlo runs.
 mc_runs=5;
 
-% Number of nodes
+% Number of nodes.
 nbnodes=30;
-% Number of channels per node
+% Number of channels per node.
 nbsensors_vec=15*ones(nbnodes,1);
-% Number of channels in total
+% Number of channels in total.
 nbsensors=sum(nbsensors_vec);
 
-% Number of samples of the signals
+% Number of samples of the signals.
 nbsamples=10000;
 
-% Number of filters of X
+% Number of filters of X.
 Q=3;
 
 norm_error=cell(mc_runs,1);
@@ -33,7 +33,7 @@ for n_runs=1:mc_runs
     % Create the data
     [Y,B]=create_data(nbsensors,nbsamples,Q);
     
-    % Structure related to parameters of the problem
+    % Structure related to parameters of the problem.
     Y_cell{1}=Y;
     B_cell{1}=B;
     Gamma_cell{1}=eye(nbsensors);
@@ -44,7 +44,7 @@ for n_runs=1:mc_runs
     data.Gamma_cell=Gamma_cell;
     data.Glob_Const_cell={};
     
-    % Structure related to parameters of the problem
+    % Structure related to parameters of the problem.
     prob_params=struct;
     prob_params.nbsensors=nbsensors;
     prob_params.Q=Q;
@@ -52,35 +52,38 @@ for n_runs=1:mc_runs
     prob_params.nbsensors_vec=nbsensors_vec;
     prob_params.nbsamples=nbsamples;
 
-    % Estimate filter using the centralized algorithm
+    % Random updating order.
+    path=1:nbnodes;
+    prob_params.update_path=path(randperm(length(path)));
+    
+    % Estimate filter using the centralized algorithm.
     [X_star,f_star]=scqp_solver(prob_params,data);
     prob_params.X_star=X_star;
-    % Compute the distance to X^* if equal to 1 
+    % Compute the distance to X^* if equal to 1.
     prob_params.compare_opt=1;
-    % Show a dynamic plot if equal to 1
+    % Show a dynamic plot if equal to 1.
     prob_params.plot_dynamic=0;
 
-    % Structure related to stopping conditions. The last to be
-    % achieved stops the algorihtm (To choose only one condition, set the
-    % other to a negative value).
+    % Structure related to stopping conditions. We fix the number of 
+    % iterations the DSFO algorithm will perform to 200.
     conv=struct;
-    conv.tol_f=-1;
     conv.nbiter=200;
 
-    % Create adjacency matrix (hollow matrix) of a random graph
+    % Create adjacency matrix (hollow matrix) of a random graph.
     adj=randi(2,nbnodes,nbnodes)-1;
     graph_adj=triu(adj,1)+tril(adj',-1);
     prob_params.graph_adj=graph_adj;
 
-    [X_est,f_seq,norm_diff,norm_err]=dsfo(prob_params,data,...
-                                conv,@scqp_eval,@scqp_solver,[]);
+    % Solve the SCQP in a distributed way using the DSFO framework.
+    [X_est,norm_diff,norm_err,f_seq]=dsfo(prob_params,data,...
+                    @scqp_solver,conv,[],@scqp_eval);
     
     norm_error{n_runs}=norm_err;
 
 end
 
 %%
-% Plot the normalized error
+% Plot the normalized error.
 
 x_int=[1:conv.nbiter];
 q_5=quantile(cell2mat(norm_error),0.5);
