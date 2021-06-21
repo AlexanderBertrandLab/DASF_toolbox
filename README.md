@@ -16,7 +16,7 @@ The `dsfo` function implements the DSFO algorithm and is called in the following
         [X_est,norm_diff,norm_err,f_seq]=dsfo(prob_params,data,...
         @prob_solver,conv,@prob_select_sol,@prob_eval)
 
-Alternatively, `dsfo_cell` can be used for the same result, teh difference being an additional cell structure for the variable `X` called `X_cell` separating each local variable `Xk` of node `k`, such that `X=[X1;...;Xk;...;XK]` into separate cells for better flexibility and tuning in various applications. This function is called in the same way as `dsfo`:
+Alternatively, `dsfo_cell` can be used for the same result, the difference being an additional cell structure for the variable `X` called `X_cell` separating each local variable `Xk` of node `k`, such that `X=[X1;...;Xk;...;XK]` into separate cells for better flexibility. At each iteration, `X_cell` is updated from `update_X_cell` where each block is updated separately. Modifying the updating scheme to adapt it to the user's applications is then made easier compared to `dsfo` at the expense of a slightly less straightforward code. This function is called in the same way as `dsfo`:
 
         [X_est,norm_diff,norm_err,f_seq]=dsfo_cell(prob_params,data,...
         @prob_solver,conv,@prob_select_sol,@prob_eval)
@@ -70,7 +70,7 @@ where `data` and `prob_params` are the structures defined above.
 | `tol_X`| Tolerance on the difference between consecutive arguments, i.e., `||X^(i+1))-X^i||_F`. If the difference is smaller than this variable, stop the algorithm. |
 | `nbiter` | Maximum number of iterations. Stop the algorithm whenever it is achieved. |
 
-By default the algorithm stops at maximum 200 iterations. If one or more fields are provided and valid, the algorithm stops when the first stopping criterion is achieved.
+By default, the algorithm stops at maximum 200 iterations. If one or more fields are provided and valid, the algorithm stops when the first stopping criterion is achieved.
 
 #### 5) The function resolving uniqueness ambiguities
 

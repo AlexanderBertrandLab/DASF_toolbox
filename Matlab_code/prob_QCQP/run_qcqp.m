@@ -57,16 +57,15 @@ while n_runs<=mc_runs
     prob_params.nbsamples=nbsamples;
     
     % Random updating order.
-    path=1:nbnodes;
-    prob_params.update_path=path(randperm(length(path)));
+    prob_params.update_path=randperm(nbnodes);
     
     % Estimate filter using the centralized algorithm.
     [X_star,f_star]=qcqp_solver(prob_params,data);
     prob_params.X_star=X_star;
-    % Compute the distance to X^* if equal to 1.
-    prob_params.compare_opt=1;
-    % Show a dynamic plot if equal to 1.
-    prob_params.plot_dynamic=0;
+    % Compute the distance to X^* if "true".
+    prob_params.compare_opt=true;
+    % Show a dynamic plot if "true".
+    prob_params.plot_dynamic=false;
 
     % Structure related to stopping conditions. We fix the number of 
     % iterations the DSFO algorithm will perform to 200.

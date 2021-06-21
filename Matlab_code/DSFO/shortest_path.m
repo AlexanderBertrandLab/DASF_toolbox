@@ -27,15 +27,15 @@ function [dist,path]=shortest_path(q,adj)
     dist(q)=0;
    
     visited=[];
-    pred=zeros(1,nbnodes);
+    pred=zeros(nbnodes,1);
     unvisited=setdiff([1:nbnodes],visited);
     path=cell(nbnodes,1);
 
     while(length(visited)<nbnodes)
-        I=find(dist==min(dist(unvisited)));
-        I=I';
+        inds=find(dist==min(dist(unvisited)));
+        inds=inds';
        
-        for ind=I
+        for ind=inds
             visited=[visited,ind];
             unvisited=setdiff([1:nbnodes],visited);
             neighbors_i=find(adj(ind,:)==1);

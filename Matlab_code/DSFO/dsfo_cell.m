@@ -23,11 +23,11 @@ function [X,norm_diff,norm_err,f_seq]=dsfo_cell(prob_params,data,...
 %                          provided, a random path is created.
 %            X_star : (Optional) Optimal argument solving the the problem
 %                     (for comparison, e.g., to compute norm_err).
-%            compare_opt : (Optional) If equal to 1 and X_star is given, 
-%                          compute norm_err. 0 by default.
-%            plot_dynamic : (Optional) If equal to 1 and X_star is given, 
+%            compare_opt : (Optional, binary) If "true" and X_star is given, 
+%                          compute norm_err. "false" by default.
+%            plot_dynamic : (Optional, binary) If "true" X_star is given, 
 %                           plot dynamically the first column of X_star and 
-%                           the current estimate X. 0 by default.
+%                           the current estimate X. "false" by default.
 %
 % data : Structure related data containing the following fields:
 %            Y_cell : Cell containing matrices of size 
@@ -46,11 +46,11 @@ function [X,norm_diff,norm_err,f_seq]=dsfo_cell(prob_params,data,...
 % conv:  (Optional) Structure related to the convergence and stopping 
 %         criteria of the algorithm, containing the following fields:
 %
+%            nbiter : Maximum number of iterations.
+%
 %            tol_f : Tolerance in objective: |f^(i+1)-f^(i)|>tol_f
 %
 %            tol_X : Tolerance in arguments: ||X^(i+1)-X^(i)||_F>tol_f
-%
-%            nbiter : Maximum number of iterations.
 %
 % By default, the number of iterations is 200, unless specified otherwise.
 % If other fields are given and valid, the first condtion to be achieved
@@ -78,12 +78,11 @@ Q=prob_params.Q;
 nbsensors=prob_params.nbsensors;
 nbnodes=prob_params.nbnodes;
 nbsensors_vec=prob_params.nbsensors_vec;
-adj=prob_params.graph_adj;
+graph_adj=prob_params.graph_adj;
 
 if (~isfield(prob_params,'update_path'))
     % Random updating order
-    path=1:nbnodes;
-    update_path=path(randperm(length(path)));
+    update_path=randperm(nbnodes);
     warning('Randomly selected updating path')
 else
     update_path=prob_params.update_path;
@@ -96,44 +95,48 @@ else
 end
 
 if (~isfield(prob_params,'compare_opt'))
-    compare_opt=0;
+    compare_opt=false;
 else
     compare_opt=prob_params.compare_opt;
 end
 
 if (~isfield(prob_params,'plot_dynamic'))
-    plot_dynamic=0;
+    plot_dynamic=false;
 else
     plot_dynamic=prob_params.plot_dynamic;
 end
 
 if (isempty(conv))
-    tol_f=-1;
-    tol_X=-1;
+    tol_f_break=false;
+    tol_X_break=false;
     nbiter=200;
     warning('Performing 200 iterations')
 elseif ((isfield(conv,'nbiter') && conv.nbiter>0) || ...
                             (isfield(conv,'tol_f') && conv.tol_f>0) || ...
                             (isfield(conv,'tol_X') && conv.tol_X>0))
-    if (~isfield(conv,'tol_f') || conv.tol_f<=0)
-        tol_f=-1;
-    else
-        tol_f=conv.tol_f;
-    end
-    if (~isfield(conv,'tol_X') || conv.tol_X<=0)
-        tol_X=-1;
-    else
-        tol_X=conv.tol_X;
-    end
+    
     if (~isfield(conv,'nbiter') || conv.nbiter<=0)
         nbiter=200;
         warning('Performing at most 200 iterations')
     else
         nbiter=conv.nbiter;
     end
+                        
+    if (~isfield(conv,'tol_f') || conv.tol_f<=0)
+        tol_f_break=false;
+    else
+        tol_f=conv.tol_f;
+        tol_f_break=true;
+    end
+    if (~isfield(conv,'tol_X') || conv.tol_X<=0)
+        tol_X_break=false;
+    else
+        tol_X=conv.tol_X;
+        tol_X_break=true;
+    end
 else
-    tol_f=-1;
-    tol_X=-1;
+    tol_f_break=false;
+    tol_X_break=false;
     nbiter=200;
     warning('Performing 200 iterations')
 end
@@ -141,8 +144,9 @@ end
 X=randn(nbsensors,Q);
 X_cell=mat2cell(X,nbsensors_vec,Q);
 X_old=X;
+
 if(isempty(prob_eval))
-    tol_f=-1;
+    tol_f_break=false;
 else
     f=prob_eval(X,data);
 end
@@ -160,7 +164,7 @@ while i<nbiter
     
     % Prune the network.
     % Find shortest path.
-    [neighbors,path]=find_path(q,adj);
+    [neighbors,path]=find_path(q,graph_adj);
     
     % Neighborhood clusters.
     Nu=constr_Nu(neighbors,path);
@@ -194,14 +198,14 @@ while i<nbiter
     
     X_cell=mat2cell(X,nbsensors_vec,Q);
     
-    if(~isempty(X_star) && compare_opt==1)
+    if(~isempty(X_star) && compare_opt)
         if(~isempty(prob_select_sol))
             Xq=X_cell{q};
             Xq_star=block_q(X_star,q,nbsensors_vec);
             X=prob_select_sol(Xq_star,Xq,X);
         end
         norm_err=[norm_err,norm(X-X_star,'fro')^2/norm(X_star,'fro')^2];
-        if(plot_dynamic==1)
+        if(plot_dynamic)
             dynamic_plot(X,X_star)
         end
     end
@@ -212,7 +216,7 @@ while i<nbiter
     
     i=i+1;
     
-    if (tol_f>0 && abs(f-f_old)<=tol_f) || (tol_X>0 && norm(X-X_old,'fro')<=tol_X)
+    if (tol_f_break && abs(f-f_old)<=tol_f) || (tol_X_break && norm(X-X_old,'fro')<=tol_X)
         break
     end
 
