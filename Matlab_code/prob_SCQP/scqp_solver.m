@@ -1,6 +1,6 @@
 function [X_star,f_star]=scqp_solver(prob_params,data)
 % Solve:
-% min_X f(X)=0.5*trace(X'*Ryy*X)+trace(X'*B) s.t. trace(X'*Gamma*X)=1
+% min_X f(X)=0.5*E[||X'*y(t)||^2]+trace(X'*B) s.t. trace(X'*Gamma*X)=1
 
 % Author: Cem Musluoglu, KU Leuven, Department of Electrical Engineering
 % (ESAT), STADIUS Center for Dynamical Systems, Signal Processing and Data

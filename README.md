@@ -34,8 +34,8 @@ Alternatively, `dsfo_cell` can be used for the same result, the difference being
 | `nbsamples` | Scalar containing the number of time samples per iteration of the signals in the network (e.g. to compute an estimation of the correlation matrix). |
 | `graph_adj (nbnodes x nbnodes)`| Adjacency matrix of the graph of the considered network, with `graph_adj(i,j)==1` if nodes `i`and `j` are connected and `0` otherwise. Moreover, `graph_adj(i,i)=0`. |
 | `X_star (nbsensors x Q)` | **Optional.** Optimal argument for the optimization problem, computed using a centralized solver, for example `prob_solver` (see I-5) below). Used for comparison purposes, for example to compute the normalized error. |
-| `compare_opt` | **Optional.** If the optimal argument `X_star` is known and given, compute the normalized error `norm_err` at each iteration between `X^i` and `X_star` if this variable is equal to `1` (see II-3) below). |
-| `plot_dynamic`| **Optional.** If the optimal argument `X_star` is known and given, show a dynamic plot comparing the first column of `X_star` to the first column of `X^i` if this variable is equal to `1`. |
+| `compare_opt` | **Optional.** Binary value. If the optimal argument `X_star` is known and given, compute the normalized error `norm_err` at each iteration between `X^i` and `X_star` if this variable is "true" (see II-3) below). "false" by default. |
+| `plot_dynamic`| **Optional.** Binary value. If the optimal argument `X_star` is known and given, show a dynamic plot comparing the first column of `X_star` to the first column of `X^i` if this variable is "true". "false" by default. |
 
 #### 2) Data
  `data:` Structure related to the data of the problem, containing the following fields:
@@ -66,9 +66,9 @@ where `data` and `prob_params` are the structures defined above.
 
 | Field | Description |
 | ---- | --- |
+| `nbiter` | Maximum number of iterations. Stop the algorithm whenever it is achieved. |
 | `tol_f`| Tolerance on the difference between consecutive objectives, i.e., `abs(f(X^(i+1))-f(X^i))`. If the difference is smaller than this variable, stop the algorithm. |
 | `tol_X`| Tolerance on the difference between consecutive arguments, i.e., `||X^(i+1))-X^i||_F`. If the difference is smaller than this variable, stop the algorithm. |
-| `nbiter` | Maximum number of iterations. Stop the algorithm whenever it is achieved. |
 
 By default, the algorithm stops at maximum 200 iterations. If one or more fields are provided and valid, the algorithm stops when the first stopping criterion is achieved.
 
@@ -103,7 +103,7 @@ where `data` is the structure defined above.
 
 #### 3) Normalized error
 
-`norm_err:` **Computed only if** `X_star` **is provided and** `compare_opt` **is equal to 1.** Vector containing the scaled norm of the difference between `X^i` and `X_star`, i.e., `||X^i-X_star||_F^2/||X_star||_F^2`.
+`norm_err:` **Computed only if** `X_star` **is provided and** `compare_opt` **is "true".** Vector containing the scaled norm of the difference between `X^i` and `X_star`, i.e., `||X^i-X_star||_F^2/||X_star||_F^2`.
 
 #### 4) Sequence of objectives
 

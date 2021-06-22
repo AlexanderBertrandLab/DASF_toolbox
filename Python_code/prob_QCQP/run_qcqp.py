@@ -1,11 +1,11 @@
 import numpy as np
+import matplotlib as mpl
+import matplotlib.pyplot as plt
 import sys
 
 sys.path.append('../')
-import tro_functions as tro
+import qcqp_functions as qcqp
 from dsfo_toolbox import dsfo
-import matplotlib as mpl
-import matplotlib.pyplot as plt
 
 mpl.use('macosx')
 
@@ -16,9 +16,9 @@ mpl.use('macosx')
 mc_runs = 5
 
 # Number of nodes.
-nbnodes = 30
+nbnodes = 10
 # Number of channels per node.
-nbsensors_vec = 15 * np.ones(nbnodes)
+nbsensors_vec = 5 * np.ones(nbnodes)
 nbsensors_vec = nbsensors_vec.astype(int)
 # Number of channels in total.
 nbsensors = np.sum(nbsensors_vec)
@@ -27,19 +27,20 @@ nbsensors = np.sum(nbsensors_vec)
 nbsamples = 10000
 
 # Number of filters of X.
-Q = 5
+Q = 3
 
 norm_error = []
+n_runs = 0
 
 rng = np.random.default_rng()
 
-for k in range(mc_runs):
-    Y, V = tro.create_data(nbsensors, nbsamples)
+while n_runs < mc_runs:
+    Y, B, alpha, c, d = qcqp.create_data(nbsensors, nbsamples, Q)
 
-    Y_list = [Y, V]
+    Y_list = [Y]
+    B_list = [B, c]
     Gamma_list = [np.identity(nbsensors)]
-    B_list = []
-    Glob_Const_list = []
+    Glob_Const_list = [alpha, d]
 
     data = {'Y_list': Y_list, 'B_list': B_list,
             'Gamma_list': Gamma_list, 'Glob_Const_list': Glob_Const_list}
@@ -54,8 +55,8 @@ for k in range(mc_runs):
     update_path = rng.permutation(range(nbnodes))
     prob_params['update_path'] = update_path
 
-    X_star = tro.tro_solver(prob_params, data)
-    f_star = tro.tro_eval(X_star, data)
+    X_star = qcqp.qcqp_solver(prob_params, data)
+    f_star = qcqp.qcqp_eval(X_star, data)
 
     prob_params['X_star'] = X_star
     prob_params['compare_opt'] = True
@@ -63,11 +64,13 @@ for k in range(mc_runs):
 
     nbiter = 200
     conv = {'nbiter': nbiter}
-
-    X_est, norm_diff, norm_err, f_seq = dsfo(prob_params, data, tro.tro_solver,
-                                             conv, tro.tro_select_sol, tro.tro_eval)
-
-    norm_error.append(norm_err)
+    try:
+        X_est, norm_diff, norm_err, f_seq = dsfo(prob_params, data, qcqp.qcqp_solver,
+                                                 conv, prob_eval=qcqp.qcqp_eval, prob_select_sol=None)
+        norm_error.append(norm_err)
+        n_runs = n_runs + 1
+    except:
+        print("Infeasible")
 
 q5 = np.quantile(norm_error, 0.5, axis=0)
 q25 = np.quantile(norm_error, 0.25, axis=0)

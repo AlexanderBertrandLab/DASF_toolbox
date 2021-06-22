@@ -1,6 +1,6 @@
 function f=tro_eval(X,data)
 
-% Evaluate the TRO objective trace(X'*Ryy*X)/trace(X'*Rvv*X).
+% Evaluate the TRO objective E[||X'*y(t)||^2]/E[||X'*v(t)||^2].
 
 % Author: Cem Musluoglu, KU Leuven, Department of Electrical Engineering
 % (ESAT), STADIUS Center for Dynamical Systems, Signal Processing and Data

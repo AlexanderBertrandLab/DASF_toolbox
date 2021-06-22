@@ -1,6 +1,6 @@
 function f=qcqp_eval(X,data)
 
-% Evaluate the QCQP objective 0.5*trace(X'*Ryy*X)-trace(X'*B);
+% Evaluate the QCQP objective 0.5*E[||X'*y(t)||^2]-trace(X'*B);
 
 % Author: Cem Musluoglu, KU Leuven, Department of Electrical Engineering
 % (ESAT), STADIUS Center for Dynamical Systems, Signal Processing and Data

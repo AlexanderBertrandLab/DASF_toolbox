@@ -1,6 +1,6 @@
 function [X_star,f_star]=qcqp_solver(prob_params,data)
 
-% Solve min 0.5*trace(X'*Ryy*X)-trace(X'*B) s.t. trace(X'*Gamma*X)<= alpha^2; X'*c=d.
+% Solve min 0.5*E[||X'*y(t)||^2]-trace(X'*B) s.t. trace(X'*Gamma*X)<= alpha^2; X'*c=d.
 
 % Author: Cem Musluoglu, KU Leuven, Department of Electrical Engineering
 % (ESAT), STADIUS Center for Dynamical Systems, Signal Processing and Data
@@ -28,16 +28,17 @@ function [X_star,f_star]=qcqp_solver(prob_params,data)
 
     elseif (alpha^2>norm(d)^2/norm(inv(sqrt_Gamma)'*c)^2)
 
-        Mf=@(muv)Ryy+muv*Gamma;
-        wf=@(muv)(B'*inv(Mf(muv))'*c-d)/(c'*inv(Mf(muv))*c);
-        Xf=@(muv)inv(Mf(muv))*(B-c*wf(muv)');
-        norm_fun=@(muv)trace(Xf(muv)'*Gamma*Xf(muv))-alpha^2;
-        f_fun=@(muv)0.5*trace(Xf(muv)'*Ryy*Xf(muv))-trace(B'*Xf(muv));
+        Mat=@(mu)Ryy+mu*Gamma;
+        Mat_inv=@(mu)inv(Mat(mu));
+        w=@(mu)(B'*Mat_inv(mu)'*c-d)/(c'*Mat_inv(mu)*c);
+        X=@(mu)Mat_inv(mu)*(B-c*w(mu)');
+        norm_fun=@(mu)trace(X(mu)'*Gamma*X(mu))-alpha^2;
+        
         if norm_fun(0)<0
-            X_star=Xf(0);
+            X_star=X(0);
         else 
             mu_star=fzero(norm_fun,[0,1e15]);
-            X_star=Xf(mu_star);
+            X_star=X(mu_star);
         end
 
     else

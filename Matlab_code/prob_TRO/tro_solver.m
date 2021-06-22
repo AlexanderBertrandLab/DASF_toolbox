@@ -1,6 +1,6 @@
 function [X_star,f_star]=tro_solver(prob_params,data)
 
-% Solve the TRO problem max trace(X'*Ryy*X)/trace(X'*Rvv*X) s.t.
+% Solve the TRO problem max E[||X'*y(t)||^2]/E[||X'*v(t)||^2] s.t.
 % X'*Gamma*X=I.
 
 % Author: Cem Musluoglu, KU Leuven, Department of Electrical Engineering

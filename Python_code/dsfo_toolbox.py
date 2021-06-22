@@ -142,6 +142,7 @@ def dsfo(prob_params, data, prob_solver,
     if len(X_star) and compare_opt and plot_dynamic:
         plt.ioff()
         #plt.show(block=False)
+        plt.close()
 
     return X, norm_diff, norm_err, f_seq
 
