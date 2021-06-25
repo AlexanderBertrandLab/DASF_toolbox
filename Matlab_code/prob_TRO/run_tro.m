@@ -1,4 +1,4 @@
-% Example script to run the TI-DSFO algorithm to solve the TRO problem
+% Example script to run the DSFO algorithm to solve the TRO problem.
 
 % Author: Cem Musluoglu, KU Leuven, Department of Electrical Engineering
 % (ESAT), STADIUS Center for Dynamical Systems, Signal Processing and Data
@@ -8,7 +8,7 @@
 clear all
 close all
 
-addpath('../DSFO/');
+addpath('../dsfo_toolbox/');
 
 % Number of Monte-Carlo runs.
 mc_runs=5;
@@ -33,7 +33,7 @@ for n_runs=1:mc_runs
     % Create the data.
     [Y,V]=create_data(nbsensors_vec,nbnodes,nbsamples);
     
-    % Structure related to the data.
+    % Structure related to the data of the problem.
     Y_cell=cell(2,1);
     Y_cell{1}=Y;
     Y_cell{2}=V;
@@ -59,7 +59,7 @@ for n_runs=1:mc_runs
     % Estimate filter using the centralized algorithm.
     [X_star,f_star]=tro_solver(prob_params,data);
     prob_params.X_star=X_star;
-    % Compute the distance to X^* if "true".
+    % Compute the distance to X_star if "true".
     prob_params.compare_opt=true;
     % Show a dynamic plot if "true".
     prob_params.plot_dynamic=false;

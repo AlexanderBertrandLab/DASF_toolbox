@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 import sys
 
 sys.path.append('../dsfo_toolbox/')
-import qcqp_functions as qcqp
+import scqp_functions as scqp
 from dsfo_toolbox import dsfo
 
 # Choose plot backend.
@@ -16,9 +16,9 @@ mpl.use('macosx')
 mc_runs = 5
 
 # Number of nodes.
-nbnodes = 10
+nbnodes = 30
 # Number of channels per node.
-nbsensors_vec = 5 * np.ones(nbnodes)
+nbsensors_vec = 15 * np.ones(nbnodes)
 nbsensors_vec = nbsensors_vec.astype(int)
 # Number of channels in total.
 nbsensors = np.sum(nbsensors_vec)
@@ -34,15 +34,15 @@ n_runs = 0
 
 rng = np.random.default_rng()
 
-while n_runs < mc_runs:
+for k in range(mc_runs):
     # Create the data.
-    Y, B, alpha, c, d = qcqp.create_data(nbsensors, nbsamples, Q)
+    Y, B = scqp.create_data(nbsensors, nbsamples, Q)
 
     # Dictionary related to the data of the problem.
     Y_list = [Y]
-    B_list = [B, c]
+    B_list = [B]
     Gamma_list = [np.identity(nbsensors)]
-    Glob_Const_list = [alpha, d]
+    Glob_Const_list = []
 
     data = {'Y_list': Y_list, 'B_list': B_list,
             'Gamma_list': Gamma_list, 'Glob_Const_list': Glob_Const_list}
@@ -61,8 +61,8 @@ while n_runs < mc_runs:
     prob_params['update_path'] = update_path
 
     # Estimate filter using the centralized algorithm.
-    X_star = qcqp.qcqp_solver(prob_params, data)
-    f_star = qcqp.qcqp_eval(X_star, data)
+    X_star = scqp.scqp_solver(prob_params, data)
+    f_star = scqp.scqp_eval(X_star, data)
 
     prob_params['X_star'] = X_star
     # Compute the distance to X_star if "True".
@@ -74,14 +74,11 @@ while n_runs < mc_runs:
     nbiter = 200
     conv = {'nbiter': nbiter}
 
-    try:
-        # Solve the QCQP in a distributed way using the DSFO framework.
-        X_est, norm_diff, norm_err, f_seq = dsfo(prob_params, data, qcqp.qcqp_solver,
-                                                 conv, prob_eval=qcqp.qcqp_eval, prob_select_sol=None)
-        norm_error.append(norm_err)
-        n_runs = n_runs + 1
-    except:
-        print("Infeasible")
+    # Solve the SCQP in a distributed way using the DSFO framework.
+    X_est, norm_diff, norm_err, f_seq = dsfo(prob_params, data, scqp.scqp_solver,
+                                            conv, prob_eval=scqp.scqp_eval, prob_select_sol=None)
+    norm_error.append(norm_err)
+
 
 # Plot the normalized error.
 q5 = np.quantile(norm_error, 0.5, axis=0)

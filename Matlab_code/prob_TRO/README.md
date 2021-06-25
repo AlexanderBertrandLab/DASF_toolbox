@@ -45,7 +45,7 @@ taking as input the following data:
 
 If one or more of these do not appear in the problem, set their corresponding cell to an empty one.
 
-**Example:** `Gamma_cell={}` if no quadratic term `X'*Gamma'*X` appears in the problem.
+**Example:** `Gamma_cell={}` if no quadratic term `X'*Gamma*X` appears in the problem.
 
 The function `tro_solver` depends on the signals `y1(t)` and `y2(t)`, and the quadratic term `Gamma1`. There is no linear term or global constants.
 

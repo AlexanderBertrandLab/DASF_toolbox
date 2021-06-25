@@ -10,7 +10,7 @@ function X=tro_select_sol(Xq_old,Xq,X)
     Q=size(Xq_old,2);
 
     for l=1:Q
-        if sum(sum((Xq_old(:,l)-Xq(:,l)).^2))>sum(sum((-Xq_old(:,l)-Xq(:,l)).^2))
+        if norm(Xq_old(:,l)-Xq(:,l))>norm(-Xq_old(:,l)-Xq(:,l))
             X(:,l)=-X(:,l);
         end
     end

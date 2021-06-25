@@ -3,8 +3,7 @@ function data_compressed=compress(data,Cq)
 % Function to compress the data.
 %
 % INPUTS:
-% data: Structure containing the compressed data. Contains the
-%                  same fields as 'data'.
+% data: Structure related to the data.
 % Cq: Transformation matrix making the transition between local and global
 %     data.
 %

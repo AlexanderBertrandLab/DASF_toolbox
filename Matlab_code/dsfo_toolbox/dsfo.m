@@ -1,4 +1,4 @@
-function [X,norm_diff,norm_err,f_seq]=dsfo_cell(prob_params,data,...
+function [X,norm_diff,norm_err,f_seq]=dsfo(prob_params,data,...
     prob_solver,conv,prob_select_sol,prob_eval)
 
 % Function running the DSFO for a given problem.
@@ -11,7 +11,7 @@ function [X,norm_diff,norm_err,f_seq]=dsfo_cell(prob_params,data,...
 %                            each node.
 %            nbsensors : Sum of the number of sensors for each node
 %                        (dimension of the network-wide signals). Is equal
-%                        to sum(nbsensnode).
+%                        to sum(nbsensors_vec).
 %            Q : Number of filters to use (dimension of projected space)
 %            nbsamples : Number of time samples of the signals per
 %                        iteration.
@@ -29,7 +29,7 @@ function [X,norm_diff,norm_err,f_seq]=dsfo_cell(prob_params,data,...
 %                           plot dynamically the first column of X_star and 
 %                           the current estimate X. "false" by default.
 %
-% data : Structure related data containing the following fields:
+% data : Structure related to the data containing the following fields:
 %            Y_cell : Cell containing matrices of size 
 %                     (nbsensors x nbsamples) corresponding to the
 %                     stochastic signals.
@@ -53,7 +53,7 @@ function [X,norm_diff,norm_err,f_seq]=dsfo_cell(prob_params,data,...
 %            tol_X : Tolerance in arguments: ||X^(i+1)-X^(i)||_F>tol_f
 %
 % By default, the number of iterations is 200, unless specified otherwise.
-% If other fields are given and valid, the first condtion to be achieved
+% If other fields are given and valid, the first condition to be achieved
 % stops the algorithm.
 %
 % prob_select_sol : (Optional) Function resolving the uniqueness ambiguity.
@@ -63,10 +63,10 @@ function [X,norm_diff,norm_err,f_seq]=dsfo_cell(prob_params,data,...
 %
 %
 % OUTPUTS : 
-% X               : Estimation of the optimal variable
-% norm_diff       : Sequence of ||X^(i+1)-X^(i)||_F^2/(nbsensors*Q)
-% norm_err        : Sequence of ||X^(i)-X_star||_F^2/||X_star||_F^2
-% f_seq           : Sequence of objective values across iterations
+% X               : Estimation of the optimal variable.
+% norm_diff       : Sequence of ||X^(i+1)-X^(i)||_F^2/(nbsensors*Q).
+% norm_err        : Sequence of ||X^(i)-X_star||_F^2/||X_star||_F^2.
+% f_seq           : Sequence of objective values across iterations.
 %
 % Author: Cem Musluoglu, KU Leuven, Department of Electrical Engineering
 % (ESAT), STADIUS Center for Dynamical Systems, Signal Processing and Data
@@ -81,7 +81,7 @@ nbsensors_vec=prob_params.nbsensors_vec;
 graph_adj=prob_params.graph_adj;
 
 if (~isfield(prob_params,'update_path'))
-    % Random updating order
+    % Random updating order.
     update_path=randperm(nbnodes);
     warning('Randomly selected updating path')
 else
@@ -142,7 +142,6 @@ else
 end
 
 X=randn(nbsensors,Q);
-X_cell=mat2cell(X,nbsensors_vec,Q);
 X_old=X;
 
 if(isempty(prob_eval))
@@ -172,15 +171,23 @@ while i<nbiter
     % Global - local transition matrix.
     Cq=constr_Cq(X,q,prob_params,neighbors,Nu);
 
-    % Compute compressed data.
+    % Compute the compressed data.
     data_compressed=compress(data,Cq);
 
     % Compute the local variable.
-    % Solve the local problem using the algorithm for the global problem
-    % using compressed data.
+    % Solve the local problem with the algorithm for the global problem
+    % using the compressed data.
     X_tilde=prob_solver(prob_params,data_compressed);
     
-    % Evaluate objective.
+    % Select a solution among potential ones if the problem has a non-
+    % unique solution.
+    if(~isempty(prob_select_sol))
+        Xq=X_tilde(1:nbsensors_vec(q),:);
+        Xq_old=block_q(X_old,q,nbsensors_vec);
+        X_tilde=prob_select_sol(Xq_old,Xq,X_tilde);
+    end
+    
+    % Evaluate the objective.
     if(~isempty(prob_eval))
         f_old=f;
         f=prob_eval(X_tilde,data_compressed);
@@ -188,19 +195,15 @@ while i<nbiter
     end
     
     % Global variable.
-    X_cell=update_X_cell(X_cell,X_tilde,q,prob_params,neighbors,Nu,...
-                prob_select_sol);
-    X=cell2mat(X_cell);
+    X=Cq*X_tilde;
     
     if i>0
         norm_diff=[norm_diff,norm(X-X_old,'fro').^2/numel(X)];
     end
     
-    X_cell=mat2cell(X,nbsensors_vec,Q);
-    
     if(~isempty(X_star) && compare_opt)
         if(~isempty(prob_select_sol))
-            Xq=X_cell{q};
+            Xq=block_q(X,q,nbsensors_vec);
             Xq_star=block_q(X_star,q,nbsensors_vec);
             X=prob_select_sol(Xq_star,Xq,X);
         end
@@ -209,8 +212,6 @@ while i<nbiter
             dynamic_plot(X,X_star)
         end
     end
-    
-    X_cell=mat2cell(X,nbsensors_vec,Q);
     
     X_old=X;
     

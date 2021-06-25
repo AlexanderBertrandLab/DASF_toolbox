@@ -30,9 +30,9 @@ Folder with the DSFO implementation and utility functions (more details inside t
 
 `block_q.m:` Function to extract the block of X corresponding to node q.
 
-`dsfo_cell.m:` Same function as `dsfo` but the optimization variable is divided into cells *within the function* to explicitly emphasize and separate the block structure of the global variable `X=[X1;...;Xk;...XK]`. At the expense of a slightly less straightforward implementation than `dsfo`, it better represents how each node updates their local variable.
+`dsfo_block.m:` Same function as `dsfo` but the optimization variable is divided into cells *within the function* to explicitly emphasize and separate the block structure of the global variable `X=[X1;...;Xk;...XK]`. At the expense of a slightly less straightforward implementation than `dsfo`, it better represents how each node updates their local variable.
 
-`update_X_cell.m:` Only called from `dsfo_cell`. Explicitly updating the `Xk` of each node `k` separately, where the global variable `X` is equal to `[X1;...;Xk;...XK]`, it allows to adapt the updating scheme depending on the user's application in an easier way than the implementation used in `dsfo`, resulting in more flexibility. 
+`update_X_block.m:` Only called from `dsfo_block`. Explicitly updating the `Xk` of each node `k` separately, where the global variable `X` is equal to `[X1;...;Xk;...XK]`, it allows to adapt the updating scheme depending on the user's application in an easier way than the implementation used in `dsfo`, resulting in more flexibility. 
 
 **Dependencies:**
 
@@ -61,21 +61,21 @@ Folder with the DSFO implementation and utility functions (more details inside t
 
 
 
-                              dsfo_cell
+                              dsfo_block
                                   |
                                   |
-           -----------------------------------------------------------------------------
-           |    |        |          |          |     |    |    |        |    |         |
-           |    |        |          |          |     |    |    |        |    |         |
-           |    v        v          v          v     |    |    v        |    v         v
-           |find_path constr_Nu constr_Cq compress   |    |update_X_cell| block_q plot_dynamic
-           |    |                                    |    |          |  |         
-           |    |                                    |    |          |  |         
-           |    v                                    v    |          |  |         
-           | shortest_path                        make_sym|          |  |
-           |                                              |          |  |
-           |                                              |          |  |
-           |                                              |          |  |
-           |                                              |          |  |
-           v                                              v          v  v
+           ------------------------------------------------------------------------------
+           |    |        |          |          |     |    |    |         |    |         |
+           |    |        |          |          |     |    |    |         |    |         |
+           |    v        v          v          v     |    |    v         |    v         v
+           |find_path constr_Nu constr_Cq compress   |    |update_X_block| block_q plot_dynamic
+           |    |                                    |    |          |   |         
+           |    |                                    |    |          |   |         
+           |    v                                    v    |          |   |         
+           | shortest_path                        make_sym|          |   |
+           |                                              |          |   |
+           |                                              |          |   |
+           |                                              |          |   |
+           |                                              |          |   |
+           v                                              v          v   v
         prob_eval                                    prob_solver   prob_select_sol

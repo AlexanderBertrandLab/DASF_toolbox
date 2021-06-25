@@ -47,7 +47,7 @@ https://www.manopt.org
 
 If one or more of these do not appear in the problem, set their corresponding cell to an empty one.
 
-**Example:** `Gamma_cell={}` if no quadratic term `X'*Gamma'*X` appears in the problem.
+**Example:** `Gamma_cell={}` if no quadratic term `X'*Gamma*X` appears in the problem.
 
 The function `scqp_solver` depends on the signal `y1(t)`, the linear term `B1` and the quadratic term `Gamma1`.
 

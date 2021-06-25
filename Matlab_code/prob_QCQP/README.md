@@ -50,7 +50,7 @@ taking as input the following data:
 
 If one or more of these do not appear in the problem, set their corresponding cell to an empty one.
 
-**Example:** `Gamma_cell={}` if no quadratic term `X'*Gamma'*X` appears in the problem.
+**Example:** `Gamma_cell={}` if no quadratic term `X'*Gamma*X` appears in the problem.
 
 The function `qcqp_solver` depends on the signal `y1(t)`, the linear terms `B1` and `b2`, the quadratic term `Gamma1`, and the global constants `gc1` and `gc2`.
 

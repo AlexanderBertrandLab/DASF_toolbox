@@ -2,13 +2,14 @@ import numpy as np
 from scipy import linalg as LA
 
 
-# Solve the TRO problem max E[||X'*y(t)||^2]/E[||X'*v(t)||^2] s.t. X'*Gamma*X=I.
+# This module implements the functions related to the TRO problem.
 #
 # Author: Cem Musluoglu, KU Leuven, Department of Electrical Engineering (ESAT), STADIUS Center for Dynamical Systems,
 # Signal Processing and Data Analytics
 # Correspondence: cemates.musluoglu@esat.kuleuven.be
 
 def tro_solver(prob_params, data):
+    """Solve the TRO problem max E[||X'*y(t)||^2]/E[||X'*v(t)||^2] s.t. X'*Gamma*X=I."""
     Y = data['Y_list'][0]
     V = data['Y_list'][1]
     Gamma = data['Gamma_list'][0]
@@ -53,13 +54,8 @@ def tro_solver(prob_params, data):
     return X_star
 
 
-# Evaluate the TRO objective E[||X'*y(t)||^2]/E[||X'*v(t)||^2].
-#
-# Author: Cem Musluoglu, KU Leuven, Department of Electrical Engineering (ESAT), STADIUS Center for Dynamical Systems,
-# Signal Processing and Data Analytics
-# Correspondence: cemates.musluoglu@esat.kuleuven.be
-
 def tro_eval(X, data):
+    """Evaluate the TRO objective E[||X'*y(t)||^2]/E[||X'*v(t)||^2]."""
     Y = data['Y_list'][0]
     V = data['Y_list'][1]
     N = np.size(Y, 1)
@@ -74,29 +70,19 @@ def tro_eval(X, data):
     return f
 
 
-# Resolve the sign ambiguity for the TRO problem.
-#
-# Author: Cem Musluoglu, KU Leuven, Department of Electrical Engineering (ESAT), STADIUS Center for Dynamical Systems,
-# Signal Processing and Data Analytics
-# Correspondence: cemates.musluoglu@esat.kuleuven.be
-
 def tro_select_sol(Xq_old, Xq, X):
+    """Resolve the sign ambiguity for the TRO problem."""
     Q = np.size(Xq_old, 1)
 
     for l in range(Q):
-        if np.sum((Xq_old[:, l] - Xq[:, l]) ** 2) > np.sum((-Xq_old[:, l] - Xq[:, l]) ** 2):
+        if np.linalg.norm(Xq_old[:, l] - Xq[:, l])> np.linalg.norm(-Xq_old[:, l] - Xq[:, l]):
             X[:, l] = -X[:, l]
 
     return X
 
 
-# Create data for the TRO problem.
-#
-# Author: Cem Musluoglu, KU Leuven, Department of Electrical Engineering (ESAT), STADIUS Center for Dynamical Systems,
-# Signal Processing and Data Analytics
-# Correspondence: cemates.musluoglu@esat.kuleuven.be
-
 def create_data(nbsensors, nbsamples):
+    """Create data for the TRO problem."""
     rng = np.random.default_rng()
 
     nbsources = 5

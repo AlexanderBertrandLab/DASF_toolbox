@@ -4,14 +4,14 @@ import scipy.optimize as opt
 import warnings
 
 
-# Solve the QCQP problem min 0.5*E[||X'*y(t)||^2]-trace(X'*B) s.t. trace(X'*Gamma*X)<= alpha^2; X'*c=d.
+# This module implements the functions related to the QCQP problem.
 #
 # Author: Cem Musluoglu, KU Leuven, Department of Electrical Engineering (ESAT), STADIUS Center for Dynamical Systems,
 # Signal Processing and Data Analytics
 # Correspondence: cemates.musluoglu@esat.kuleuven.be
 
 def qcqp_solver(prob_params, data):
-
+    """Solve the QCQP problem min 0.5*E[||X'*y(t)||^2]-trace(X'*B) s.t. trace(X'*Gamma*X)<= alpha^2; X'*c=d."""
     Y = data['Y_list'][0]
     B = data['B_list'][0]
     c = data['B_list'][1]
@@ -67,13 +67,9 @@ def norm_fun(mu,data):
 
     return norm
 
-# Evaluate the QCQP objective 0.5*E[||X'*y(t)||^2]-trace(X'*B).
-#
-# Author: Cem Musluoglu, KU Leuven, Department of Electrical Engineering (ESAT), STADIUS Center for Dynamical Systems,
-# Signal Processing and Data Analytics
-# Correspondence: cemates.musluoglu@esat.kuleuven.be
 
 def qcqp_eval(X, data):
+    """Evaluate the QCQP objective 0.5*E[||X'*y(t)||^2]-trace(X'*B)."""
     Y = data['Y_list'][0]
     B = data['B_list'][0]
     N = np.size(Y, 1)
@@ -86,13 +82,8 @@ def qcqp_eval(X, data):
     return f
 
 
-# Create data for the QCQP problem.
-#
-# Author: Cem Musluoglu, KU Leuven, Department of Electrical Engineering (ESAT), STADIUS Center for Dynamical Systems,
-# Signal Processing and Data Analytics
-# Correspondence: cemates.musluoglu@esat.kuleuven.be
-
 def create_data(nbsensors, nbsamples, Q):
+    """Create data for the QCQP problem."""
     rng = np.random.default_rng()
 
     Y = rng.standard_normal(size=(nbsensors, nbsamples))

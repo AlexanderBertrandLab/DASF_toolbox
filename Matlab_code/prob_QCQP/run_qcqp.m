@@ -1,4 +1,4 @@
-% Example script to run the DSFO algorithm to solve the TRO problem.
+% Example script to run the DSFO algorithm to solve the QCQP problem.
 
 % Author: Cem Musluoglu, KU Leuven, Department of Electrical Engineering
 % (ESAT), STADIUS Center for Dynamical Systems, Signal Processing and Data
@@ -8,7 +8,7 @@
 clear all
 close all
 
-addpath('../DSFO/');
+addpath('../dsfo_toolbox/');
 
 % Number of Monte-Carlo runs.
 mc_runs=5;
@@ -34,7 +34,7 @@ while n_runs<=mc_runs
     % Create the data.
     [Y,B,alpha,c,d]=create_data(nbsensors,nbsamples,Q);
     
-    % Structure related to parameters of the problem.
+    % Structure related to the data of the problem.
     Y_cell{1}=Y;
     B_cell{1}=B;
     B_cell{2}=c;
@@ -62,7 +62,7 @@ while n_runs<=mc_runs
     % Estimate filter using the centralized algorithm.
     [X_star,f_star]=qcqp_solver(prob_params,data);
     prob_params.X_star=X_star;
-    % Compute the distance to X^* if "true".
+    % Compute the distance to X_star if "true".
     prob_params.compare_opt=true;
     % Show a dynamic plot if "true".
     prob_params.plot_dynamic=false;
@@ -72,7 +72,7 @@ while n_runs<=mc_runs
     conv=struct;
     conv.nbiter=200;
     
-    % Create adjacency matrix (hollow matrix) of a random graph
+    % Create adjacency matrix (hollow matrix) of a random graph.
     adj=randi(2,nbnodes,nbnodes)-1;
     graph_adj=triu(adj,1)+tril(adj',-1);
     prob_params.graph_adj=graph_adj;
