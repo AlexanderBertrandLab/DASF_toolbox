@@ -12,6 +12,7 @@ the DSFO algorithm solves the problem in a distributed setting such as a wireles
 **Note:** There can be more than one `y(t)`, `B` and `Gamma` which are not represented for conciseness. 
 
 The `dsfo` function implements the DSFO algorithm and is called in the following way:
+
 **Matlab:**
 
         [X_est,norm_diff,norm_err,f_seq]=dsfo(prob_params,data,...

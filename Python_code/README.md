@@ -93,7 +93,7 @@ where `data` is the dictionary defined above.
 
 #### 2) Norm of difference of arguments
 
-`norm_diff:` Vector containing the scaled norm of the difference between consecutive arguments, i.e., `||X^(i+1)-X^i||_F^2/(nbsensors*Q)`.
+`norm_diff:` Vector containing the scaled norm of the difference between consecutive arguments, i.e., `||X^(i+1) - X^i||_F ** 2 / (nbsensors * Q)`.
 
 #### 3) Normalized error
 

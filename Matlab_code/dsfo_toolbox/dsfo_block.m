@@ -1,4 +1,4 @@
-function [X,norm_diff,norm_err,f_seq]=dsfo_cell(prob_params,data,...
+function [X,norm_diff,norm_err,f_seq]=dsfo_block(prob_params,data,...
     prob_solver,conv,prob_select_sol,prob_eval)
 
 % Function running the DSFO for a given problem.
@@ -142,7 +142,7 @@ else
 end
 
 X=randn(nbsensors,Q);
-X_cell=mat2cell(X,nbsensors_vec,Q);
+X_block=mat2cell(X,nbsensors_vec,Q);
 X_old=X;
 
 if(isempty(prob_eval))
@@ -188,19 +188,19 @@ while i<nbiter
     end
     
     % Global variable.
-    X_cell=update_X_cell(X_cell,X_tilde,q,prob_params,neighbors,Nu,...
+    X_block=update_X_cell(X_block,X_tilde,q,prob_params,neighbors,Nu,...
                 prob_select_sol);
-    X=cell2mat(X_cell);
+    X=cell2mat(X_block);
     
     if i>0
         norm_diff=[norm_diff,norm(X-X_old,'fro').^2/numel(X)];
     end
     
-    X_cell=mat2cell(X,nbsensors_vec,Q);
+    X_block=mat2cell(X,nbsensors_vec,Q);
     
     if(~isempty(X_star) && compare_opt)
         if(~isempty(prob_select_sol))
-            Xq=X_cell{q};
+            Xq=X_block{q};
             Xq_star=block_q(X_star,q,nbsensors_vec);
             X=prob_select_sol(Xq_star,Xq,X);
         end
@@ -210,7 +210,7 @@ while i<nbiter
         end
     end
     
-    X_cell=mat2cell(X,nbsensors_vec,Q);
+    X_block=mat2cell(X,nbsensors_vec,Q);
     
     X_old=X;
     
