@@ -6,6 +6,7 @@ import matplotlib.pyplot as plt
 sys.path.append('../dsfo_toolbox/')
 import tro_functions as tro
 from dsfo_toolbox import dsfo
+from dsfo_toolbox import dsfo_block
 
 # Choose plot backend.
 mpl.use('macosx')

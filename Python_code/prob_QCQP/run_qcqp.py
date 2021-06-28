@@ -6,6 +6,7 @@ import sys
 sys.path.append('../dsfo_toolbox/')
 import qcqp_functions as qcqp
 from dsfo_toolbox import dsfo
+from dsfo_toolbox import dsfo_block
 
 # Choose plot backend.
 mpl.use('macosx')
@@ -78,6 +79,7 @@ while n_runs < mc_runs:
         # Solve the QCQP in a distributed way using the DSFO framework.
         X_est, norm_diff, norm_err, f_seq = dsfo(prob_params, data, qcqp.qcqp_solver,
                                                  conv, prob_eval=qcqp.qcqp_eval, prob_select_sol=None)
+
         norm_error.append(norm_err)
         n_runs = n_runs + 1
     except:

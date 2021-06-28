@@ -502,7 +502,7 @@ def update_X_block(X_block, X_tilde, q, prob_params, neighbors, Nu, prob_select_
     nbneighbors = len(neighbors)
     ind = np.arange(nbnodes)
 
-    for l in range(q - 1):
+    for l in range(q):
         for k in range(nbneighbors):
             if l in Nu[k]:
                 start_r = nbsensors_vec[q] + ind[k] * Q

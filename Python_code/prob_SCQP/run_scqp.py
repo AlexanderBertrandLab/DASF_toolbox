@@ -6,6 +6,7 @@ import sys
 sys.path.append('../dsfo_toolbox/')
 import scqp_functions as scqp
 from dsfo_toolbox import dsfo
+from dsfo_toolbox import dsfo_block
 
 # Choose plot backend.
 mpl.use('macosx')
@@ -77,6 +78,7 @@ for k in range(mc_runs):
     # Solve the SCQP in a distributed way using the DSFO framework.
     X_est, norm_diff, norm_err, f_seq = dsfo(prob_params, data, scqp.scqp_solver,
                                             conv, prob_eval=scqp.scqp_eval, prob_select_sol=None)
+
     norm_error.append(norm_err)
 
 
