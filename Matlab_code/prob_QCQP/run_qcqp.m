@@ -1,4 +1,5 @@
-% Example script to run the DSFO algorithm to solve the QCQP problem.
+% Example script to run the DSFO algorithm to solve the Quadratically
+% Constrained Quadratic Problem (QCQP).
 
 % Author: Cem Musluoglu, KU Leuven, Department of Electrical Engineering
 % (ESAT), STADIUS Center for Dynamical Systems, Signal Processing and Data
@@ -32,7 +33,7 @@ n_runs=1;
 while n_runs<=mc_runs
     
     % Create the data.
-    [Y,B,alpha,c,d]=create_data(nbsensors,nbsamples,Q);
+    [Y,B,alpha,c,d]=create_data(nbsensors,nbsensors_vec,nbnodes,nbsamples,Q);
     
     % Structure related to the data of the problem.
     Y_cell{1}=Y;
@@ -75,6 +76,12 @@ while n_runs<=mc_runs
     % Create adjacency matrix (hollow matrix) of a random graph.
     adj=randi(2,nbnodes,nbnodes)-1;
     graph_adj=triu(adj,1)+tril(adj',-1);
+    non_connected=find(all(graph_adj==0));
+    % If there are non-connected nodes, connect them to every other node.
+    if(non_connected)
+        graph_adj(:,non_connected)=1;
+        graph_adj(non_connected,:)=1;
+    end
     prob_params.graph_adj=graph_adj;
     
     % Solve the QCQP in a distributed way using the DSFO framework.
@@ -108,19 +115,19 @@ ylim([1e-20,inf])
 ax=gca;
 ax.FontSize=14;
 xlabel('Iterations','Interpreter','latex','Fontsize',20)
-ylabel('$\frac{||X^{i}-X^*||_2^F}{||X^*||_F^2}$','Interpreter','latex','Fontsize',20)
+ylabel('$\epsilon$','Interpreter','latex','Fontsize',20)
 grid on
 
 %%
 
-function [Y,B,alpha,c,d]=create_data(nbsensors,nbsamples,Q)
+function [Y,B,alpha,c,d]=create_data(nbsensors,nbsensors_vec,nbnodes,nbsamples,Q)
 
     rng('shuffle');
-    Y=randn(nbsensors,nbsamples);
-    Y=Y-mean(Y,2);
-    Y=Y./var(Y')';
+    % Create signal.
+    Y=create_signal(nbsamples,nbsensors_vec,nbnodes);
     Ryy=1/nbsamples*conj(Y*Y');
     Ryy=make_sym(Ryy);
+    % Generate other paramaeters.
     B=randn(nbsensors,Q);
     c=randn(nbsensors,1);
     d=randn(Q,1);
@@ -132,6 +139,7 @@ function [Y,B,alpha,c,d]=create_data(nbsensors,nbsamples,Q)
     if toss==0
         alpha=randn(1,1);
         alpha=alpha^2;
+        
     % Enforce the solution to be strictly satisfying the inequality
     % constraint.
     else
@@ -155,6 +163,34 @@ function [Y,B,alpha,c,d]=create_data(nbsensors,nbsamples,Q)
             alpha=alpha^2;
             alpha=sqrt(norm(X,'fro')^2+alpha^2);
         end
+    end
+
+end
+
+function Y=create_signal(nbsamples,nbsensors_vec,nbnodes)
+
+    signalvar=0.5;
+    noisepower=0.1;
+    nbsources=10;
+    offset=0.5;
+    
+    rng('shuffle');
+    S=randn(nbsources,nbsamples);
+    S=sqrt(signalvar)./(sqrt(var(S,0,2))).*(S-mean(S,2)*ones(1,nbsamples));
+
+    for k=1:nbnodes
+        A{k}=rand(nbsensors_vec(k),nbsources)-offset;
+        noise{k}=randn(nbsensors_vec(k),nbsamples); 
+        noise{k}=sqrt(noisepower)./sqrt(var(noise{k},0,2)).*(noise{k}...
+            -mean(noise{k},2)*ones(1,nbsamples));
+    end
+
+    column_blk=0;
+
+    for k=1:nbnodes
+        Y_cell{k}=A{k}*S+noise{k};
+        Y(column_blk+1:column_blk+nbsensors_vec(k),1:nbsamples)=Y_cell{k};
+        column_blk=column_blk+nbsensors_vec(k);
     end
 
 end

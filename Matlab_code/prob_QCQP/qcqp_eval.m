@@ -11,7 +11,7 @@ function f=qcqp_eval(X,data)
     B=data.B_cell{1};
     
     N=size(Y,2);
-    Ryy=1/N*conj(Y*Y');
+    Ryy=make_sym(Y*Y')/N;
     
     f=0.5*trace(X'*Ryy*X)-trace(X'*B);
     

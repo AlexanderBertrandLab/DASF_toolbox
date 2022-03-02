@@ -166,10 +166,10 @@ while i<nbiter
     [neighbors,path]=find_path(q,graph_adj);
     
     % Neighborhood clusters.
-    Nu=constr_Nu(neighbors,path);
+    clusters=find_clusters(neighbors,path);
     
     % Global - local transition matrix.
-    Cq=constr_Cq(X,q,prob_params,neighbors,Nu);
+    Cq=build_Cq(X,q,prob_params,neighbors,clusters);
 
     % Compute the compressed data.
     data_compressed=compress(data,Cq);
@@ -182,9 +182,9 @@ while i<nbiter
     % Select a solution among potential ones if the problem has a non-
     % unique solution.
     if(~isempty(prob_select_sol))
-        Xq=X_tilde(1:nbsensors_vec(q),:);
         Xq_old=block_q(X_old,q,nbsensors_vec);
-        X_tilde=prob_select_sol(Xq_old,Xq,X_tilde);
+        X_tilde_old=[Xq_old;repmat(eye(Q),length(neighbors),1)];
+        X_tilde=prob_select_sol(X_tilde_old,X_tilde);
     end
     
     % Evaluate the objective.
@@ -203,9 +203,7 @@ while i<nbiter
     
     if(~isempty(X_star) && compare_opt)
         if(~isempty(prob_select_sol))
-            Xq=block_q(X,q,nbsensors_vec);
-            Xq_star=block_q(X_star,q,nbsensors_vec);
-            X=prob_select_sol(Xq_star,Xq,X);
+            X=prob_select_sol(X_star,X);
         end
         norm_err=[norm_err,norm(X-X_star,'fro')^2/norm(X_star,'fro')^2];
         if(plot_dynamic)

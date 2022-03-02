@@ -1,4 +1,4 @@
-function X=tro_select_sol(Xq_old,Xq,X)
+function X=tro_select_sol(X_ref,X)
 
 % Resolve the sign ambiguity for the TRO problem.
 
@@ -7,10 +7,10 @@ function X=tro_select_sol(Xq_old,Xq,X)
 % Analytics
 % Correspondence: cemates.musluoglu@esat.kuleuven.be
 
-    Q=size(Xq_old,2);
+    Q=size(X_ref,2);
 
     for l=1:Q
-        if norm(Xq_old(:,l)-Xq(:,l))>norm(-Xq_old(:,l)-Xq(:,l))
+        if norm(X_ref(:,l)-X(:,l))>norm(-X_ref(:,l)-X(:,l))
             X(:,l)=-X(:,l);
         end
     end

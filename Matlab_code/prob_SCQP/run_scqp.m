@@ -1,4 +1,5 @@
-% Example script to run the DSFO algorithm to solve the SCQP problem.
+% Example script to run the DSFO algorithm to solve the Spherically
+% Constrained Quadratic Problem (SCQP).
 
 % Author: Cem Musluoglu, KU Leuven, Department of Electrical Engineering
 % (ESAT), STADIUS Center for Dynamical Systems, Signal Processing and Data
@@ -31,7 +32,7 @@ norm_error=cell(mc_runs,1);
 for n_runs=1:mc_runs
     
     % Create the data
-    [Y,B]=create_data(nbsensors,nbsamples,Q);
+    [Y,B]=create_data(nbsensors,nbsensors_vec,nbnodes,nbsamples,Q);
     
     % Structure related to the data of the problem.
     Y_cell{1}=Y;
@@ -71,6 +72,12 @@ for n_runs=1:mc_runs
     % Create adjacency matrix (hollow matrix) of a random graph.
     adj=randi(2,nbnodes,nbnodes)-1;
     graph_adj=triu(adj,1)+tril(adj',-1);
+    non_connected=find(all(graph_adj==0));
+    % If there are non-connected nodes, connect them to every other node.
+    if(non_connected)
+        graph_adj(:,non_connected)=1;
+        graph_adj(non_connected,:)=1;
+    end
     prob_params.graph_adj=graph_adj;
 
     % Solve the SCQP in a distributed way using the DSFO framework.
@@ -99,16 +106,36 @@ ylim([1e-20,inf])
 ax=gca;
 ax.FontSize=14;
 xlabel('Iterations','Interpreter','latex','Fontsize',20)
-ylabel('$\frac{||X^{i}-X^*||_2^F}{||X^*||_F^2}$','Interpreter','latex','Fontsize',20)
+ylabel('$\epsilon$','Interpreter','latex','Fontsize',20)
 grid on
 
 %%
 
-function [Y,B]=create_data(nbsensors,nbsamples,Q)
+function [Y,B]=create_data(nbsensors,nbsensors_vec,nbnodes,nbsamples,Q)
    
-    Y=randn(nbsensors,nbsamples);
-    Y=Y-mean(Y,2);
-    Y=Y./var(Y')';
+    signalvar=0.5;
+    noisepower=0.1;
+    nbsources=10;
+    offset=0.5;
+    
+    rng('shuffle');
+    S=randn(nbsources,nbsamples);
+    S=sqrt(signalvar)./(sqrt(var(S,0,2))).*(S-mean(S,2)*ones(1,nbsamples));
+
+    for k=1:nbnodes
+        A{k}=rand(nbsensors_vec(k),nbsources)-offset;
+        noise{k}=randn(nbsensors_vec(k),nbsamples); 
+        noise{k}=sqrt(noisepower)./sqrt(var(noise{k},0,2)).*(noise{k}...
+            -mean(noise{k},2)*ones(1,nbsamples));
+    end
+
+    teller=0;
+
+    for k=1:nbnodes
+        Y_cell{k}=A{k}*S+noise{k};
+        Y(teller+1:teller+nbsensors_vec(k),1:nbsamples)=Y_cell{k};
+        teller=teller+nbsensors_vec(k);
+    end
     
     B=randn(nbsensors,Q);
 

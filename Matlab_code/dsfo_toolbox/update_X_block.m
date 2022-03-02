@@ -28,22 +28,22 @@ function X_block_upd=update_X_block(X_block,X_tilde,q,prob_params,neighbors,...
     nbnodes=prob_params.nbnodes;
     nbsensors_vec=prob_params.nbsensors_vec;
     Q=prob_params.Q;
+    nbneighbors=length(neighbors);
     
     if(~isempty(prob_select_sol))
-        Xq=X_tilde(1:nbsensors_vec(q),:);
-        Xqold=X_block{q};
-        X_tilde=prob_select_sol(Xqold,Xq,X_tilde);
+        Xq_old=X_block{q};
+        X_tilde_old=[Xq_old;repmat(eye(Q),nbneighbors,1)];
+        X_tilde=prob_select_sol(X_tilde_old,X_tilde);
     end
     
     X_block_upd=cell(nbnodes,1);
     X_block_upd{q}=X_tilde(1:nbsensors_vec(q),:);
     
-    nbneighbors=length(neighbors);
     ind=0:nbneighbors-1;
     
     for l=1:q-1
         for k=1:nbneighbors
-            if ~isempty(find(Nu{k} == l))
+            if ~isempty(find(Nu{k}==l))
                 start_r=nbsensors_vec(q)+ind(k)*Q+1;
                 stop_r=nbsensors_vec(q)+ind(k)*Q+Q;
             end
@@ -52,7 +52,7 @@ function X_block_upd=update_X_block(X_block,X_tilde,q,prob_params,neighbors,...
     end
     for l=q+1:nbnodes
         for k=1:nbneighbors
-            if ~isempty(find(Nu{k} == l))
+            if ~isempty(find(Nu{k}==l))
                 start_r=nbsensors_vec(q)+ind(k)*Q+1;
                 stop_r=nbsensors_vec(q)+ind(k)*Q+Q;
             end

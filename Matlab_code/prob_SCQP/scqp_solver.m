@@ -1,6 +1,7 @@
 function [X_star,f_star]=scqp_solver(prob_params,data)
-% Solve:
-% min_X f(X)=0.5*E[||X'*y(t)||^2]+trace(X'*B) s.t. trace(X'*Gamma*X)=1.
+% 
+% Solve the SCQP: min_X f(X)=0.5*E[||X'*y(t)||^2]+trace(X'*B) 
+%                 s.t. trace(X'*Gamma*X)=1.
 
 % Author: Cem Musluoglu, KU Leuven, Department of Electrical Engineering
 % (ESAT), STADIUS Center for Dynamical Systems, Signal Processing and Data
@@ -14,7 +15,7 @@ function [X_star,f_star]=scqp_solver(prob_params,data)
     
     manifold = spherefactory(size(B,1),size(B,2));
     
-    Ryy=1/nbsamples*conj(Y*Y');
+    Ryy=make_sym(Y*Y')/nbsamples;
     
     L=chol(make_sym(Gamma))';
     Ryyt=inv(L)*Ryy*inv(L)';

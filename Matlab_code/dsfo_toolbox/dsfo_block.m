@@ -167,10 +167,10 @@ while i<nbiter
     [neighbors,path]=find_path(q,graph_adj);
     
     % Neighborhood clusters.
-    Nu=constr_Nu(neighbors,path);
+    clusters=find_clusters(neighbors,path);
     
     % Global - local transition matrix.
-    Cq=constr_Cq(X,q,prob_params,neighbors,Nu);
+    Cq=build_Cq(X,q,prob_params,neighbors,clusters);
 
     % Compute the compressed data.
     data_compressed=compress(data,Cq);
@@ -188,7 +188,7 @@ while i<nbiter
     end
     
     % Global variable.
-    X_block=update_X_cell(X_block,X_tilde,q,prob_params,neighbors,Nu,...
+    X_block=update_X_block(X_block,X_tilde,q,prob_params,neighbors,clusters,...
                 prob_select_sol);
     X=cell2mat(X_block);
     
@@ -200,9 +200,7 @@ while i<nbiter
     
     if(~isempty(X_star) && compare_opt)
         if(~isempty(prob_select_sol))
-            Xq=X_block{q};
-            Xq_star=block_q(X_star,q,nbsensors_vec);
-            X=prob_select_sol(Xq_star,Xq,X);
+            X=prob_select_sol(X_star,X);
         end
         norm_err=[norm_err,norm(X-X_star,'fro')^2/norm(X_star,'fro')^2];
         if(plot_dynamic)

@@ -24,9 +24,9 @@ function data_compressed=compress(data,Cq)
     data_compressed=struct;
 
     if(~isempty(data.Y_cell))
-        nbsignals=length(Y_cell);
-        Y_cell_compressed=cell(nbsignals,1);
-        for ind=1:nbsignals
+        nbY=length(Y_cell);
+        Y_cell_compressed=cell(nbY,1);
+        for ind=1:nbY
             Y_cell_compressed{ind}=Cq'*Y_cell{ind};
         end
         data_compressed.Y_cell=Y_cell_compressed;
@@ -35,9 +35,9 @@ function data_compressed=compress(data,Cq)
     end
     
     if(~isempty(data.B_cell))
-        nbparams=length(B_cell);
-        B_cell_compressed=cell(nbparams,1);
-        for ind=1:nbparams
+        nbB=length(B_cell);
+        B_cell_compressed=cell(nbB,1);
+        for ind=1:nbB
             B_cell_compressed{ind}=Cq'*B_cell{ind};
         end
         data_compressed.B_cell=B_cell_compressed;
@@ -46,9 +46,9 @@ function data_compressed=compress(data,Cq)
     end
     
     if(~isempty(data.Gamma_cell))
-        nbquadr=length(Gamma_cell);
-        Gamma_cell_compressed=cell(nbquadr,1);
-        for ind=1:nbquadr
+        nbGamma=length(Gamma_cell);
+        Gamma_cell_compressed=cell(nbGamma,1);
+        for ind=1:nbGamma
             Gamma_cell_compressed{ind}=Cq'*Gamma_cell{ind}*Cq;
             Gamma_cell_compressed{ind}=make_sym(Gamma_cell_compressed{ind});
         end

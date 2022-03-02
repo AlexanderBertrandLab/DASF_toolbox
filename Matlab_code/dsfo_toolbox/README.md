@@ -22,13 +22,15 @@ Folder with the DSFO implementation and utility functions (more details inside t
 
 `make_sym.m:` Function to force symmetry.
 
-`constr_Nu.m:` Function to obtain clusters of nodes for each neighbor.
+`find_clusters.m:` Function to obtain clusters of nodes for each neighbor.
 
-`constr_Cq.m:` Function to construct the transition matrix between the local data and variables and the global ones.
+`build_Cq.m:` Function to build the transition matrix between the local data and variables and the global ones.
 
 `compress.m:` Function to compress the data.
 
 `block_q.m:` Function to extract the block of X corresponding to node q.
+
+`dsfo_multivar.m:` Same function as `dsfo` but for problems with multiple variables (e.g. Canonical Correlation Analysis). The output `X` is a cell containing multiple variables.
 
 `dsfo_block.m:` Same function as `dsfo` but the optimization variable is divided into cells *within the function* to explicitly emphasize and separate the block structure of the global variable `X=[X1;...;Xk;...XK]`. At the expense of a slightly less straightforward implementation than `dsfo`, it better represents how each node updates their local variable.
 
@@ -45,7 +47,7 @@ Folder with the DSFO implementation and utility functions (more details inside t
            |    |           |           |            |     |    |    |    |
            |    |           |           |            |     |    |    |    |
            |    v           v           v            v     |    v    |    v
-           |find_path    constr_Nu    constr_Cq   compress | block_q |  plot_dynamic
+           |find_path  find_clusters   build_Cq   compress | block_q |  plot_dynamic
            |    |                                    |     |         |
            |    |                                    |     |         |
            |    v                                    v     |         |
@@ -68,7 +70,7 @@ Folder with the DSFO implementation and utility functions (more details inside t
            |    |        |          |          |     |    |    |         |    |         |
            |    |        |          |          |     |    |    |         |    |         |
            |    v        v          v          v     |    |    v         |    v         v
-           |find_path constr_Nu constr_Cq compress   |    |update_X_block| block_q plot_dynamic
+           |find_path find_clusters build_Cq compress|    |update_X_block| block_q plot_dynamic
            |    |                                    |    |          |   |         
            |    |                                    |    |          |   |         
            |    v                                    v    |          |   |         

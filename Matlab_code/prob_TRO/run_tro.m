@@ -1,4 +1,5 @@
-% Example script to run the DSFO algorithm to solve the TRO problem.
+% Example script to run the DSFO algorithm to solve the Trace Ratio
+% Optimization (TRO) Problem.
 
 % Author: Cem Musluoglu, KU Leuven, Department of Electrical Engineering
 % (ESAT), STADIUS Center for Dynamical Systems, Signal Processing and Data
@@ -72,6 +73,12 @@ for n_runs=1:mc_runs
     % Create adjacency matrix (hollow matrix) of a random graph.
     adj=randi(2,nbnodes,nbnodes)-1;
     graph_adj=triu(adj,1)+tril(adj',-1);
+    non_connected=find(all(graph_adj==0));
+    % If there are non-connected nodes, connect them to every other node.
+    if(non_connected)
+        graph_adj(:,non_connected)=1;
+        graph_adj(non_connected,:)=1;
+    end
     prob_params.graph_adj=graph_adj;
     
     % Solve the TRO problem in a distributed way using the DSFO framework.
@@ -101,34 +108,31 @@ ylim([1e-8,inf])
 ax=gca;
 ax.FontSize=14;
 xlabel('Iterations','Interpreter','latex','Fontsize',20)
-ylabel('$\frac{||X^{i}-X^*||_2^F}{||X^*||_F^2}$','Interpreter','latex','Fontsize',20)
+ylabel('$\epsilon$','Interpreter','latex','Fontsize',20)
 grid on
 
 %%
 
 function [Y,V]=create_data(nbsensors_vec,nbnodes,nbsamples)
-
-    noisepower=0.1; 
+    
+    noisepower=0.1;
     signalvar=0.5;
     nbsources=5;
     latent_dim=10;
+    offset=0.5;
 
     rng('shuffle');
-    d=randn(nbsamples,nbsources);
-    d=sqrt(signalvar)./(sqrt(var(d))).*(d-ones(nbsamples,1)*mean(d));
-    s=randn(nbsamples,latent_dim-nbsources);
-    s=sqrt(signalvar)./(sqrt(var(s))).*(s-ones(nbsamples,1)*mean(s));
-    
-%     Ainit=rand(nbsources,sum(nbsensors_vec))-0.5;
-%     Binit=rand(latent_dim-nbsources,sum(nbsensors_vec))-0.5;
-%     noise=randn(nbsamples,sum(nbsensors_vec)); 
-%     noise=sqrt(noisepower)./sqrt(var(noise)).*(noise-ones(nbsamples,1)*mean(noise)); 
+    D=randn(nbsources,nbsamples);
+    D=sqrt(signalvar)./(sqrt(var(D,0,2))).*(D-mean(D,2)*ones(1,nbsamples));
+    S=randn(latent_dim-nbsources,nbsamples);
+    S=sqrt(signalvar)./(sqrt(var(S,0,2))).*(S-mean(S,2)*ones(1,nbsamples));
 
     for k=1:nbnodes
-        Ainit{k}=rand(nbsources,nbsensors_vec(k))-0.5;
-        Binit{k}=rand(latent_dim-nbsources,nbsensors_vec(k))-0.5;
-        noise{k}=randn(nbsamples,nbsensors_vec(k)); 
-        noise{k}=sqrt(noisepower)./sqrt(var(noise{k})).*(noise{k}-ones(nbsamples,1)*mean(noise{k})); 
+        A{k}=rand(nbsensors_vec(k),nbsources)-offset;
+        B{k}=rand(nbsensors_vec(k),latent_dim-nbsources)-offset;
+        noise{k}=randn(nbsensors_vec(k),nbsamples); 
+        noise{k}=sqrt(noisepower)./sqrt(var(noise{k},0,2)).*(noise{k}...
+            -mean(noise{k},2)*ones(1,nbsamples)); 
     end
 
     column_blk=0;
@@ -137,19 +141,13 @@ function [Y,V]=create_data(nbsensors_vec,nbnodes,nbsamples)
     V_cell=cell(nbnodes,1);
     
     for k=1:nbnodes
-        V_cell{k}=s*Binit{k}+noise{k};
-        Y_cell{k}=d*Ainit{k}+V_cell{k};
+        V_cell{k}=B{k}*S+noise{k};
+        Y_cell{k}=A{k}*D+V_cell{k};
 
-        Y(1:nbsamples,column_blk+1:column_blk+nbsensors_vec(k))=Y_cell{k};
-        V(1:nbsamples,column_blk+1:column_blk+nbsensors_vec(k))=V_cell{k};
+        Y(column_blk+1:column_blk+nbsensors_vec(k),1:nbsamples)=Y_cell{k};
+        V(column_blk+1:column_blk+nbsensors_vec(k),1:nbsamples)=V_cell{k};
         column_blk=column_blk+nbsensors_vec(k);
     end
-    
-    %V=s*Binit+noise;
-    %Y=d*Ainit+V;
-    
-    Y=Y';
-    V=V';
 
 end
 

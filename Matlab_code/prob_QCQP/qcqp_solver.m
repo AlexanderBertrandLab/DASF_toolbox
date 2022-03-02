@@ -1,6 +1,7 @@
 function [X_star,f_star]=qcqp_solver(prob_params,data)
 
-% Solve min 0.5*E[||X'*y(t)||^2]-trace(X'*B) s.t. trace(X'*Gamma*X)<= alpha^2; X'*c=d.
+% Solve the QCQP: min_X 0.5*E[||X'*y(t)||^2]-trace(X'*B)
+%                 s.t. trace(X'*Gamma*X) <= alpha^2, X'*c=d.
 
 % Author: Cem Musluoglu, KU Leuven, Department of Electrical Engineering
 % (ESAT), STADIUS Center for Dynamical Systems, Signal Processing and Data
@@ -15,8 +16,7 @@ function [X_star,f_star]=qcqp_solver(prob_params,data)
     d=data.Glob_Const_cell{2};
     nbsamples=prob_params.nbsamples;
     
-    Ryy=1/nbsamples*conj(Y*Y');
-    Ryy=make_sym(Ryy);
+    Ryy=make_sym(Y*Y')/nbsamples;
 
     [U,S,V]=svd(Gamma);
     sqrt_S=diag(sqrt(diag(S)));

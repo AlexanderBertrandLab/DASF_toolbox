@@ -14,10 +14,8 @@ function f=tro_eval(X,data)
 
     N=size(Y,2);
 
-    Ryy=1/N*conj(Y*Y');
-    Rvv=1/N*conj(V*V');
-    Ryy=make_sym(Ryy);
-    Rvv=make_sym(Rvv);
+    Ryy=make_sym(Y*Y')/N;
+    Rvv=make_sym(V*V')/N;
 
     f=trace(X'*Ryy*X)/trace(X'*Rvv*X);
 

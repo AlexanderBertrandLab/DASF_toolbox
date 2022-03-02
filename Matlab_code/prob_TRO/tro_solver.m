@@ -1,7 +1,7 @@
 function [X_star,f_star]=tro_solver(prob_params,data)
 
-% Solve the TRO problem max E[||X'*y(t)||^2]/E[||X'*v(t)||^2] s.t.
-% X'*Gamma*X=I.
+% Solve the TRO Problem: max_X E[||X'*y(t)||^2]/E[||X'*v(t)||^2] 
+%                        s.t. X'*Gamma*X=I.
 
 % Author: Cem Musluoglu, KU Leuven, Department of Electrical Engineering
 % (ESAT), STADIUS Center for Dynamical Systems, Signal Processing and Data
@@ -25,10 +25,8 @@ function [X_star,f_star]=tro_solver(prob_params,data)
 
     N=prob_params.nbsamples;
 
-    Ryy=1/N*conj(Y*Y');
-    Rvv=1/N*conj(V*V');
-    Ryy=make_sym(Ryy);
-    Rvv=make_sym(Rvv);
+    Ryy=make_sym(Y*Y')/N;
+    Rvv=make_sym(V*V')/N;
 
     [U_c,S_c,V_c]=svd(Gamma);
 
@@ -42,10 +40,10 @@ function [X_star,f_star]=tro_solver(prob_params,data)
 
     while (tol_f>0 && abs(f-f_old)>tol_f) || (i<nbiter)
 
-        [E_int,l_int]=eig(Kyy-f*Kvv);
-        [~,ind_int]=sort(diag(l_int),'descend');
+        [E,L]=eig(Kyy-f*Kvv);
+        [~,ind]=sort(diag(L),'descend');
 
-        X=E_int(:,ind_int(1:Q));
+        X=E(:,ind(1:Q));
         f_old=f;
         data_t=struct;
         Y_cell_t=cell(2,1);

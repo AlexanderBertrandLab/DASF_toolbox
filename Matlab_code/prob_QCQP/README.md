@@ -1,8 +1,8 @@
-# Quadratically constrained quadratic problem
+# Quadratically Constrained Quadratic Problem
  
-Folder implementing the following quadratically constrained quadratic problem (QCQP) in a distributed setting using the the DSFO framework:
+Folder implementing the following Quadratically Constrained Quadratic Problem (QCQP) in a distributed setting using the the DSFO framework:
 ``
-P: min_X 0.5*|| E[X'*y(t)] ||^2-trace(X'*B) s.t. trace(X'*I*X)<=alpha^2, X'*c=d,
+P: min_X 0.5*E[ || X'*y(t) ||^2 ]-trace(X'*B) s.t. trace(X'*I*X)<=alpha^2, X'*c=d,
 ``
 
 with the following data:
@@ -21,7 +21,7 @@ The functions and files in this folder are:
 
 `qcqp_solver.m:` Centralized algorithm for solving the QCQP:
 
-        min_X 0.5*|| E[X'*y1(t)] ||^2-trace(X'*B1) s.t. trace(X'*Gamma1*X)<=gc1^2, X'*b2=gc2.
+        min_X 0.5*E[ || X'*y1(t) ||^2 ]-trace(X'*B1) s.t. trace(X'*Gamma1*X)<=gc1^2, X'*b2=gc2.
 
 taking as input the following data:
 
@@ -64,3 +64,13 @@ Looking at problem `P`, the relationship between the data in `P` and the solver 
 | `I==Gamma1` | `data.Gamma_cell{1}=I` |
 | `alpha==gc1`| `data.Glob_Const_cell{1}=alpha` |
 | `d==gc2` | `data.Glob_Const_cell{2}=d` |
+
+**Creating the data and parameters:** In the given example code, we take:
+``
+y(t)=A*s(t)+n(t),
+``
+where the entries of `s(t)` independently follow `N(0,0.5)`, and the entries of `n(t)` independently follow `N(0,0.1)` for each time instant `t`, where `N` denotes the Gaussian distribution. We take `s` to be `10`-dimensional. Additionally the entries of `A` are drawn independently from `U([-0.5,0.5])`. 
+
+On the other hand, the entries of the linear terms `B`, `c` and global constants `alpha` and `d` follow independently `N(0,1)`. We ensure that `alpha^2 >= ||d||^2 / ||c||^2` which would otherwise make the problem infeasible.
+
+A coin toss is also done to decide whether to satisfy the inequality constraint strictly. This is done to show convergence in different settings.
