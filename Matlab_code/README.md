@@ -82,11 +82,11 @@ By default, the algorithm stops at maximum 200 iterations. If one or more fields
 
 #### 5) The function resolving uniqueness ambiguities
 
-`prob_select_sol:` **Optional.** Function required only when the problem `P` has multiple solutions. Among potential solutions `[X1;...;Xq;...;XK]`, choose the one for which `||X_tilde-X_tilde_old||` is minimized when `q` is the updating node, where `X_tilde_old==[Xq_old;I_Q;...;I_Q]` is the local variable value for which `X` does not change. The function should be of the form:
+`prob_select_sol:` **Optional.** Function required only when the problem `P` has multiple solutions. Among potential solutions `[X1;...;Xq;...;XK]`, choose the one for which `||Xq-Xq_old||` is minimized when `q` is the updating node, where `Xq_old` is the previous filter of node `q`. The function should be of the form:
 
-        X_tilde=prob_select_sol(X_tilde_old,X_tilde)
+        X_tilde=prob_select_sol(X_tilde_old,X_tilde,nbsensors_vec,q)
 
-This function is also used to resolve the ambiguity between `X` and `X_star` if applicable (i.e., `X_star` is provided and `compare_opt` is "true", see II-3 below).
+This function can also be used to resolve the ambiguity between `X` and `X_star` if applicable (i.e., `X_star` is provided and `compare_opt` is "true", see II-3 below).
 
 **Note:** `dsfo` takes the function handle `@prob_select_sol` as an argument, not the function itself.
 

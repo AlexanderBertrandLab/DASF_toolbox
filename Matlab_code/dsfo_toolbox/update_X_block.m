@@ -33,7 +33,7 @@ function X_block_upd=update_X_block(X_block,X_tilde,q,prob_params,neighbors,...
     if(~isempty(prob_select_sol))
         Xq_old=X_block{q};
         X_tilde_old=[Xq_old;repmat(eye(Q),nbneighbors,1)];
-        X_tilde=prob_select_sol(X_tilde_old,X_tilde);
+        X_tilde=prob_select_sol(X_tilde_old,X_tilde,nbsensors_vec,q);
     end
     
     X_block_upd=cell(nbnodes,1);

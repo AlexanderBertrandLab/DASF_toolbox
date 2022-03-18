@@ -200,7 +200,7 @@ while i<nbiter
     
     if(~isempty(X_star) && compare_opt)
         if(~isempty(prob_select_sol))
-            X=prob_select_sol(X_star,X);
+            X=prob_select_sol(X_star,X,nbsensors_vec,q);
         end
         norm_err=[norm_err,norm(X-X_star,'fro')^2/norm(X_star,'fro')^2];
         if(plot_dynamic)

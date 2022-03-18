@@ -184,7 +184,7 @@ while i<nbiter
     if(~isempty(prob_select_sol))
         Xq_old=block_q(X_old,q,nbsensors_vec);
         X_tilde_old=[Xq_old;repmat(eye(Q),length(neighbors),1)];
-        X_tilde=prob_select_sol(X_tilde_old,X_tilde);
+        X_tilde=prob_select_sol(X_tilde_old,X_tilde,nbsensors_vec,q);
     end
     
     % Evaluate the objective.
@@ -203,7 +203,7 @@ while i<nbiter
     
     if(~isempty(X_star) && compare_opt)
         if(~isempty(prob_select_sol))
-            X=prob_select_sol(X_star,X);
+            X=prob_select_sol(X_star,X,nbsensors_vec,q);
         end
         norm_err=[norm_err,norm(X-X_star,'fro')^2/norm(X_star,'fro')^2];
         if(plot_dynamic)
