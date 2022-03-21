@@ -15,13 +15,14 @@ function [X,norm_diff,norm_err,f_seq]=dsfo_multivar(prob_params,data,...
 %            Q : Number of filters to use (dimension of projected space)
 %            nbsamples : Number of time samples of the signals per
 %                        iteration.
+%            nbvariables : Number of variables.
 %            graph_adj : Adjacency (binary) matrix, with graph_adj(i,j)=1  
 %                        if i and j are connected. Otherwise 0. 
 %                        graph_adj(i,i)=0.
 %            update_path : (Optional) Vector of nodes representing the 
 %                          updating path followed by the algorithm. If not 
 %                          provided, a random path is created.
-%            X_star : (Optional) Optimal argument solving the the problem
+%            X_star : (Optional) Optimal argument solving the problem
 %                     (for comparison, e.g., to compute norm_err).
 %            compare_opt : (Optional, binary) If "true" and X_star is given, 
 %                          compute norm_err. "false" by default.

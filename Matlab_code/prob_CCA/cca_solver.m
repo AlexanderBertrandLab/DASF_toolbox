@@ -24,14 +24,14 @@ function [X_star,f_star]=cca_solver(prob_params,data)
     A_X=make_sym(Ryv*inv_Rvv*Rvy);
     
     X_star=cell(2,1);
-    [E_X,L_X]=eig(A_X,Ryy);
-    l_X=diag(L_X);
+    [eigvecs_X,eigvals_X]=eig(A_X,Ryy);
+    l_X=diag(eigvals_X);
     [~,ind]=sort(l_X,'descend');
     l_X=l_X(ind);
-    E_X=E_X(:,ind);
-    X_star{1}=E_X(:,1:Q);
-    E_W=inv_Rvv*Rvy*E_X*diag(1./sqrt(abs(l_X)));
-    X_star{2}=E_W(:,1:Q);
+    eigvecs_X=eigvecs_X(:,ind);
+    X_star{1}=eigvecs_X(:,1:Q);
+    eigvecs_W=inv_Rvv*Rvy*eigvecs_X*diag(1./sqrt(abs(l_X)));
+    X_star{2}=eigvecs_W(:,1:Q);
     
     f_star=trace(X_star{1}'*Ryv*X_star{2});
 

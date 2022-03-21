@@ -11,7 +11,7 @@ import warnings
 # Correspondence: cemates.musluoglu@esat.kuleuven.be
 
 def qcqp_solver(prob_params, data):
-    """Solve the QCQP problem min 0.5*E[||X'*y(t)||^2]-trace(X'*B) s.t. trace(X'*Gamma*X)<= alpha^2; X'*c=d."""
+    """Solve the QCQP problem min 0.5 * E[||X.T @ y(t)||**2] - trace(X.T @ B) s.t. trace(X.T @ Gamma @ X) <= alpha**2; X.T @ c = d."""
     Y = data['Y_list'][0]
     B = data['B_list'][0]
     c = data['B_list'][1]
@@ -69,7 +69,7 @@ def norm_fun(mu,data):
 
 
 def qcqp_eval(X, data):
-    """Evaluate the QCQP objective 0.5*E[||X'*y(t)||^2]-trace(X'*B)."""
+    """Evaluate the QCQP objective 0.5 * E[||X.T @ y(t)||**2] - trace(X.T @ B)."""
     Y = data['Y_list'][0]
     B = data['B_list'][0]
     N = np.size(Y, 1)
@@ -86,7 +86,7 @@ def create_data(nbsensors, nbsamples, Q):
     """Create data for the QCQP problem."""
     rng = np.random.default_rng()
 
-    Y = rng.standard_normal(size=(nbsensors, nbsamples))
+    Y = create_signal(nbsensors, nbsamples)
     Ryy = Y @ Y.T / nbsamples
     Ryy = (Ryy + Ryy.T) / 2
     B = rng.standard_normal(size=(nbsensors, Q))
@@ -119,3 +119,20 @@ def create_data(nbsensors, nbsamples, Q):
             alpha = np.sqrt(LA.norm(X, ord='fro') ** 2 + alpha ** 2)
 
     return Y, B, alpha, c, d
+
+def create_signal(nbsensors, nbsamples):
+    """Create signals for the QCQP problem."""
+    rng = np.random.default_rng()
+
+    signalvar = 0.5
+    noisepower = 0.1
+    nbsources = 10
+    offset = 0.5
+
+    s = rng.normal(loc=0, scale=np.sqrt(signalvar), size=(nbsources, nbsamples))
+    A = rng.uniform(low=-offset, high=offset, size=(nbsensors, nbsources))
+    noise = rng.normal(loc=0, scale=np.sqrt(noisepower), size=(nbsensors, nbsamples))
+
+    Y = A @ s + noise
+
+    return Y

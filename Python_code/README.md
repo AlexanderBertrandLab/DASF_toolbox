@@ -13,12 +13,17 @@ the DSFO algorithm solves the problem in a distributed setting such as a wireles
 
 The `dsfo` function implements the DSFO algorithm and is called in the following way:
 
-        X_est,norm_diff,norm_err,f_seq=dsfo(prob_params,data,...
+        X_est, norm_diff, norm_err, f_seq = dsfo(prob_params,data,...
         prob_solver,conv,prob_select_sol,prob_eval)
 
 Alternatively, `dsfo_block` can be used for the same result, the difference being an additional list for the variable `X` called `X_block` separating each local variable `Xk` of node `k`, such that `X=[X1;...;Xk;...;XK]` into separate blocks for better flexibility. At each iteration, `X_block` is updated from `update_X_block` where each block is updated separately. Modifying the updating scheme to adapt it to the user's applications is then made easier compared to `dsfo` at the expense of a slightly less straightforward code. This function is called in the same way as `dsfo`:
 
-        X_est,norm_diff,norm_err,f_seq=dsfo_block(prob_params,data,...
+        X_est, norm_diff, norm_err, f_seq = dsfo_block(prob_params,data,...
+        prob_solver,conv,prob_select_sol,prob_eval)
+
+On the other hand, `dsfo_multivar` is the same function as `dsfo` but used for the case where there is a "set" of optimization variables, for example `(X,W)` in the case of the Canonical Correlation Analysis problem (see folder `prob_CCA` for an example). In this case, `prob_params` contains an extra filed called `nbvariables`, which gives the number of variables (for example `2` for CCA). If given, `X_star`should be a `nbvariables x 1` cell containing the optimal values. The output `X_est` is also a `nbvariables x 1` cell. The difference of arguments `norm_diff` and error `norm_err` (see II-2 and II-3) are computed over the full variable set.This function is called the same way as the previous ones:
+
+        X_est, norm_diff, norm_err, f_seq = dsfo_multivar(prob_params,data,...
         prob_solver,conv,prob_select_sol,prob_eval)
 
 ### I - Inputs
@@ -33,7 +38,8 @@ Alternatively, `dsfo_block` can be used for the same result, the difference bein
 | `Q`| Scalar containing the number of columns of `X`, the optimization variable. |
 | `nbsamples` | Scalar containing the number of time samples per iteration of the signals in the network (e.g. to compute an estimation of the correlation matrix). |
 | `graph_adj (nbnodes x nbnodes)`| Adjacency matrix of the graph of the considered network, with `graph_adj[i,j]==1` if nodes `i`and `j` are connected and `0` otherwise. Moreover, `graph_adj[i,i]=0`. |
-| `X_star (nbsensors x Q)` | **Optional.** Optimal argument for the optimization problem, computed using a centralized solver, for example `prob_solver` (see I-5) below). Used for comparison purposes, for example to compute the normalized error. |
+| `nbvariables`| **Required only if `dsfo_multivar` is used.** Number of different variables (e.g. the optimization variable set of the CCA problem is `(X,W)`, therefore `nbvariables==2`). |
+| `X_star (nbsensors x Q)` | **Optional.** Optimal argument for the optimization problem, computed using a centralized solver, for example `prob_solver` (see I-5) below). Used for comparison purposes, for example to compute the normalized error. **If `dsfo_multivar` is used.** `X_star` is a list with `nbvariables` elements where each entry is the  `(nbsensors x Q)` optimal matrix for the corresponding variable. ||
 | `compare_opt` | **Optional.** Binary value. If the optimal argument `X_star` is known and given, compute the normalized error `norm_err` at each iteration between `X^i` and `X_star` if this variable is "True" (see II-3) below). "False" by default. |
 | `plot_dynamic`| **Optional.** Binary value. If the optimal argument `X_star` is known and given, show a dynamic plot comparing the first column of `X_star` to the first column of `X^i` if this variable is "True". "False" by default. |
 
@@ -51,11 +57,13 @@ If one or more of these do not appear in the problem, set their corresponding li
 
 **Example:** `Gamma_list=[]` if no quadratic term `X.T @ Gamma @ X` appears in the problem.
 
+**If `dsfo_multivar` is used:** In this case, `data` is a list with `nbvariables` elements containing the same structure described above for each variable.
+
 #### 3) The problem solver
 
-`prob_sover:` Function solving the optimization problem `P` in a centralized setting and having as output `X_star`, the argument solving the problem. The function should be of the form:
+`prob_solver:` Function solving the optimization problem `P` in a centralized setting and having as output `X_star`, the argument solving the problem. The function should be of the form:
 
-        X_star=prob_solver(data,prob_params)
+        X_star = prob_solver(data,prob_params)
 
 where `data` and `prob_params` are the dictionaries defined above.
 
@@ -72,17 +80,17 @@ By default, the algorithm stops at maximum 200 iterations. If one or more fields
 
 #### 5) The function resolving uniqueness ambiguities
 
-`prob_select_sol:` **Optional.** Function required only when the problem `P` has multiple solutions. Among potential solutions `[X1;...;Xq;...;XK]`, choose the one for which `||Xq_old-Xq||` is minimized when `q` is the updating node, where `X_old==[X1_old;...;Xq_old;...;XK_old]` is the global variable at the previous iteration. The function should be of the form:
+`prob_select_sol:` **Optional.** Function required only when the problem `P` has multiple solutions. Among potential solutions `[X1;...;Xq;...;XK]`, choose the one for which `||Xq-Xq_old||` is minimized when `q` is the updating node, where `Xq_old` is the previous filter of node `q`. The function should be of the form:
 
-        X=prob_select_sol(Xq_old,Xq,X)
+        X_tilde = prob_select_sol(X_tilde_old,X_tilde,nbsensors_vec,q)
 
-`X` is the current global variable, i.e., the one chosen by `prob_solver` before resolving the ambiguity.
+This function can also be used to resolve the ambiguity between `X` and `X_star` if applicable (i.e., `X_star` is provided and `compare_opt` is "true", see II-3 below).
 
 #### 6) The problem objective evaluator
 
 `prob_eval:` **Optional.** Function evaluating the objective `f` of the problem `P` at the given `X`. The function should be of the form:
         
-        f=prob_eval(X,data) % Equal to f(X)
+        f = prob_eval(X,data) % Equal to f(X)
 
 where `data` is the dictionary defined above.
 
@@ -105,4 +113,4 @@ where `data` is the dictionary defined above.
 
 ### III - Examples
 
-See the folders `prob_QCQP`, `prob_SCQP` and `prob_TRO`.
+See the folders `prob_CCA`, `prob_GEVD`, `prob_LCMV`, `prob_LS`, `prob_QCQP`, `prob_SCQP` and `prob_TRO` for examples for an example of each problem.

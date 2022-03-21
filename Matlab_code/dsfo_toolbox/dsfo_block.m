@@ -21,7 +21,7 @@ function [X,norm_diff,norm_err,f_seq]=dsfo_block(prob_params,data,...
 %            update_path : (Optional) Vector of nodes representing the 
 %                          updating path followed by the algorithm. If not 
 %                          provided, a random path is created.
-%            X_star : (Optional) Optimal argument solving the the problem
+%            X_star : (Optional) Optimal argument solving the problem
 %                     (for comparison, e.g., to compute norm_err).
 %            compare_opt : (Optional, binary) If "true" and X_star is given, 
 %                          compute norm_err. "false" by default.

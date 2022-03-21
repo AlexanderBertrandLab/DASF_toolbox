@@ -9,7 +9,7 @@ from scipy import linalg as LA
 # Correspondence: cemates.musluoglu@esat.kuleuven.be
 
 def tro_solver(prob_params, data):
-    """Solve the TRO problem max E[||X'*y(t)||^2]/E[||X'*v(t)||^2] s.t. X'*Gamma*X=I."""
+    """Solve the TRO problem max E[||X.T @ y(t)||**2] / E[||X.T @ v(t)||**2] s.t. X.T @ Gamma @ X = I."""
     Y = data['Y_list'][0]
     V = data['Y_list'][1]
     Gamma = data['Gamma_list'][0]
@@ -38,10 +38,10 @@ def tro_solver(prob_params, data):
     Kvv = np.diag(np.sqrt(1 / S_c)) @ U_c.T @ Rvv @ U_c @ np.diag(np.sqrt(1 / S_c))
 
     while (i == 0) or (np.abs(f - f_old) > tol_f):
-        l_int, E_int = LA.eig(Kyy - f * Kvv)
-        ind_int = np.argsort(l_int)[::-1]
+        eigvals, eigvecs = LA.eig(Kyy - f * Kvv)
+        indices = np.argsort(eigvals)[::-1]
 
-        X = E_int[:, ind_int[0:Q]]
+        X = eigvecs[:, indices[0:Q]]
         f_old = f
         Y_list_t = [Y_t, V_t]
         data_t = {'Y_list': Y_list_t}
@@ -55,7 +55,7 @@ def tro_solver(prob_params, data):
 
 
 def tro_eval(X, data):
-    """Evaluate the TRO objective E[||X'*y(t)||^2]/E[||X'*v(t)||^2]."""
+    """Evaluate the TRO objective E[||X.T @ y(t)||**2] / E[||X.T @ v(t)||**2]."""
     Y = data['Y_list'][0]
     V = data['Y_list'][1]
     N = np.size(Y, 1)
@@ -70,13 +70,26 @@ def tro_eval(X, data):
     return f
 
 
-def tro_select_sol(Xq_old, Xq, X):
+def tro_select_sol(X_ref, X, nbsensors_vec, q):
     """Resolve the sign ambiguity for the TRO problem."""
-    Q = np.size(Xq_old, 1)
+    M_X = np.size(X_ref,0)
+    Q = np.size(X_ref, 1)
+    M = np.sum(nbsensors_vec)
 
-    for l in range(Q):
-        if np.linalg.norm(Xq_old[:, l] - Xq[:, l])> np.linalg.norm(-Xq_old[:, l] - Xq[:, l]):
-            X[:, l] = -X[:, l]
+    if M == M_X:
+        # Comparison of the full variable (resolve the sign ambiguity between X
+        # and X_star).
+        for l in range(Q):
+            if np.linalg.norm(X_ref[:, l] - X[:, l]) > np.linalg.norm(-X_ref[:, l] - X[:, l]):
+                X[:, l] = -X[:, l]
+    else:
+        # Comparison of the full variable (resolve the sign ambiguity between X
+        # and X_old).
+        Xq = X[0:nbsensors_vec[q], :]
+        Xq_ref = X_ref[0:nbsensors_vec[q], :]
+        for l in range(Q):
+            if np.linalg.norm(Xq_ref[:, l] - Xq[:, l]) > np.linalg.norm(-Xq_ref[:, l] - Xq[:, l]):
+                X[:, l] = -X[:, l]
 
     return X
 
@@ -85,19 +98,19 @@ def create_data(nbsensors, nbsamples):
     """Create data for the TRO problem."""
     rng = np.random.default_rng()
 
+    noisepower = 0.1
+    signalvar = 0.5
     nbsources = 5
     latent_dim = 10
+    offset = 0.5
 
-    d = rng.standard_normal(size=(nbsamples, nbsources))
-    s = rng.standard_normal(size=(nbsamples, latent_dim - nbsources))
-    A = rng.uniform(low=-0.5, high=0.5, size=(nbsources, nbsensors))
-    B = rng.uniform(low=-0.5, high=0.5, size=(latent_dim - nbsources, nbsensors))
-    noise = rng.standard_normal(size=(nbsamples, nbsensors))
+    d = rng.normal(loc=0, scale=np.sqrt(signalvar), size=(nbsources, nbsamples))
+    s = rng.normal(loc=0, scale=np.sqrt(signalvar), size=(latent_dim - nbsources, nbsamples))
+    A = rng.uniform(low=-offset, high=offset, size=(nbsensors, nbsources))
+    B = rng.uniform(low=offset, high=offset, size=(nbsensors, latent_dim - nbsources))
+    noise = rng.normal(loc=0, scale=np.sqrt(noisepower), size=(nbsensors, nbsamples))
 
-    V = s @ B + noise
-    Y = d @ A + V
-
-    Y = Y.T
-    V = V.T
+    V = B @ s + noise
+    Y = A @ d + V
 
     return Y, V

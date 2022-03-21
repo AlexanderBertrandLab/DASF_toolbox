@@ -1,8 +1,8 @@
-# The trace ratio optimization problem
+# The Trace Ratio Optimization Problem
  
-Example implementing the trace ratio optimization (TRO) problem in a distributed setting using the the DSFO framework:
+Example implementing the Trace Ratio Optimization (TRO) Problem in a distributed setting using the the DSFO framework:
 ``
-P: max_X || E[X.T @ y(t)] || ** 2 / || E[X.T @ v(t)] || ** 2 s.t. X.T @ I  @ X = I,
+P: max_X E[ || X.T @ y(t) || ** 2 ] / E[ || X.T @ v(t) || ** 2 ] s.t. X.T @ I  @ X = I,
 ``
 
 with the following data:
@@ -17,7 +17,7 @@ The functions and files in this folder are:
 
 `tro_solver:` Centralized algorithm for solving the TRO problem: 
         
-        max_X || E[X'*y1(t)] ||^2 / || E[X'*y2(t)] ||^2 s.t. X'*Gamma1*X=I.
+        max_X E[ || X.T @ y1(t) || ** 2 ] / E[ || X.T @ y2(t) || ** 2 ] s.t. X.T @ Gamma1 @ X = I.
 
 taking as input the following data:
 
@@ -33,7 +33,7 @@ taking as input the following data:
 
 `run_tro.py:` Script to run the DSFO algorithm to solve the TRO problem in a randomly generated network.
 
-`TRO_script.ipynb:` Jupyter notebook example.
+`TRO_notebook.ipynb:` Jupyter notebook example.
 
 **How to initialize** `data`**:** We remind the fields of the structure `data`:
 | Field | Description |
@@ -58,3 +58,10 @@ Looking at problem `P`, the relationship between the data in `P` and the solver 
 | `I==Gamma1` | `data['Gamma_list'][0]=I` |
 |  | `data['B_list']=[]` |
 | | `data['Glob_Const_list']=[]` |
+
+**Creating the data and parameters:** In the given example code, we take:
+``
+v(t) = B @ s(t) + n(t),
+y(t) = A @ d(t) + v(t),
+``
+where the entries of `s(t)` and `d(t)` independently follow `N(0,0.5)`, and the entries of `n(t)` independently follow `N(0,0.1)` for each time instant `t`, where `N` denotes the Gaussian distribution. We take `s` and `d` to be `5`-dimensional. Additionally the entries of `A` and `B` are drawn independently from `U([-0.5,0.5])`.

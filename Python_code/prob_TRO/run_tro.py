@@ -68,7 +68,7 @@ for k in range(mc_runs):
     # Compute the distance to X_star if "True".
     prob_params['compare_opt'] = True
     # Show a dynamic plot if "True".
-    prob_params['plot_dynamic'] = True
+    prob_params['plot_dynamic'] = False
 
     # Dictionary related to stopping conditions. We fix the number of iterations the DSFO algorithm will perform to 200.
     nbiter = 200

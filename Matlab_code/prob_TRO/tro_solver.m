@@ -40,10 +40,10 @@ function [X_star,f_star]=tro_solver(prob_params,data)
 
     while (tol_f>0 && abs(f-f_old)>tol_f) || (i<nbiter)
 
-        [E,L]=eig(Kyy-f*Kvv);
-        [~,ind]=sort(diag(L),'descend');
+        [eigvecs,eigvals]=eig(Kyy-f*Kvv);
+        [~,ind]=sort(diag(eigvals),'descend');
 
-        X=E(:,ind(1:Q));
+        X=eigvecs(:,ind(1:Q));
         f_old=f;
         data_t=struct;
         Y_cell_t=cell(2,1);

@@ -13,7 +13,7 @@ import autograd
 # Correspondence: cemates.musluoglu@esat.kuleuven.be
 
 def scqp_solver(prob_params, data):
-    """Solve the SCQP problem min 0.5*E[||X'*y(t)||^2]+trace(X'*B) s.t. trace(X'*Gamma*X)=1."""
+    """Solve the SCQP problem min 0.5 * E[||X.T @ y(t)||**2] + trace(X.T @ B) s.t. trace(X.T @ Gamma @ X)=1."""
     Y = data['Y_list'][0]
     B = data['B_list'][0]
     Gamma = data['Gamma_list'][0]
@@ -50,7 +50,7 @@ def scqp_solver(prob_params, data):
 
 
 def scqp_eval(X, data):
-    """Evaluate the SCQP objective 0.5*E[||X'*y(t)||^2]+trace(X'*B)."""
+    """Evaluate the SCQP objective 0.5 * E[||X.T @ y(t)||**2] + trace(X.T @ B)."""
     Y = data['Y_list'][0]
     B = data['B_list'][0]
     N = np.size(Y, 1)
@@ -67,7 +67,16 @@ def create_data(nbsensors, nbsamples, Q):
     """Create data for the SCQP problem."""
     rng = np.random.default_rng()
 
-    Y = rng.standard_normal(size=(nbsensors, nbsamples))
+    signalvar = 0.5
+    noisepower = 0.1
+    nbsources = 10
+    offset = 0.5
+
+    s = rng.normal(loc=0, scale=np.sqrt(signalvar), size=(nbsources, nbsamples))
+    A = rng.uniform(low=-offset, high=offset, size=(nbsensors, nbsources))
+    noise = rng.normal(loc=0, scale=np.sqrt(noisepower), size=(nbsensors, nbsamples))
+
+    Y = A @ s + noise
     B = rng.standard_normal(size=(nbsensors, Q))
 
     return Y, B

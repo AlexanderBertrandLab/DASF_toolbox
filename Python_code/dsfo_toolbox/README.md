@@ -20,13 +20,15 @@ The file `dsfo_toolbox.py` contains the DSFO implementation (more details inside
 
 `shortest_path:` Function computing the shortest path distance between a source node and all nodes in the network using Dijkstra's method. Note: This implementation is only for graphs for which the weight at each edge is equal to 1.
 
-`constr_Nu:` Function to obtain clusters of nodes for each neighbor.
+`find_clusters:` Function to obtain clusters of nodes for each neighbor.
 
-`constr_Cq:` Function to construct the transition matrix between the local data and variables and the global ones.
+`build_Cq:` Function to construct the transition matrix between the local data and variables and the global ones.
 
 `compress:` Function to compress the data.
 
 `block_q:` Function to extract the block of X corresponding to node q.
+
+`dsfo_multivar:` Same function as `dsfo` but for problems with multiple variables (e.g. Canonical Correlation Analysis). The output `X` is a cell containing multiple variables.
 
 `dsfo_block:` Same function as `dsfo` but the optimization variable is divided into cells *within the function* to explicitly emphasize and separate the block structure of the global variable `X=[X1;...;Xk;...XK]`. At the expense of a slightly less straightforward implementation than `dsfo`, it better represents how each node updates their local variable.
 
@@ -43,7 +45,7 @@ The file `dsfo_toolbox.py` contains the DSFO implementation (more details inside
            |    |           |           |            |     |    |    |    |
            |    |           |           |            |     |    |    |    |
            |    v           v           v            v     |    v    |    v
-           |find_path    constr_Nu    constr_Cq   compress | block_q |  plot_dynamic
+           |find_path  find_clusters   build_Cq   compress | block_q |  plot_dynamic
            |    |                                    |     |         |
            |    |                                    |     |         |
            |    v                                    v     |         |
@@ -62,11 +64,11 @@ The file `dsfo_toolbox.py` contains the DSFO implementation (more details inside
                               dsfo_block
                                   |
                                   |
-           -----------------------------------------------------------------------------
+           ------------------------------------------------------------------------------
            |    |        |          |          |     |    |    |         |    |         |
            |    |        |          |          |     |    |    |         |    |         |
            |    v        v          v          v     |    |    v         |    v         v
-           |find_path constr_Nu constr_Cq compress   |    |update_X_block| block_q plot_dynamic
+           |find_path find_clusters build_Cq compress|    |update_X_block| block_q plot_dynamic
            |    |                                    |    |          |   |         
            |    |                                    |    |          |   |         
            |    v                                    v    |          |   |         

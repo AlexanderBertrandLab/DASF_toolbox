@@ -119,8 +119,6 @@ function [Y,B,H]=create_data(nbsensors_vec,nbnodes,nbsamples,Q)
 
     rng('shuffle');
     [Y,A]=create_signal(nbsamples,nbsensors_vec,nbnodes);
-    Ryy=1/nbsamples*conj(Y*Y');
-    Ryy=make_sym(Ryy);
     A_mat=cell2mat(A);
     B=A_mat(:,1:Q);
     H=randn(Q,Q); 
@@ -132,6 +130,7 @@ function [Y,A]=create_signal(nbsamples,nbsensors_vec,nbnodes)
     signalvar=0.5;
     noisepower=0.1;
     nbsources=10;
+    offset=0.5;
     
     rng('shuffle');
     S=randn(nbsources,nbsamples);
@@ -139,7 +138,7 @@ function [Y,A]=create_signal(nbsamples,nbsensors_vec,nbnodes)
 
     A=cell(nbnodes,1);
     for k=1:nbnodes
-        A{k}=rand(nbsensors_vec(k),nbsources)-0.5;
+        A{k}=rand(nbsensors_vec(k),nbsources)-offset;
         noise{k}=randn(nbsensors_vec(k),nbsamples); 
         noise{k}=sqrt(noisepower)./sqrt(var(noise{k},0,2)).*(noise{k}...
             -mean(noise{k},2)*ones(1,nbsamples));

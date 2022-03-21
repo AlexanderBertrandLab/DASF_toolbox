@@ -18,10 +18,10 @@ function [X_star,f_star]=gevd_solver(prob_params,data)
     Ryy=make_sym(Y*Y')/N;
     Rvv=make_sym(V*V')/N;
     
-    [E,L]=eig(Ryy,Rvv);
-    [~,ind]=sort(diag(L),'descend');
+    [eigvecs,eigvals]=eig(Ryy,Rvv);
+    [~,ind]=sort(diag(eigvals),'descend');
 
-    X_star=E(:,ind(1:Q));
+    X_star=eigvecs(:,ind(1:Q));
     f_star=gevd_eval(X_star,data);
 
 end
