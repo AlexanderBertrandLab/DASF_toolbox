@@ -1,6 +1,6 @@
 # The Generalized Eigenvalue Decomposition
  
-Example implementing the Generalized Eigenvalue Decomposition (GEVD) in a distributed setting using the the DSFO framework:
+Example implementing the Generalized Eigenvalue Decomposition (GEVD) in a distributed setting using the the DASF framework:
 ``
 P: max_X E[ || X'*y(t) ||^2 ] s.t. E[ X'*v(t)*v(t)'*X ]=I,
 ``
@@ -31,7 +31,7 @@ taking as input the following data:
 
 `gevd_select_sol.m:`  Resolve the uniqueness ambiguity of the GEVD problem, i.e., invariance of the problem to the sign of the columns of `X`.
 
-`run_gevd.m:` Script to run the DSFO algorithm to solve the GEVD problem in a randomly generated network.
+`run_gevd.m:` Script to run the DASF algorithm to solve the GEVD problem in a randomly generated network.
 
 `GEVD_script.mlx:` Matlab live script example.
 

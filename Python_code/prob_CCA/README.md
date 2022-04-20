@@ -1,6 +1,6 @@
 # Canonical Correlation Analysis
  
-Example implementing the Canonical Correlation Analysis (CCA) in a distributed setting using the the DSFO framework:
+Example implementing the Canonical Correlation Analysis (CCA) in a distributed setting using the the DASF framework:
 ``
 P: max_(X,W) E[trace(X.T @ y(t) @ v(t).T @ W)]
     s.t. E[X.T @ y(t) @ y(t).T @ X] = I, E[W.T @ v(t) @ v(t).T @ W] = I,
@@ -31,11 +31,11 @@ taking as input the following data:
 
 `cca_select_sol:`  Resolve the uniqueness ambiguity of the CCA problem, i.e., invariance of the problem to the sign of the columns of `X`.
 
-`run_cca.py:` Script to run the DSFO algorithm to solve the CCA problem in a randomly generated network.
+`run_cca.py:` Script to run the DASF algorithm to solve the CCA problem in a randomly generated network.
 
 `CCA_notebook.ipynb:` Jupyter notebook example.
 
-**How to initialize** `data`**:** In this case, `data` will be a list containing `data_X` and `data_W` which are dictionaries with the same fields as the `data` structure for problems using the `dsfo` function. We have one dictionary per variable. We remind the fields of the dictionaries `data_X` and `data_W`:
+**How to initialize** `data`**:** In this case, `data` will be a list containing `data_X` and `data_W` which are dictionaries with the same fields as the `data` structure for problems using the `dasf` function. We have one dictionary per variable. We remind the fields of the dictionaries `data_X` and `data_W`:
 | Field | Description |
  | --- | --- |
  | **Signals:** `Y_list` | List for stochastic signals, where each signal is a `nbsensors x nbsamples` matrix corresponding to time samples of multi-channel signals in the network. There is one element for each different signal. <br /> **Example:** If the problem depends on `X.T @ y(t)` and `X.T @ v(t)` then `Y` and `V` contain the time samples of `y` and `v` respectively and we have `Y_list[0]=Y` and `Y_list[1]=V`. |

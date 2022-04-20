@@ -3,10 +3,10 @@ import matplotlib as mpl
 import matplotlib.pyplot as plt
 import sys
 
-sys.path.append('../dsfo_toolbox/')
+sys.path.append('../dasf_toolbox/')
 import qcqp_functions as qcqp
-from dsfo_toolbox import dsfo
-from dsfo_toolbox import dsfo_block
+from dasf_toolbox import dasf
+from dasf_toolbox import dasf_block
 
 # Choose plot backend.
 mpl.use('macosx')
@@ -71,13 +71,13 @@ while n_runs < mc_runs:
     # Show a dynamic plot if "True".
     prob_params['plot_dynamic'] = False
 
-    # Dictionary related to stopping conditions. We fix the number of iterations the DSFO algorithm will perform to 200.
+    # Dictionary related to stopping conditions. We fix the number of iterations the DASF algorithm will perform to 200.
     nbiter = 200
     conv = {'nbiter': nbiter}
 
     try:
-        # Solve the QCQP in a distributed way using the DSFO framework.
-        X_est, norm_diff, norm_err, f_seq = dsfo(prob_params, data, qcqp.qcqp_solver,
+        # Solve the QCQP in a distributed way using the DASF framework.
+        X_est, norm_diff, norm_err, f_seq = dasf(prob_params, data, qcqp.qcqp_solver,
                                                  conv, prob_eval=qcqp.qcqp_eval, prob_select_sol=None)
 
         norm_error.append(norm_err)

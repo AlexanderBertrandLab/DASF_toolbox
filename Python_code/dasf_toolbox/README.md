@@ -1,8 +1,8 @@
-# The DSFO framework
+# The DASF framework
 
-The file `dsfo_toolbox.py` contains the DSFO implementation (more details inside the code).
+The file `dasf_toolbox.py` contains the DASF implementation (more details inside the code).
 
-`dsfo:` Function implementing the DSFO framework taking as arguments:
+`dasf:` Function implementing the DASF framework taking as arguments:
 
         - prob_params: Structure containing the problem parameters such as the number of nodes, the size of the filter, etc.
         
@@ -28,17 +28,17 @@ The file `dsfo_toolbox.py` contains the DSFO implementation (more details inside
 
 `block_q:` Function to extract the block of X corresponding to node q.
 
-`dsfo_multivar:` Same function as `dsfo` but for problems with multiple variables (e.g. Canonical Correlation Analysis). The output `X` is a cell containing multiple variables.
+`dasf_multivar:` Same function as `dasf` but for problems with multiple variables (e.g. Canonical Correlation Analysis). The output `X` is a cell containing multiple variables.
 
-`dsfo_block:` Same function as `dsfo` but the optimization variable is divided into cells *within the function* to explicitly emphasize and separate the block structure of the global variable `X=[X1;...;Xk;...XK]`. At the expense of a slightly less straightforward implementation than `dsfo`, it better represents how each node updates their local variable.
+`dasf_block:` Same function as `dasf` but the optimization variable is divided into cells *within the function* to explicitly emphasize and separate the block structure of the global variable `X=[X1;...;Xk;...XK]`. At the expense of a slightly less straightforward implementation than `dasf`, it better represents how each node updates their local variable.
 
-`update_X_block:` Only called from `dsfo_block`. Explicitly updating the `Xk` of each node `k` separately, where the global variable `X` is equal to `[X1;...;Xk;...XK]`, it allows to adapt the updating scheme depending on the user's application in an easier way than the implementation used in `dsfo`, resulting in more flexibility. 
+`update_X_block:` Only called from `dasf_block`. Explicitly updating the `Xk` of each node `k` separately, where the global variable `X` is equal to `[X1;...;Xk;...XK]`, it allows to adapt the updating scheme depending on the user's application in an easier way than the implementation used in `dasf`, resulting in more flexibility. 
 
 **Dependencies:**
 
 
 
-                                dsfo
+                                dasf
                                   |
                                   |
            ----------------------------------------------------------------
@@ -61,7 +61,7 @@ The file `dsfo_toolbox.py` contains the DSFO implementation (more details inside
 
 
 
-                              dsfo_block
+                              dasf_block
                                   |
                                   |
            ------------------------------------------------------------------------------

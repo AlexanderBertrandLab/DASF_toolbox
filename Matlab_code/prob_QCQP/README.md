@@ -1,6 +1,6 @@
 # Quadratically Constrained Quadratic Problem
  
-Folder implementing the following Quadratically Constrained Quadratic Problem (QCQP) in a distributed setting using the the DSFO framework:
+Folder implementing the following Quadratically Constrained Quadratic Problem (QCQP) in a distributed setting using the the DASF framework:
 ``
 P: min_X 0.5*E[ || X'*y(t) ||^2 ]-trace(X'*B) s.t. trace(X'*I*X)<=alpha^2, X'*c=d,
 ``
@@ -36,7 +36,7 @@ taking as input the following data:
 
 `qcqp_eval.m:`  Evaluate the QCQP objective function.
 
-`run_qcqp.m:` Script to run the DSFO algorithm to solve the QCQP in a randomly generated network.
+`run_qcqp.m:` Script to run the DASF algorithm to solve the QCQP in a randomly generated network.
 
 `QCQP_script.mlx:` Matlab live script example.
 

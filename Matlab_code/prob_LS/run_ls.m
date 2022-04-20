@@ -1,4 +1,4 @@
-% Example script to run the DSFO algorithm to solve the Least Squares (LS)
+% Example script to run the DASF algorithm to solve the Least Squares (LS)
 % Problem.
 
 % Author: Cem Musluoglu, KU Leuven, Department of Electrical Engineering
@@ -9,7 +9,7 @@
 clear all
 close all
 
-addpath('../dsfo_toolbox/');
+addpath('../dasf_toolbox/');
 
 % Number of Monte-Carlo runs.
 mc_runs=5;
@@ -67,7 +67,7 @@ while n_runs<=mc_runs
     prob_params.plot_dynamic=false;
 
     % Structure related to stopping conditions. We fix the number of 
-    % iterations the DSFO algorithm will perform to 200.
+    % iterations the DASF algorithm will perform to 200.
     conv=struct;
     conv.nbiter=200;
     
@@ -82,8 +82,8 @@ while n_runs<=mc_runs
     end
     prob_params.graph_adj=graph_adj;
     
-    % Solve the LS in a distributed way using the DSFO framework.
-    [X_est,norm_diff,norm_err,f_seq]=dsfo(prob_params,data,...
+    % Solve the LS in a distributed way using the DASF framework.
+    [X_est,norm_diff,norm_err,f_seq]=dasf(prob_params,data,...
                 @ls_solver,conv,[],@ls_eval);
     norm_error{n_runs}=norm_err;
     n_runs=n_runs+1;

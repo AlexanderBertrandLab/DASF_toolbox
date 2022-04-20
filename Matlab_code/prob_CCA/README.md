@@ -1,6 +1,6 @@
 # Canonical Correlation Analysis
  
-Folder implementing the following Canonical Correlation Analysis (CCA) in a distributed setting using the the DSFO framework:
+Folder implementing the following Canonical Correlation Analysis (CCA) in a distributed setting using the the DASF framework:
 ``
 P: min_(X,W) E[  v(t)'*W*X'*y(t) ] s.t. E[ X'*y(t)*y(t)'*X ]=I, E[ W'*v(t)*v(t)'*W ]=I,
 ``
@@ -27,11 +27,11 @@ taking as input the following data:
 
 `cca_eval.m:`  Evaluate the CCA objective function.
 
-`run_cca.m:` Script to run the DSFO algorithm to solve the CCA in a randomly generated network.
+`run_cca.m:` Script to run the DASF algorithm to solve the CCA in a randomly generated network.
 
 `CCA_script.mlx:` Matlab live script example.
 
-**How to initialize** `data`**:** In this case, `data` will be a cell containing `data_X` and `data_W` which are structures with the same fields as the `data` structure for problems using the `dsfo` function. We have one structure per variable. We remind the fields of the structures `data_X` and `data_W`:
+**How to initialize** `data`**:** In this case, `data` will be a cell containing `data_X` and `data_W` which are structures with the same fields as the `data` structure for problems using the `dasf` function. We have one structure per variable. We remind the fields of the structures `data_X` and `data_W`:
 | Field | Description |
  | --- | --- |
  | **Signals:** `Y_cell` | Cell for stochastic signals, where each signal is a `nbsensors x nbsamples` matrix corresponding to time samples of multi-channel signals in the network. There is one cell for each different signal. <br /> **Example:** If the problem depends on `X'*y(t)` and `X'*v(t)` then `Y` and `V` contain the time samples of `y` and `v` respectively and we have `Y_cell{1}=Y` and `Y_cell{2}=V`. |

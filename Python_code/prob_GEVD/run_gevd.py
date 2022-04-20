@@ -3,10 +3,10 @@ import sys
 import matplotlib as mpl
 import matplotlib.pyplot as plt
 
-sys.path.append('../dsfo_toolbox/')
+sys.path.append('../dasf_toolbox/')
 import gevd_functions as gevd
-from dsfo_toolbox import dsfo
-from dsfo_toolbox import dsfo_block
+from dasf_toolbox import dasf
+from dasf_toolbox import dasf_block
 
 # Choose plot backend.
 mpl.use('macosx')
@@ -70,12 +70,12 @@ for k in range(mc_runs):
     # Show a dynamic plot if "True".
     prob_params['plot_dynamic'] = False
 
-    # Dictionary related to stopping conditions. We fix the number of iterations the DSFO algorithm will perform to 200.
+    # Dictionary related to stopping conditions. We fix the number of iterations the DASF algorithm will perform to 200.
     nbiter = 200
     conv = {'nbiter': nbiter}
 
-    # Solve the GEVD in a distributed way using the DSFO framework.
-    X_est, norm_diff, norm_err, f_seq = dsfo(prob_params, data, gevd.gevd_solver,
+    # Solve the GEVD in a distributed way using the DASF framework.
+    X_est, norm_diff, norm_err, f_seq = dasf(prob_params, data, gevd.gevd_solver,
                                              conv, gevd.gevd_select_sol, gevd.gevd_eval)
 
     norm_error.append(norm_err)

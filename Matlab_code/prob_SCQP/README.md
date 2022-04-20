@@ -1,6 +1,6 @@
 # Spherically Constrained Quadratic Problem
  
-Folder implementing the following Spherically Constrained Quadratic Problem (SCQP) in a distributed setting using the the DSFO framework:
+Folder implementing the following Spherically Constrained Quadratic Problem (SCQP) in a distributed setting using the the DASF framework:
 ``
 P: min_X 0.5*E[ || X'*y(t) ||^2 ]+trace(X'*B) s.t. trace(X'*I*X)=1,
 ``
@@ -33,7 +33,7 @@ https://www.manopt.org
 
 `scqp_eval.m:`  Evaluate the SCQP objective function.
 
-`run_scqp.m:` Script to run the DSFO algorithm to solve the SCQP in a randomly generated network.
+`run_scqp.m:` Script to run the DASF algorithm to solve the SCQP in a randomly generated network.
 
 `SCQP_script.mlx:` Matlab live script example.
 

@@ -1,6 +1,6 @@
 # Least Squares
  
-Folder implementing the following Least Squares (LS) Problem in a distributed setting using the the DSFO framework:
+Folder implementing the following Least Squares (LS) Problem in a distributed setting using the the DASF framework:
 ``
 P: min_X E[ || d(t)-X'*y(t) ||^2 ],
 ``
@@ -29,7 +29,7 @@ taking as input the following data:
 
 `ls_eval.m:`  Evaluate the LS objective function.
 
-`run_ls.m:` Script to run the DSFO algorithm to solve the LS in a randomly generated network.
+`run_ls.m:` Script to run the DASF algorithm to solve the LS in a randomly generated network.
 
 `LS_script.mlx:` Matlab live script example.
 

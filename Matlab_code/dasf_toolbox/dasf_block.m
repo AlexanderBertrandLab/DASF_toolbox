@@ -1,7 +1,7 @@
-function [X,norm_diff,norm_err,f_seq]=dsfo_block(prob_params,data,...
+function [X,norm_diff,norm_err,f_seq]=dasf_block(prob_params,data,...
     prob_solver,conv,prob_select_sol,prob_eval)
 
-% Function running the DSFO for a given problem.
+% Function running the DASF for a given problem.
 %
 % INPUTS :
 % prob_params : Structure related to the problem parameters containing the

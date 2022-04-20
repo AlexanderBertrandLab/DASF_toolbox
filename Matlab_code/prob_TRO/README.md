@@ -1,6 +1,6 @@
 # The Trace Ratio Optimization Problem
  
-Example implementing the Trace Ratio Optimization (TRO) Problem in a distributed setting using the the DSFO framework:
+Example implementing the Trace Ratio Optimization (TRO) Problem in a distributed setting using the the DASF framework:
 ``
 P: max_X E[ || X'*y(t) ||^2 ] / E[ || X'*v(t) ||^2 ] s.t. X'*I*X=I,
 ``
@@ -31,7 +31,7 @@ taking as input the following data:
 
 `tro_select_sol.m:`  Resolve the uniqueness ambiguity of the TRO problem, i.e., invariance of the problem to the sign of the columns of `X`.
 
-`run_tro.m:` Script to run the DSFO algorithm to solve the TRO problem in a randomly generated network.
+`run_tro.m:` Script to run the DASF algorithm to solve the TRO problem in a randomly generated network.
 
 `TRO_script.mlx:` Matlab live script example.
 

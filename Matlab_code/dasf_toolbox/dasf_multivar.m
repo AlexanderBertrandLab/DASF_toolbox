@@ -1,7 +1,7 @@
-function [X,norm_diff,norm_err,f_seq]=dsfo(prob_params,data,...
+function [X,norm_diff,norm_err,f_seq]=dasf_multivar(prob_params,data,...
     prob_solver,conv,prob_select_sol,prob_eval)
 
-% Function running the DSFO for a given problem.
+% Function running the DASF for a given problem.
 %
 % INPUTS :
 % prob_params : Structure related to the problem parameters containing the
@@ -15,6 +15,7 @@ function [X,norm_diff,norm_err,f_seq]=dsfo(prob_params,data,...
 %            Q : Number of filters to use (dimension of projected space)
 %            nbsamples : Number of time samples of the signals per
 %                        iteration.
+%            nbvariables : Number of variables.
 %            graph_adj : Adjacency (binary) matrix, with graph_adj(i,j)=1  
 %                        if i and j are connected. Otherwise 0. 
 %                        graph_adj(i,i)=0.
@@ -78,6 +79,7 @@ Q=prob_params.Q;
 nbsensors=prob_params.nbsensors;
 nbnodes=prob_params.nbnodes;
 nbsensors_vec=prob_params.nbsensors_vec;
+nbvariables=prob_params.nbvariables;
 graph_adj=prob_params.graph_adj;
 
 if (~isfield(prob_params,'update_path'))
@@ -141,7 +143,10 @@ else
     warning('Performing 200 iterations')
 end
 
-X=randn(nbsensors,Q);
+X=cell(nbvariables,1);
+for k=1:nbvariables
+   X{k}=randn(nbsensors,Q);
+end
 X_old=X;
 
 if(isempty(prob_eval))
@@ -168,22 +173,31 @@ while i<nbiter
     % Neighborhood clusters.
     clusters=find_clusters(neighbors,path);
     
-    % Global - local transition matrix.
-    Cq=build_Cq(X,q,prob_params,neighbors,clusters);
+    % Global - local transition matrices.
+    Cq=cell(nbvariables,1);
+    for k=1:nbvariables
+       Cq{k}=build_Cq(X{k},q,prob_params,neighbors,clusters); 
+    end
 
     % Compute the compressed data.
-    data_compressed=compress(data,Cq);
-
+    data_compressed=cell(nbvariables,1);
+    for k=1:nbvariables
+        data_compressed{k}=compress(data{k},Cq{k});
+    end
+    
     % Compute the local variable.
     % Solve the local problem with the algorithm for the global problem
     % using the compressed data.
     X_tilde=prob_solver(prob_params,data_compressed);
-    
+        
     % Select a solution among potential ones if the problem has a non-
     % unique solution.
     if(~isempty(prob_select_sol))
-        Xq_old=block_q(X_old,q,nbsensors_vec);
-        X_tilde_old=[Xq_old;repmat(eye(Q),length(neighbors),1)];
+        X_tilde_old=cell(nbvariables,1);
+        for k=1:nbvariables
+            Xq_old=block_q(X_old{k},q,nbsensors_vec);
+            X_tilde_old{k}=[Xq_old;repmat(eye(Q),length(neighbors),1)];
+        end
         X_tilde=prob_select_sol(X_tilde_old,X_tilde,nbsensors_vec,q);
     end
     
@@ -195,19 +209,23 @@ while i<nbiter
     end
     
     % Global variable.
-    X=Cq*X_tilde;
+    for k=1:nbvariables
+        X{k}=Cq{k}*X_tilde{k};
+    end
     
     if i>0
-        norm_diff=[norm_diff,norm(X-X_old,'fro').^2/numel(X)];
+        norm_diff=[norm_diff,norm(cell2mat(X)-cell2mat(X_old),'fro').^2/...
+            numel(cell2mat(X))];
     end
     
     if(~isempty(X_star) && compare_opt)
         if(~isempty(prob_select_sol))
             X=prob_select_sol(X_star,X,nbsensors_vec,q);
         end
-        norm_err=[norm_err,norm(X-X_star,'fro')^2/norm(X_star,'fro')^2];
+        norm_err=[norm_err,norm(cell2mat(X)-cell2mat(X_star),'fro')^2/...
+            norm(cell2mat(X_star),'fro')^2];
         if(plot_dynamic)
-            dynamic_plot(X,X_star)
+            dynamic_plot(cell2mat(X),cell2mat(X_star))
         end
     end
     
@@ -215,12 +233,15 @@ while i<nbiter
     
     i=i+1;
     
-    if (tol_f_break && abs(f-f_old)<=tol_f) || (tol_X_break && norm(X-X_old,'fro')<=tol_X)
+    if (tol_f_break && abs(f-f_old)<=tol_f) || (tol_X_break &&...
+            norm(cell2mat(X)-cell2mat(X_old),'fro')<=tol_X)
         break
     end
 
 end
 
 end
+
+
 
 

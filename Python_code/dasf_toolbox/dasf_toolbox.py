@@ -8,7 +8,7 @@ mpl.use('macosx')
 # mpl.use('Qt5Agg')
 # mpl.use('TkAgg')
 
-# This module implements in a generic way the DSFO algorithm.
+# This module implements in a generic way the DASF algorithm.
 #
 # Author: Cem Musluoglu, KU Leuven, Department of Electrical Engineering
 # (ESAT), STADIUS Center for Dynamical Systems, Signal Processing and Data
@@ -16,9 +16,9 @@ mpl.use('macosx')
 # Correspondence: cemates.musluoglu@esat.kuleuven.be
 
 
-def dsfo(prob_params, data, prob_solver,
+def dasf(prob_params, data, prob_solver,
          conv=None, prob_select_sol=None, prob_eval=None):
-    """ Function running the DSFO for a given problem.
+    """ Function running the DASF for a given problem.
 
     INPUTS :
 
@@ -521,9 +521,9 @@ def update_X_block(X_block, X_tilde, q, prob_params, neighbors, Nu, prob_select_
     return X_block_upd
 
 
-def dsfo_block(prob_params, data, prob_solver,
+def dasf_block(prob_params, data, prob_solver,
          conv=None, prob_select_sol=None, prob_eval=None):
-    """ Function running the DSFO for a given problem.
+    """ Function running the DASF for a given problem.
 
     INPUTS :
 
@@ -727,9 +727,9 @@ def dsfo_block(prob_params, data, prob_solver,
     return X, norm_diff, norm_err, f_seq
 
 
-def dsfo_multivar(prob_params, data, prob_solver,
+def dasf_multivar(prob_params, data, prob_solver,
          conv=None, prob_select_sol=None, prob_eval=None):
-    """ Function running the DSFO for a given problem.
+    """ Function running the DASF for a given problem.
 
     INPUTS :
 

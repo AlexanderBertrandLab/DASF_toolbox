@@ -1,4 +1,4 @@
-% Example script to run the DSFO algorithm to solve the CCA Problem.
+% Example script to run the DASF algorithm to solve the CCA Problem.
 
 % Author: Cem Musluoglu, KU Leuven, Department of Electrical Engineering
 % (ESAT), STADIUS Center for Dynamical Systems, Signal Processing and Data
@@ -8,7 +8,7 @@
 clear all
 close all
 
-addpath('../dsfo_toolbox/');
+addpath('../dasf_toolbox/');
 
 % Number of Monte-Carlo runs.
 mc_runs=5;
@@ -77,7 +77,7 @@ for n_runs=1:mc_runs
     prob_params.plot_dynamic=false;
 
     % Structure related to stopping conditions. We fix the number of 
-    % iterations the DSFO algorithm will perform to 1000.
+    % iterations the DASF algorithm will perform to 1000.
     conv=struct;
     conv.nbiter=1000;
     
@@ -92,8 +92,8 @@ for n_runs=1:mc_runs
     end
     prob_params.graph_adj=graph_adj;
     
-    % Solve the CCA problem in a distributed way using the DSFO framework.
-    [X_est,norm_diff,norm_err,f_seq]=dsfo_multivar(prob_params,data,...
+    % Solve the CCA problem in a distributed way using the DASF framework.
+    [X_est,norm_diff,norm_err,f_seq]=dasf_multivar(prob_params,data,...
                     @cca_solver,conv,@cca_select_sol,@cca_eval);
     
     norm_error{n_runs}=norm_err;

@@ -1,6 +1,6 @@
 # Linearly Constrained Minimum Variance
  
-Folder implementing the following Linearly Constrained Minimum Variance (LCMV) in a distributed setting using the the DSFO framework:
+Folder implementing the following Linearly Constrained Minimum Variance (LCMV) in a distributed setting using the the DASF framework:
 ``
 P: min_X E[ || X'*y(t) ||^2 ] s.t. X'*B=H,
 ``
@@ -30,7 +30,7 @@ taking as input the following data:
 
 `lcmv_eval.m:`  Evaluate the LCMV objective function.
 
-`run_lcmv.m:` Script to run the DSFO algorithm to solve the LCMV in a randomly generated network.
+`run_lcmv.m:` Script to run the DASF algorithm to solve the LCMV in a randomly generated network.
 
 `LCMV_script.mlx:` Matlab live script example.
 

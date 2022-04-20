@@ -3,9 +3,9 @@ import sys
 import matplotlib as mpl
 import matplotlib.pyplot as plt
 
-sys.path.append('../dsfo_toolbox/')
+sys.path.append('../dasf_toolbox/')
 import cca_functions as cca
-from dsfo_toolbox import dsfo_multivar
+from dasf_toolbox import dasf_multivar
 
 # Choose plot backend.
 mpl.use('macosx')
@@ -77,12 +77,12 @@ for k in range(mc_runs):
     # Show a dynamic plot if "True".
     prob_params['plot_dynamic'] = False
 
-    # Dictionary related to stopping conditions. We fix the number of iterations the DSFO algorithm will perform to 200.
+    # Dictionary related to stopping conditions. We fix the number of iterations the DASF algorithm will perform to 200.
     nbiter = 1000
     conv = {'nbiter': nbiter}
 
-    # Solve the CCA in a distributed way using the DSFO framework.
-    X_est, norm_diff, norm_err, f_seq = dsfo_multivar(prob_params, data, cca.cca_solver,
+    # Solve the CCA in a distributed way using the DASF framework.
+    X_est, norm_diff, norm_err, f_seq = dasf_multivar(prob_params, data, cca.cca_solver,
                                              conv, cca.cca_select_sol, cca.cca_eval)
 
     norm_error.append(norm_err)

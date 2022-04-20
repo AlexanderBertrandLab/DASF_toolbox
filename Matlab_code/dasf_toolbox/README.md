@@ -1,8 +1,8 @@
-# The DSFO framework
+# The DASF framework
 
-Folder with the DSFO implementation and utility functions (more details inside the code).
+Folder with the DASF implementation and utility functions (more details inside the code).
 
-`dsfo.m:` Function implementing the DSFO framework taking as arguments:
+`dasf.m:` Function implementing the DASF framework taking as arguments:
 
         - prob_params: Structure containing the problem parameters such as the number of nodes, the size of the filter, etc.
         
@@ -30,17 +30,17 @@ Folder with the DSFO implementation and utility functions (more details inside t
 
 `block_q.m:` Function to extract the block of X corresponding to node q.
 
-`dsfo_multivar.m:` Same function as `dsfo` but for problems with multiple variables (e.g. Canonical Correlation Analysis). The output `X` is a cell containing multiple variables.
+`dasf_multivar.m:` Same function as `dasf` but for problems with multiple variables (e.g. Canonical Correlation Analysis). The output `X` is a cell containing multiple variables.
 
-`dsfo_block.m:` Same function as `dsfo` but the optimization variable is divided into cells *within the function* to explicitly emphasize and separate the block structure of the global variable `X=[X1;...;Xk;...XK]`. At the expense of a slightly less straightforward implementation than `dsfo`, it better represents how each node updates their local variable.
+`dasf_block.m:` Same function as `dasf` but the optimization variable is divided into cells *within the function* to explicitly emphasize and separate the block structure of the global variable `X=[X1;...;Xk;...XK]`. At the expense of a slightly less straightforward implementation than `dasf`, it better represents how each node updates their local variable.
 
-`update_X_block.m:` Only called from `dsfo_block`. Explicitly updating the `Xk` of each node `k` separately, where the global variable `X` is equal to `[X1;...;Xk;...XK]`, it allows to adapt the updating scheme depending on the user's application in an easier way than the implementation used in `dsfo`, resulting in more flexibility. 
+`update_X_block.m:` Only called from `dasf_block`. Explicitly updating the `Xk` of each node `k` separately, where the global variable `X` is equal to `[X1;...;Xk;...XK]`, it allows to adapt the updating scheme depending on the user's application in an easier way than the implementation used in `dasf`, resulting in more flexibility. 
 
 **Dependencies:**
 
 
 
-                                dsfo
+                                dasf
                                   |
                                   |
            ----------------------------------------------------------------
@@ -63,7 +63,7 @@ Folder with the DSFO implementation and utility functions (more details inside t
 
 
 
-                              dsfo_block
+                              dasf_block
                                   |
                                   |
            ------------------------------------------------------------------------------
