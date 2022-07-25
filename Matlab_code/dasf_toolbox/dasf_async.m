@@ -1,4 +1,4 @@
-function [X,norm_diff,norm_err,f_seq]=dasf_block(prob_params,data,...
+function [X,norm_diff,norm_err,f_seq]=dasf_async(prob_params,data,...
     prob_solver,conv,prob_select_sol,prob_eval)
 
 % Function running the DASF for a given problem.
@@ -18,9 +18,6 @@ function [X,norm_diff,norm_err,f_seq]=dasf_block(prob_params,data,...
 %            graph_adj : Adjacency (binary) matrix, with graph_adj(i,j)=1  
 %                        if i and j are connected. Otherwise 0. 
 %                        graph_adj(i,i)=0.
-%            update_path : (Optional) Vector of nodes representing the 
-%                          updating path followed by the algorithm. If not 
-%                          provided, a random path is created.
 %            X_init : (Optional) Initial estimate for X.
 %            X_star : (Optional) Optimal argument solving the problem
 %                     (for comparison, e.g., to compute norm_err).
@@ -81,14 +78,6 @@ nbnodes=prob_params.nbnodes;
 nbsensors_vec=prob_params.nbsensors_vec;
 graph_adj=prob_params.graph_adj;
 rng('shuffle');
-
-if (~isfield(prob_params,'update_path'))
-    % Random updating order.
-    update_path=randperm(nbnodes);
-    warning('Randomly selected updating path')
-else
-    update_path=prob_params.update_path;
-end
 
 if (~isfield(prob_params,'X_star'))
     X_star=[];
@@ -166,44 +155,87 @@ norm_err=[];
 
 while i<nbiter
     
-    % Select updating node.
-    q=update_path(rem(i,nbnodes)+1);
+    alpha=1;
     
-    % Prune the network.
-    % Find shortest path.
+    nbupdating_nodes=randi(nbnodes);
+    updating_nodes=randsample(nbnodes,nbupdating_nodes);
+    %updating_nodes=[1:nbnodes];
+    
+    for l=1:length(updating_nodes)
+        % Select updating node.
+        q=updating_nodes(l);
+
+        % Prune the network.
+        % Find shortest path.
+        [neighbors,path]=find_path(q,graph_adj);
+
+        % Neighborhood clusters.
+        clusters=find_clusters(neighbors,path);
+
+        % Global - local transition matrix.
+        Cq=build_Cq(X,q,prob_params,neighbors,clusters);
+
+        % Compute the compressed data.
+        data_compressed=compress(data,Cq);
+
+        % Compute the local variable.
+        % Solve the local problem with the algorithm for the global problem
+        % using the compressed data.
+        X_tilde=prob_solver(prob_params,data_compressed);
+        nbneighbors=length(neighbors);
+        X_tilde=prob_select_sol([X_block{q};repmat(eye(Q),nbneighbors,1)],...
+            X_tilde,prob_params,data_compressed,q);
+        
+        Xq_new=X_tilde(1:nbsensors_vec(q),:);
+        X_block{q}=(1-alpha)*X_block{q}+alpha*Xq_new;
+        
+    end
+    
+    
+    %{
+    CX=blkdiag(X_block{1:nbnodes});
+    data_compressed=compress(data,CX);
+    G=prob_solver(prob_params,data_compressed);
+    X=CX*G;
+    X_block=mat2cell(X,nbsensors_vec,Q);
+    X_block=update_X_block(X_block,X_tilde,q,prob_params,neighbors,...
+    clusters,prob_select_sol);
+    X=cell2mat(X_block);
+    %}
+    
+    
+    X=cell2mat(X_block);
+    q=1;
     [neighbors,path]=find_path(q,graph_adj);
-    
-    % Neighborhood clusters.
     clusters=find_clusters(neighbors,path);
-    
-    % Global - local transition matrix.
     Cq=build_Cq(X,q,prob_params,neighbors,clusters);
-
-    % Compute the compressed data.
     data_compressed=compress(data,Cq);
-
-    % Compute the local variable.
-    % Solve the local problem with the algorithm for the global problem
-    % using the compressed data.
     X_tilde=prob_solver(prob_params,data_compressed);
+    X_block=update_X_block(X_block,X_tilde,q,prob_params,data_compressed,...
+    neighbors,clusters,prob_select_sol);
+    X=cell2mat(X_block);
+    %X=Cq*X_tilde;
+    %X_block=mat2cell(X,nbsensors_vec,Q);
+    
+    
+    
+    % Global variable.
+    %X_block=update_X_block(X_block,X_tilde,q,prob_params,neighbors,clusters,...
+    %            prob_select_sol);
+    %X=cell2mat(X_block);
     
     % Evaluate the objective.
     if(~isempty(prob_eval))
         f_old=f;
-        f=prob_eval(X_tilde,data_compressed);
+        f=prob_eval(X,data);
         f_seq=[f_seq,f];
     end
-    
-    % Global variable.
-    X_block=update_X_block(X_block,X_tilde,q,prob_params,data_compressed,...
-                neighbors,clusters,prob_select_sol);
-    X=cell2mat(X_block);
     
     if i>0
         norm_diff=[norm_diff,norm(X-X_old,'fro').^2/numel(X)];
     end
     
-    X_block=mat2cell(X,nbsensors_vec,Q);
+    %X_block=mat2cell(X,nbsensors_vec,Q);
     
     if(~isempty(X_star) && compare_opt)
         if(~isempty(prob_select_sol))

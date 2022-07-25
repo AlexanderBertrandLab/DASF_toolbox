@@ -21,6 +21,7 @@ function [X,norm_diff,norm_err,f_seq]=dasf(prob_params,data,...
 %            update_path : (Optional) Vector of nodes representing the 
 %                          updating path followed by the algorithm. If not 
 %                          provided, a random path is created.
+%            X_init : (Optional) Initial estimate for X.
 %            X_star : (Optional) Optimal argument solving the problem
 %                     (for comparison, e.g., to compute norm_err).
 %            compare_opt : (Optional, binary) If "true" and X_star is given, 
@@ -79,6 +80,7 @@ nbsensors=prob_params.nbsensors;
 nbnodes=prob_params.nbnodes;
 nbsensors_vec=prob_params.nbsensors_vec;
 graph_adj=prob_params.graph_adj;
+rng('shuffle');
 
 if (~isfield(prob_params,'update_path'))
     % Random updating order.
@@ -141,7 +143,12 @@ else
     warning('Performing 200 iterations')
 end
 
-X=randn(nbsensors,Q);
+if (~isfield(prob_params,'X_init'))
+    X=randn(nbsensors,Q);
+else
+    X=prob_params.X_init;
+end
+
 X_old=X;
 
 if(isempty(prob_eval))
@@ -184,7 +191,7 @@ while i<nbiter
     if(~isempty(prob_select_sol))
         Xq_old=block_q(X_old,q,nbsensors_vec);
         X_tilde_old=[Xq_old;repmat(eye(Q),length(neighbors),1)];
-        X_tilde=prob_select_sol(X_tilde_old,X_tilde,nbsensors_vec,q);
+        X_tilde=prob_select_sol(X_tilde_old,X_tilde,prob_params,data_compressed,q);
     end
     
     % Evaluate the objective.
@@ -203,7 +210,7 @@ while i<nbiter
     
     if(~isempty(X_star) && compare_opt)
         if(~isempty(prob_select_sol))
-            X=prob_select_sol(X_star,X,nbsensors_vec,q);
+            X=prob_select_sol(X_star,X,prob_params,data,q);
         end
         norm_err=[norm_err,norm(X-X_star,'fro')^2/norm(X_star,'fro')^2];
         if(plot_dynamic)

@@ -15,7 +15,7 @@ function [X_star,f_star]=lcmv_solver(prob_params,data)
     
     Ryy=make_sym(Y*Y')/nbsamples;
 
-    X_star=inv(Ryy)*B*inv(B.'*inv(Ryy)*B)*H;
+    X_star=inv(Ryy)*B*inv(B.'*inv(Ryy)*B)*H';
     f_star=lcmv_eval(X_star,data);
         
 end

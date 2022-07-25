@@ -1,5 +1,5 @@
-function X_block_upd=update_X_block(X_block,X_tilde,q,prob_params,neighbors,...
-    Nu,prob_select_sol)
+function X_block_upd=update_X_block(X_block,X_tilde,q,prob_params,data,...
+    neighbors,clusters,prob_select_sol)
 
 % Function to update the cell containing the blocks of X for each
 % corresponding node.
@@ -11,9 +11,9 @@ function X_block_upd=update_X_block(X_block,X_tilde,q,prob_params,neighbors,...
 % q: Updating node.
 % prob_params: Structure related to the problem parameters.
 % neighbors: Vector containing the neighbors of node q.
-% Nu: Vector of cells. For each neighbor k of q, there is a corresponding
-%     cell with the nodes of the subgraph containing k, obtained by cutting 
-%     the link between nodes q and k.
+% clusters: Vector of cells. For each neighbor k of q, there is a 
+%     corresponding cell with the nodes of the subgraph containing k, 
+%     obtained by cutting the link between nodes q and k.
 % prob_select_sol : (Optional) Function resolving the uniqueness ambiguity.
 %
 % OUTPUTS:
@@ -33,7 +33,7 @@ function X_block_upd=update_X_block(X_block,X_tilde,q,prob_params,neighbors,...
     if(~isempty(prob_select_sol))
         Xq_old=X_block{q};
         X_tilde_old=[Xq_old;repmat(eye(Q),nbneighbors,1)];
-        X_tilde=prob_select_sol(X_tilde_old,X_tilde,nbsensors_vec,q);
+        X_tilde=prob_select_sol(X_tilde_old,X_tilde,prob_params,data,q);
     end
     
     X_block_upd=cell(nbnodes,1);
@@ -43,7 +43,7 @@ function X_block_upd=update_X_block(X_block,X_tilde,q,prob_params,neighbors,...
     
     for l=1:q-1
         for k=1:nbneighbors
-            if ~isempty(find(Nu{k}==l))
+            if ~isempty(find(clusters{k}==l))
                 start_r=nbsensors_vec(q)+ind(k)*Q+1;
                 stop_r=nbsensors_vec(q)+ind(k)*Q+Q;
             end
@@ -52,7 +52,7 @@ function X_block_upd=update_X_block(X_block,X_tilde,q,prob_params,neighbors,...
     end
     for l=q+1:nbnodes
         for k=1:nbneighbors
-            if ~isempty(find(Nu{k}==l))
+            if ~isempty(find(clusters{k}==l))
                 start_r=nbsensors_vec(q)+ind(k)*Q+1;
                 stop_r=nbsensors_vec(q)+ind(k)*Q+Q;
             end

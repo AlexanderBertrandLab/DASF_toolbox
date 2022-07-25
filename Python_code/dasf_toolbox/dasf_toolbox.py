@@ -34,6 +34,7 @@ def dasf(prob_params, data, prob_solver,
             Otherwise 0. graph_adj[i,i]=0.
         - update_path : (Optional) Vector of nodes representing the updating path followed by the algorithm.
             If not provided, a random path is created.
+        - X_init : (Optional) Initial estimate for X.
         - X_star : (Optional) Optimal argument solving the problem (for comparison, e.g., to compute norm_err).
         - compare_opt : (Optional, binary) If "True" and X_star is given, compute norm_err. "False" by default.
         - plot_dynamic : (Optional, binary) If "True" X_star is given, plot dynamically the first column
@@ -140,7 +141,11 @@ def dasf(prob_params, data, prob_solver,
         nbiter = 200
         warnings.warn("Performing 200 iterations")
 
-    X = rng.standard_normal(size=(nbsensors, Q))
+    if "X_init" in prob_params:
+        X = prob_params['X_init']
+    else:
+        X = rng.standard_normal(size=(nbsensors, Q))
+
     X_old = X
 
     if prob_eval is None:
@@ -539,6 +544,7 @@ def dasf_block(prob_params, data, prob_solver,
             Otherwise 0. graph_adj[i,i]=0.
         - update_path : (Optional) Vector of nodes representing the updating path followed by the algorithm.
             If not provided, a random path is created.
+        - X_init : (Optional) Initial estimate for X.
         - X_star : (Optional) Optimal argument solving the problem (for comparison, e.g., to compute norm_err).
         - compare_opt : (Optional, binary) If "True" and X_star is given, compute norm_err. "False" by default.
         - plot_dynamic : (Optional, binary) If "True" X_star is given, plot dynamically the first column
@@ -645,7 +651,11 @@ def dasf_block(prob_params, data, prob_solver,
         nbiter = 200
         warnings.warn("Performing 200 iterations")
 
-    X = rng.standard_normal(size=(nbsensors, Q))
+    if "X_init" in prob_params:
+        X = prob_params['X_init']
+    else:
+        X = rng.standard_normal(size=(nbsensors, Q))
+
     X_old = X
     X_block = np.vsplit(X, np.cumsum(nbsensors_vec)[:-1])
 
@@ -746,6 +756,7 @@ def dasf_multivar(prob_params, data, prob_solver,
             Otherwise 0. graph_adj[i,i]=0.
         - update_path : (Optional) Vector of nodes representing the updating path followed by the algorithm.
             If not provided, a random path is created.
+        - X_init : (Optional) Initial estimate for X.
         - X_star : (Optional) Optimal argument solving the problem (for comparison, e.g., to compute norm_err).
         - compare_opt : (Optional, binary) If "True" and X_star is given, compute norm_err. "False" by default.
         - plot_dynamic : (Optional, binary) If "True" X_star is given, plot dynamically the first column
@@ -853,10 +864,13 @@ def dasf_multivar(prob_params, data, prob_solver,
         nbiter = 200
         warnings.warn("Performing 200 iterations")
 
-    X = []
-    for k in range(nbvariables):
-        X_k = rng.standard_normal(size=(nbsensors, Q))
-        X.append(X_k)
+    if "X_init" in prob_params:
+        X = prob_params['X_init']
+    else:
+        X = []
+        for k in range(nbvariables):
+            X_k = rng.standard_normal(size=(nbsensors, Q))
+            X.append(X_k)
 
     X_old = X
 

@@ -19,7 +19,7 @@ def lcmv_solver(prob_params, data):
     Ryy = Y @ Y.T / N
     Ryy = (Ryy + Ryy.T) / 2
 
-    X_star = np.linalg.inv(Ryy) @ B @ np.linalg.inv(B.T @ np.linalg.inv(Ryy) @ B) @ H
+    X_star = np.linalg.inv(Ryy) @ B @ np.linalg.inv(B.T @ np.linalg.inv(Ryy) @ B) @ H.T
 
     return X_star
 
