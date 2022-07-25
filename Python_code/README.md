@@ -51,12 +51,12 @@ On the other hand, `dasf_multivar` is the same function as `dasf` but used for t
  | --- | --- |
  | **Signals:** `Y_list` | List for stochastic signals, where each signal is a `nbsensors x nbsamples` matrix corresponding to time samples of multi-channel signals in the network. There is one element for each different signal. <br /> **Example:** If the problem depends on `X.T @ y(t)` and `X.T @ v(t)` then `Y` and `V` contain the time samples of `y` and `v` respectively and we have `Y_list[0]=Y` and `Y_list[1]=V`. |
 | **Linear terms:** `B_list` | List for deterministic linear terms, where each term has `nbsensors` rows. There is one element for each different parameter. <br />**Example:** If the problem depends on `X.T @ B` and `X.T @ c` then we have `B_list[0]=B` and `B_list[1]=c`. |
-| **Quadratic terms:** `Gamma_list` | List for deterministic quadratic block-diagonal terms, where each term is a `nbsensors x nbsensors` matrix. There is one element for each different term. <br />**Example:** If the problem depends on `X.T @ X`, `X.T @ Gamma_1 @ X` and `X.T @ Gamma_2 @ X` then we have `Gamma_list[0]=identity(nbsensors)`, `Gamma_list[1]=Gamma_1` and `Gamma_list[2]=Gamma_2`. |
+| **Quadratic block-diagonal terms:** `Gamma_list` | List for deterministic quadratic block-diagonal terms, where each term is a `nbsensors x nbsensors` matrix. There is one element for each different term. <br />**Example:** If the problem depends on `X.T @ X`, `X.T @ Gamma_1 @ X` and `X.T @ Gamma_2 @ X` then we have `Gamma_list[0]=identity(nbsensors)`, `Gamma_list[1]=Gamma_1` and `Gamma_list[2]=Gamma_2`. **Note:** If we have `Gamma` such that `Gamma=B_1 @ B_2.T`, it is equivalent to use linear terms instead of quadratic block-diagonal ones. The advantage with the quadratic ones is the reduction of the communication cost.|
 | **Global constants:** `Glob_Const_list` | List for global constants, i.e., terms that do not appear in the form `X.T @ ...`. There is one element for each different term. <br />**Example:** If the problem depends on `X.T @ X-A` and `X.T @ b-c` then we have `Glob_Const_list[0]=A` and `Glob_Const_list[1]=c`. |
 
 If one or more of these do not appear in the problem, set their corresponding list to an empty one.
 
-**Example:** `Gamma_list=[]` if no quadratic term `X.T @ Gamma @ X` appears in the problem.
+**Example:** `Gamma_list=[]` if no quadratic block-diagonal term `X.T @ Gamma @ X` appears in the problem.
 
 **If `dasf_multivar` is used:** In this case, `data` is a list with `nbvariables` elements containing the same structure described above for each variable.
 

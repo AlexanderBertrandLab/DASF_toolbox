@@ -51,12 +51,12 @@ On the other hand, `dasf_multivar` is the same function as `dasf` but used for t
  | --- | --- |
  | **Signals:** `Y_cell` | Cell for stochastic signals, where each signal is a `nbsensors x nbsamples` matrix corresponding to time samples of multi-channel signals in the network. There is one cell for each different signal. <br /> **Example:** If the problem depends on `X'*y(t)` and `X'*v(t)` then `Y` and `V` contain the time samples of `y` and `v` respectively and we have `Y_cell{1}=Y` and `Y_cell{2}=V`. |
 | **Linear terms:** `B_cell` | Cell for deterministic linear terms, where each term has `nbsensors` rows. There is one cell for each different parameter. <br />**Example:** If the problem depends on `X'*B` and `X'*c` then we have `B_cell{1}=B` and `B_cell{2}=c`. |
-| **Quadratic terms:** `Gamma_cell` | Cell for deterministic quadratic block-diagonal terms, where each term is a `nbsensors x nbsensors` matrix. There is one cell for each different term. <br />**Example:** If the problem depends on `X'*X`, `X'*Gamma_1*X` and `X'*Gamma_2*X` then we have `Gamma_cell{1}=eye(nbsensors)`, `Gamma_cell{2}=Gamma_1` and `Gamma_cell{3}=Gamma_2`. |
+| **Quadratic block-diagonal terms:** `Gamma_cell` | Cell for deterministic quadratic block-diagonal terms, where each term is a `nbsensors x nbsensors` matrix. There is one cell for each different term. <br />**Example:** If the problem depends on `X'*X`, `X'*Gamma_1*X` and `X'*Gamma_2*X` then we have `Gamma_cell{1}=eye(nbsensors)`, `Gamma_cell{2}=Gamma_1` and `Gamma_cell{3}=Gamma_2`. **Note:** If we have `Gamma` such that `Gamma=B_1*B_2'`, it is equivalent to use linear terms instead of quadratic block-diagonal ones. The advantage with the quadratic ones is the reduction of the communication cost.|
 | **Global constants:** `Glob_Const_cell` | Cell for global constants, i.e., terms that do not appear in the form `X'*...`. There is one cell for each different term. <br />**Example:** If the problem depends on `X'*X-A` and `X'*b-c` then we have `Glob_Const_cell{1}=A` and `Glob_Const_cell{2}=c`. |
 
 If one or more of these do not appear in the problem, set their corresponding cell to an empty one.
 
-**Example:** `Gamma_cell={}` if no quadratic term `X'*Gamma*X` appears in the problem.
+**Example:** `Gamma_cell={}` if no quadratic block-diagonal term `X'*Gamma*X` appears in the problem.
 
 **If `dasf_multivar` is used:** In this case, `data` is a `nbvariables x 1` cell containing the same structure described above for each variable.
 
@@ -77,7 +77,7 @@ where `data` and `prob_params` are the structures defined above.
 | ---- | --- |
 | `nbiter` | Maximum number of iterations. Stop the algorithm whenever it is achieved. |
 | `tol_f`| Tolerance on the difference between consecutive objectives, i.e., `abs(f(X^(i+1))-f(X^i))`. If the difference is smaller than this variable, stop the algorithm. |
-| `tol_X`| Tolerance on the difference between consecutive arguments, i.e., ` ||X^(i+1))-X^i||_F `. If the difference is smaller than this variable, stop the algorithm. |
+| `tol_X`| Tolerance on the difference between consecutive arguments, i.e., `||X^(i+1))-X^i||_F`. If the difference is smaller than this variable, stop the algorithm. |
 
 By default, the algorithm stops at maximum 200 iterations. If one or more fields are provided and valid, the algorithm stops when the first stopping criterion is achieved.
 
