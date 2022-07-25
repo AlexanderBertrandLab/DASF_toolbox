@@ -77,7 +77,7 @@ where `data` and `prob_params` are the structures defined above.
 | ---- | --- |
 | `nbiter` | Maximum number of iterations. Stop the algorithm whenever it is achieved. |
 | `tol_f`| Tolerance on the difference between consecutive objectives, i.e., `abs(f(X^(i+1))-f(X^i))`. If the difference is smaller than this variable, stop the algorithm. |
-| `tol_X`| Tolerance on the difference between consecutive arguments, i.e., `||X^(i+1))-X^i||_F`. If the difference is smaller than this variable, stop the algorithm. |
+| `tol_X`| Tolerance on the difference between consecutive arguments, i.e., ` ||X^(i+1))-X^i||_F `. If the difference is smaller than this variable, stop the algorithm. |
 
 By default, the algorithm stops at maximum 200 iterations. If one or more fields are provided and valid, the algorithm stops when the first stopping criterion is achieved.
 
