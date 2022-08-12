@@ -1,5 +1,5 @@
 # Distributed Adaptive Signal Fusion Algorithm
- The distributed adaptive signal fusion (DASF) algorithm framework implementation.
+ The distributed adaptive signal fusion (DASF) algorithm framework implementation based on [1] and [2].
 
  Given an optimization problem fitting the DASF framework:
 
@@ -23,3 +23,8 @@ The `dasf` function implements the DASF algorithm and is called in the following
         X_est,norm_diff,norm_err,f_seq=dasf(prob_params,data,...
         prob_solver,conv,prob_select_sol,prob_eval)
 
+**References:**
+
+[1] C. A. Musluoglu and A. Bertrand "A Unified Algorithmic Framework for Distributed Adaptive Signal and Feature Fusion Problems - Part I: Algorithm Derivation", Internal Report KU Leuven, 2022.
+
+[2] C. A. Musluoglu, C. Hovine and A. Bertrand "A Unified Algorithmic Framework for Distributed Adaptive Signal and Feature Fusion Problems - Part II: Convergence Properties", Internal Report KU Leuven, 2022.

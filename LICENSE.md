@@ -76,9 +76,11 @@ By downloading and or installing the Software and associated files on your compu
 
 #### A.1 Description of the Software:
 
-The Software constitutes any software distributed as part of or pertaining to the MATLAB code as made available online at https://github.com/CemMusluoglu/DSFO.
+The Software constitutes any software distributed as part of or pertaining to the MATLAB code as made available online at https://github.com/AlexanderBertrandLab/DASF_toolbox.
 
 
 #### A.2 References:
 
-[1] C. A. Musluoglu and A. Bertrand "A Unified Framework for Distributed Signal and Feature Fusion Problems", Internal Report KU Leuven, 2021.
+[1] C. A. Musluoglu and A. Bertrand "A Unified Algorithmic Framework for Distributed Adaptive Signal and Feature Fusion Problems - Part I: Algorithm Derivation", Internal Report KU Leuven, 2022.
+
+[2] C. A. Musluoglu, C. Hovine and A. Bertrand "A Unified Algorithmic Framework for Distributed Adaptive Signal and Feature Fusion Problems - Part II: Convergence Properties", Internal Report KU Leuven, 2022.
