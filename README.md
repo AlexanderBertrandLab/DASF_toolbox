@@ -25,6 +25,6 @@ The `dasf` function implements the DASF algorithm and is called in the following
 
 **References:**
 
-[1] C. A. Musluoglu and A. Bertrand "A Unified Algorithmic Framework for Distributed Adaptive Signal and Feature Fusion Problems - Part I: Algorithm Derivation", Internal Report KU Leuven, 2022.
+[1] C. A. Musluoglu and A. Bertrand "A Unified Algorithmic Framework for Distributed Adaptive Signal and Feature Fusion Problems - Part I: Algorithm Derivation", Submitted for review, 2022.
 
-[2] C. A. Musluoglu, C. Hovine and A. Bertrand "A Unified Algorithmic Framework for Distributed Adaptive Signal and Feature Fusion Problems - Part II: Convergence Properties", Internal Report KU Leuven, 2022.
+[2] C. A. Musluoglu, C. Hovine and A. Bertrand "A Unified Algorithmic Framework for Distributed Adaptive Signal and Feature Fusion Problems - Part II: Convergence Properties", Submitted for review, 2022.
