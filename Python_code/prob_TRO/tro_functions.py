@@ -70,26 +70,13 @@ def tro_eval(X, data):
     return f
 
 
-def tro_select_sol(X_ref, X, nbsensors_vec, q):
+def tro_select_sol(X_ref, X, prob_params, q):
     """Resolve the sign ambiguity for the TRO problem."""
-    M_X = np.size(X_ref,0)
-    Q = np.size(X_ref, 1)
-    M = np.sum(nbsensors_vec)
+    Q = prob_params['Q']
 
-    if M == M_X:
-        # Comparison of the full variable (resolve the sign ambiguity between X
-        # and X_star).
-        for l in range(Q):
-            if np.linalg.norm(X_ref[:, l] - X[:, l]) > np.linalg.norm(-X_ref[:, l] - X[:, l]):
-                X[:, l] = -X[:, l]
-    else:
-        # Comparison of the full variable (resolve the sign ambiguity between X
-        # and X_old).
-        Xq = X[0:nbsensors_vec[q], :]
-        Xq_ref = X_ref[0:nbsensors_vec[q], :]
-        for l in range(Q):
-            if np.linalg.norm(Xq_ref[:, l] - Xq[:, l]) > np.linalg.norm(-Xq_ref[:, l] - Xq[:, l]):
-                X[:, l] = -X[:, l]
+    for l in range(Q):
+        if np.linalg.norm(X_ref[:, l] - X[:, l]) > np.linalg.norm(-X_ref[:, l] - X[:, l]):
+            X[:, l] = -X[:, l]
 
     return X
 

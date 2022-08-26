@@ -94,17 +94,22 @@ def dasf(prob_params, data, prob_solver,
         update_path = rng.permutation(range(nbnodes))
         prob_params['update_path'] = update_path
 
+    compare_opt_flag = False
+    plot_dynamic_flag = False
+
     if "X_star" in prob_params:
         X_star = prob_params['X_star']
     else:
         X_star = []
+        compare_opt_flag = True
+        plot_dynamic_flag = True
 
-    if "compare_opt" in prob_params:
+    if ("compare_opt" in prob_params) and (not compare_opt_flag):
         compare_opt = prob_params['compare_opt']
     else:
         compare_opt = False
 
-    if "plot_dynamic" in prob_params:
+    if ("plot_dynamic" in prob_params) and (not plot_dynamic_flag):
         plot_dynamic = prob_params['plot_dynamic']
     else:
         plot_dynamic = False
@@ -146,14 +151,14 @@ def dasf(prob_params, data, prob_solver,
     else:
         X = rng.standard_normal(size=(nbsensors, Q))
 
-    X_old = X
+    X_old = X[:]
 
     if prob_eval is None:
         tol_f_break = False
     else:
         f = prob_eval(X,data)
 
-    if len(X_star) and compare_opt and plot_dynamic:
+    if plot_dynamic:
         plt.ion()
         fig, ax = plt.subplots()
         line1, = ax.plot(X[:, 1], color='r')
@@ -164,8 +169,9 @@ def dasf(prob_params, data, prob_solver,
     i = 0
 
     norm_diff = []
-    norm_err = []
     f_seq = []
+
+    X_list = []
 
     while i < nbiter:
         # Select updating node.
@@ -192,7 +198,7 @@ def dasf(prob_params, data, prob_solver,
         if prob_select_sol is not None:
             Xq_old = block_q(X_old, q, nbsensors_vec)
             X_tilde_old = np.concatenate((Xq_old, np.tile(np.eye(Q), (len(neighbors), 1))), axis=0)
-            X_tilde = prob_select_sol(X_tilde_old, X_tilde, nbsensors_vec, q)
+            X_tilde = prob_select_sol(X_tilde_old, X_tilde, prob_params, q)
 
         # Evaluate the objective.
         if prob_eval is not None:
@@ -206,23 +212,33 @@ def dasf(prob_params, data, prob_solver,
         if i > 0:
             norm_diff.append(np.linalg.norm(X - X_old, 'fro')**2 / X.size)
 
-        if len(X_star) and compare_opt:
+        if plot_dynamic:
             if prob_select_sol is not None:
-                X = prob_select_sol(X_star, X, nbsensors_vec, q)
-            norm_err.append(np.linalg.norm(X - X_star, 'fro')**2
-                            / np.linalg.norm(X_star,'fro')**2)
-            if plot_dynamic:
-                dynamic_plot(X, X_star, line1, line2)
+                X_compare = prob_select_sol(X_star, X, nbsensors_vec, q)
+            dynamic_plot(X_compare, X_star, line1, line2)
 
-        X_old = X
+        X_old = X[:]
 
         i = i + 1
+
+        X_list.append(X)
 
         if (tol_f_break and np.absolute(f - f_old) <= tol_f) \
                 or (tol_X_break and np.linalg.norm(X - X_old, 'fro') <= tol_X):
             break
 
-    if len(X_star) and compare_opt and plot_dynamic:
+    if compare_opt:
+        # Resolve uniqueness ambiguity on X_star for comparison
+        if prob_select_sol is not None:
+            X_star = prob_select_sol(X, X_star, prob_params, q)
+
+        total_iterations = len(X_list)
+        norm_err = [None] * total_iterations
+        for k in range(total_iterations):
+            norm_err[k] = (np.linalg.norm(X_list[k] - X_star, 'fro') ** 2
+                        / np.linalg.norm(X_star, 'fro') ** 2)
+
+    if plot_dynamic:
         plt.ioff()
         #plt.show(block=False)
         plt.close()
@@ -466,7 +482,7 @@ def dynamic_plot(X, X_star, line1, line2):
     plt.pause(0.05)
 
 
-def update_X_block(X_block, X_tilde, q, prob_params, neighbors, Nu, prob_select_sol):
+def update_X_block(X_block, X_tilde, q, prob_params, neighbors, clusters, prob_select_sol):
     """ Function to update the cell containing the blocks of X for each corresponding node.
 
     INPUTS:
@@ -498,7 +514,7 @@ def update_X_block(X_block, X_tilde, q, prob_params, neighbors, Nu, prob_select_
     if prob_select_sol is not None:
         Xq_old = X_block[q]
         X_tilde_old = np.concatenate((Xq_old, np.tile(np.eye(Q), (len(neighbors), 1))), axis=0)
-        X_tilde = prob_select_sol(X_tilde_old, X_tilde, nbsensors_vec, q)
+        X_tilde = prob_select_sol(X_tilde_old, X_tilde, prob_params, q)
 
     X_block_upd = []
 
@@ -507,7 +523,7 @@ def update_X_block(X_block, X_tilde, q, prob_params, neighbors, Nu, prob_select_
 
     for l in range(q):
         for k in range(nbneighbors):
-            if l in Nu[k]:
+            if l in clusters[k]:
                 start_r = nbsensors_vec[q] + ind[k] * Q
                 stop_r = nbsensors_vec[q] + ind[k] * Q + Q
 
@@ -517,7 +533,7 @@ def update_X_block(X_block, X_tilde, q, prob_params, neighbors, Nu, prob_select_
 
     for l in range(q + 1,nbnodes):
         for k in range(nbneighbors):
-            if l in Nu[k]:
+            if l in clusters[k]:
                 start_r = nbsensors_vec[q] + ind[k] * Q
                 stop_r = nbsensors_vec[q] + ind[k] * Q + Q
 
@@ -604,17 +620,22 @@ def dasf_block(prob_params, data, prob_solver,
         update_path = rng.permutation(range(nbnodes))
         prob_params['update_path'] = update_path
 
+    compare_opt_flag = False
+    plot_dynamic_flag = False
+
     if "X_star" in prob_params:
         X_star = prob_params['X_star']
     else:
         X_star = []
+        compare_opt_flag = True
+        plot_dynamic_flag = True
 
-    if "compare_opt" in prob_params:
+    if ("compare_opt" in prob_params) and (not compare_opt_flag):
         compare_opt = prob_params['compare_opt']
     else:
         compare_opt = False
 
-    if "plot_dynamic" in prob_params:
+    if ("plot_dynamic" in prob_params) and (not plot_dynamic_flag):
         plot_dynamic = prob_params['plot_dynamic']
     else:
         plot_dynamic = False
@@ -656,7 +677,7 @@ def dasf_block(prob_params, data, prob_solver,
     else:
         X = rng.standard_normal(size=(nbsensors, Q))
 
-    X_old = X
+    X_old = X[:]
     X_block = np.vsplit(X, np.cumsum(nbsensors_vec)[:-1])
 
     if prob_eval is None:
@@ -664,7 +685,7 @@ def dasf_block(prob_params, data, prob_solver,
     else:
         f = prob_eval(X,data)
 
-    if len(X_star) and compare_opt and plot_dynamic:
+    if plot_dynamic:
         plt.ion()
         fig, ax = plt.subplots()
         line1, = ax.plot(X[:, 1], color='r')
@@ -675,8 +696,9 @@ def dasf_block(prob_params, data, prob_solver,
     i = 0
 
     norm_diff = []
-    norm_err = []
     f_seq = []
+
+    X_list = []
 
     while i < nbiter:
         # Select updating node.
@@ -706,30 +728,40 @@ def dasf_block(prob_params, data, prob_solver,
             f_seq.append(f)
 
         # Global variable.
-        X_block = update_X_block(X_block, X_tilde, q, prob_params, neighbors, Nu, prob_select_sol)
+        X_block = update_X_block(X_block, X_tilde, q, prob_params, neighbors, clusters, prob_select_sol)
         X = np.vstack(X_block)
 
         if i > 0:
             norm_diff.append(np.linalg.norm(X - X_old, 'fro')**2 / X.size)
 
-        if len(X_star) and compare_opt:
+        if plot_dynamic:
             if prob_select_sol is not None:
-                X = prob_select_sol(X_star, X, nbsensors_vec, q)
-            norm_err.append(np.linalg.norm(X - X_star, 'fro')**2
-                            / np.linalg.norm(X_star,'fro')**2)
-            if plot_dynamic:
-                dynamic_plot(X, X_star, line1, line2)
+                X_compare = prob_select_sol(X_star, X, prob_params, q)
+            dynamic_plot(X_compare, X_star, line1, line2)
 
-        X_old = X
+        X_old = X[:]
         X_block = np.vsplit(X, np.cumsum(nbsensors_vec)[:-1])
 
         i = i + 1
+
+        X_list.append(X)
 
         if (tol_f_break and np.absolute(f - f_old) <= tol_f) \
                 or (tol_X_break and np.linalg.norm(X - X_old, 'fro') <= tol_X):
             break
 
-    if len(X_star) and compare_opt and plot_dynamic:
+    if compare_opt:
+        # Resolve uniqueness ambiguity on X_star for comparison
+        if prob_select_sol is not None:
+            X_star = prob_select_sol(X, X_star, prob_params, q)
+
+        total_iterations = len(X_list)
+        norm_err = [None] * total_iterations
+        for k in range(total_iterations):
+            norm_err[k] = (np.linalg.norm(X_list[k] - X_star, 'fro') ** 2
+                           / np.linalg.norm(X_star, 'fro') ** 2)
+
+    if plot_dynamic:
         plt.ioff()
         #plt.show(block=False)
         plt.close()
@@ -817,17 +849,22 @@ def dasf_multivar(prob_params, data, prob_solver,
         update_path = rng.permutation(range(nbnodes))
         prob_params['update_path'] = update_path
 
+    compare_opt_flag = False
+    plot_dynamic_flag = False
+
     if "X_star" in prob_params:
         X_star = prob_params['X_star']
     else:
         X_star = []
+        compare_opt_flag = True
+        plot_dynamic_flag = True
 
-    if "compare_opt" in prob_params:
+    if ("compare_opt" in prob_params) and (not compare_opt_flag):
         compare_opt = prob_params['compare_opt']
     else:
         compare_opt = False
 
-    if "plot_dynamic" in prob_params:
+    if ("plot_dynamic" in prob_params) and (not plot_dynamic_flag):
         plot_dynamic = prob_params['plot_dynamic']
     else:
         plot_dynamic = False
@@ -872,14 +909,14 @@ def dasf_multivar(prob_params, data, prob_solver,
             X_k = rng.standard_normal(size=(nbsensors, Q))
             X.append(X_k)
 
-    X_old = X
+    X_old = X[:]
 
     if prob_eval is None:
         tol_f_break = False
     else:
         f = prob_eval(X,data)
 
-    if len(X_star) and compare_opt and plot_dynamic:
+    if plot_dynamic:
         plt.ion()
         fig, ax = plt.subplots()
         line1, = ax.plot(np.vstack(X)[:, 1], color='r')
@@ -890,8 +927,9 @@ def dasf_multivar(prob_params, data, prob_solver,
     i = 0
 
     norm_diff = []
-    norm_err = []
     f_seq = []
+
+    X_list = []
 
     while i < nbiter:
         # Select updating node.
@@ -928,7 +966,7 @@ def dasf_multivar(prob_params, data, prob_solver,
                 X_tilde_old_k = np.concatenate((Xq_old, np.tile(np.eye(Q), (len(neighbors), 1))), axis=0)
                 X_tilde_old.append(X_tilde_old_k)
 
-            X_tilde = prob_select_sol(X_tilde_old, X_tilde, nbsensors_vec, q)
+            X_tilde = prob_select_sol(X_tilde_old, X_tilde, prob_params, q)
 
         # Evaluate the objective.
         if prob_eval is not None:
@@ -944,24 +982,34 @@ def dasf_multivar(prob_params, data, prob_solver,
             norm_diff.append(np.linalg.norm(np.vstack(X) - np.vstack(X_old), 'fro')**2
                              / np.vstack(X).size)
 
-        if len(X_star) and compare_opt:
+        if plot_dynamic:
             if prob_select_sol is not None:
-                X = prob_select_sol(X_star, X, nbsensors_vec, q)
-            norm_err.append(np.linalg.norm(np.vstack(X) - np.vstack(X_star), 'fro')**2
-                            / np.linalg.norm(np.vstack(X_star),'fro')**2)
-            if plot_dynamic:
-                dynamic_plot(np.vstack(X), np.vstack(X_star), line1, line2)
+                X_compare = prob_select_sol(X_star, X, prob_params, q)
+            dynamic_plot(np.vstack(X_compare), np.vstack(X_star), line1, line2)
 
-        X_old = X
+        X_old = X[:]
 
         i = i + 1
+
+        X_list.append(X[:])
 
         if (tol_f_break and np.absolute(f - f_old) <= tol_f) \
                 or (tol_X_break and np.linalg.norm(np.vstack(X) - np.vstack(X_old), 'fro')
                                                    <= tol_X):
             break
 
-    if len(X_star) and compare_opt and plot_dynamic:
+    if compare_opt:
+        # Resolve uniqueness ambiguity on X_star for comparison
+        if prob_select_sol is not None:
+            X_star = prob_select_sol(X, X_star, prob_params, q)
+
+        total_iterations = len(X_list)
+        norm_err = [None] * total_iterations
+        for k in range(total_iterations):
+            norm_err[k] = (np.linalg.norm(np.vstack(X_list[k]) - np.vstack(X_star), 'fro') ** 2
+                           / np.linalg.norm(np.vstack(X_star), 'fro') ** 2)
+
+    if plot_dynamic:
         plt.ioff()
         #plt.show(block=False)
         plt.close()

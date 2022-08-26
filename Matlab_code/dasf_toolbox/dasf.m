@@ -90,19 +90,24 @@ else
     update_path=prob_params.update_path;
 end
 
+compare_opt_flag=false;
+plot_dynamic_flag=false;
+
 if (~isfield(prob_params,'X_star'))
     X_star=[];
+    compare_opt_flag=true;
+    plot_dynamic_flag=true;
 else
     X_star=prob_params.X_star;
 end
 
-if (~isfield(prob_params,'compare_opt'))
+if (~isfield(prob_params,'compare_opt') || compare_opt_flag)
     compare_opt=false;
 else
     compare_opt=prob_params.compare_opt;
 end
 
-if (~isfield(prob_params,'plot_dynamic'))
+if (~isfield(prob_params,'plot_dynamic') || plot_dynamic_flag)
     plot_dynamic=false;
 else
     plot_dynamic=prob_params.plot_dynamic;
@@ -161,7 +166,8 @@ i=0;
 
 f_seq=[];
 norm_diff=[];
-norm_err=[];
+
+X_cell_track={};
 
 while i<nbiter
     
@@ -208,24 +214,36 @@ while i<nbiter
         norm_diff=[norm_diff,norm(X-X_old,'fro').^2/numel(X)];
     end
     
-    if(~isempty(X_star) && compare_opt)
+    if(plot_dynamic)
         if(~isempty(prob_select_sol))
-            X=prob_select_sol(X_star,X,prob_params,data,q);
+            X_compare=prob_select_sol(X_star,X,prob_params,data,q);
         end
-        norm_err=[norm_err,norm(X-X_star,'fro')^2/norm(X_star,'fro')^2];
-        if(plot_dynamic)
-            dynamic_plot(X,X_star)
-        end
+        dynamic_plot(X_compare,X_star)
     end
-    
+
     X_old=X;
     
     i=i+1;
+    
+    X_cell_track{i}=X;
     
     if (tol_f_break && abs(f-f_old)<=tol_f) || (tol_X_break && norm(X-X_old,'fro')<=tol_X)
         break
     end
 
+end
+
+if(compare_opt)
+    % Resolve uniqueness ambiguity on X_star for comparison
+    if(~isempty(prob_select_sol))
+        X_star=prob_select_sol(X,X_star,prob_params,data,q);
+    end
+    
+    total_iterations=length(X_cell_track);
+    norm_err=zeros(1,total_iterations);
+    for i=1:total_iterations
+        norm_err(i)=norm(X_cell_track{i}-X_star,'fro')^2/norm(X_star,'fro')^2;
+    end
 end
 
 end

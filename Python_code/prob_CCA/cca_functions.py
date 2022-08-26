@@ -63,37 +63,22 @@ def cca_eval(X_list, data):
     return f
 
 
-def cca_select_sol(X_ref_list, X_list, nbsensors_vec, q):
+def cca_select_sol(X_ref_multi, X_multi, prob_params, q):
     """Resolve the sign ambiguity for the CCA problem."""
-    X = X_list[0]
-    W = X_list[1]
-    X_ref = X_ref_list[0]
+    X = X_multi[0]
+    W = X_multi[1]
+    X_ref = X_ref_multi[0]
+    Q = prob_params['Q']
 
-    M_X = np.size(X_ref,0)
-    Q = np.size(X_ref, 1)
-    M = np.sum(nbsensors_vec)
+    for l in range(Q):
+        if np.linalg.norm(X_ref[:, l] - X[:, l]) > np.linalg.norm(-X_ref[:, l] - X[:, l]):
+            X[:, l] = -X[:, l]
+            W[:, l] = -W[:, l]
 
-    if M == M_X:
-        # Comparison of the full variable (resolve the sign ambiguity between X
-        # and X_star).
-        for l in range(Q):
-            if np.linalg.norm(X_ref[:, l] - X[:, l]) > np.linalg.norm(-X_ref[:, l] - X[:, l]):
-                X[:, l] = -X[:, l]
-                W[:, l] = -W[:, l]
-    else:
-        # Comparison of the full variable (resolve the sign ambiguity between X
-        # and X_old).
-        Xq = X[0:nbsensors_vec[q], :]
-        Xq_ref = X_ref[0:nbsensors_vec[q], :]
-        for l in range(Q):
-            if np.linalg.norm(Xq_ref[:, l] - Xq[:, l]) > np.linalg.norm(-Xq_ref[:, l] - Xq[:, l]):
-                X[:, l] = -X[:, l]
-                W[:, l] = -W[:, l]
+    X_multi[0] = X
+    X_multi[1] = W
 
-    X_list[0] = X
-    X_list[1] = W
-
-    return X_list
+    return X_multi
 
 
 def create_data(nbsensors, nbsamples):

@@ -39,8 +39,8 @@ On the other hand, `dasf_multivar` is the same function as `dasf` but used for t
 | `nbsamples` | Scalar containing the number of time samples per iteration of the signals in the network (e.g. to compute an estimation of the correlation matrix). |
 | `graph_adj (nbnodes x nbnodes)`| Adjacency matrix of the graph of the considered network, with `graph_adj(i,j)==1` if nodes `i`and `j` are connected and `0` otherwise. Moreover, `graph_adj(i,i)=0`. |
 | `nbvariables`| **Required only if `dasf_multivar` is used.** Number of different variables (e.g. the optimization variable set of the CCA problem is `(X,W)`, therefore `nbvariables==2`). |
-| `X_init (nbsensors x Q)` | **Optional.** Initial value for `X`. If not specified, `X` is initialized randomly. **If `dasf_multivar` is used.** `X_init` is a `nbvariables x 1` cell where each entry is the  `(nbsensors x Q)` initial value matrix for the corresponding variable. |
-| `X_star (nbsensors x Q)` | **Optional.** Optimal argument for the optimization problem, computed using a centralized solver, for example `prob_solver` (see I-5 below). Used for comparison purposes, for example to compute the normalized error. **If `dasf_multivar` is used.** `X_star` is a `nbvariables x 1` cell where each entry is the  `(nbsensors x Q)` optimal matrix for the corresponding variable. |
+| `X_init (nbsensors x Q)` | **Optional.** Initial value for `X`. If not specified, `X` is initialized randomly. **If `dasf_multivar` is used:** `X_init` is a `nbvariables x 1` cell where each entry is the  `(nbsensors x Q)` initial value matrix for the corresponding variable. |
+| `X_star (nbsensors x Q)` | **Optional.** Optimal argument for the optimization problem, computed using a centralized solver, for example `prob_solver` (see I-5 below). Used for comparison purposes, for example to compute the normalized error. **If `dasf_multivar` is used:** `X_star` is a `nbvariables x 1` cell where each entry is the  `(nbsensors x Q)` optimal matrix for the corresponding variable. |
 | `compare_opt` | **Optional.** Binary value. If the optimal argument `X_star` is known and given, compute the normalized error `norm_err` at each iteration between `X^i` and `X_star` if this variable is "true" (see II-3 below). "false" by default. |
 | `plot_dynamic`| **Optional.** Binary value. If the optimal argument `X_star` is known and given, show a dynamic plot comparing the first column of `X_star` to the first column of `X^i` if this variable is "true". "false" by default. |
 
@@ -83,11 +83,11 @@ By default, the algorithm stops at maximum 200 iterations. If one or more fields
 
 #### 5) The function resolving uniqueness ambiguities
 
-`prob_select_sol:` **Optional.** Function required only when the problem `P` has multiple solutions. Among potential solutions `[X1;...;Xq;...;XK]`, choose the one for which `||Xq-Xq_old||` is minimized when `q` is the updating node, where `Xq_old` is the previous filter of node `q`. The function should be of the form:
+`prob_select_sol:` **Optional/Problem dependent.** Function required only when the problem `P` has multiple solutions. Among potential solutions `X`, choose the one for which `||X-X_ref||` is minimized. The function should be of the form:
 
-        X_tilde=prob_select_sol(X_tilde_old,X_tilde,nbsensors_vec,q)
+        X_tilde=prob_select_sol(X_ref,X,prob_params,q)
 
-This function can also be used to resolve the ambiguity between `X` and `X_star` if applicable (i.e., `X_star` is provided and `compare_opt` is "true", see II-3 below).
+For flexibility, the updating node `q` can also be specified.
 
 **Note:** `dasf` takes the function handle `@prob_select_sol` as an argument, not the function itself.
 
