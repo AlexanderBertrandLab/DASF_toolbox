@@ -1,9 +1,8 @@
 import numpy as np
 from numpy import linalg as LA
-import pymanopt
 from pymanopt.manifolds import Sphere
 from pymanopt import Problem
-from pymanopt.optimizers import TrustRegions
+from pymanopt.solvers import TrustRegions
 import autograd
 
 
@@ -37,15 +36,14 @@ def scqp_solver(prob_params, data):
     Ryy_t = (Ryy_t + Ryy_t.T) / 2
     B_t = LA.inv(L) @ B
 
-    @pymanopt.function.autograd(manifold)
     def cost(X):
         return 0.5 * autograd.numpy.trace(X.T @ Ryy_t @ X) + autograd.numpy.trace(X.T @ B_t)
 
     problem = Problem(manifold=manifold, cost=cost)
     problem.verbosity = 0
 
-    solver = TrustRegions(verbosity=0)
-    X_star = solver.run(problem).point
+    solver = TrustRegions()
+    X_star = solver.solve(problem)
     X_star = LA.inv(L.T) @ X_star
 
     return X_star

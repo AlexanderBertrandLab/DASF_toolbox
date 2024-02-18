@@ -54,6 +54,36 @@ def tro_solver(prob_params, data):
     return X_star
 
 
+def tro_aux_solver(prob_params, data, rho):
+    """Given rho in prob_params, solve the auxiliary problem of TRO: max E[||X.T @ y(t)||**2] - rho * E[||X.T @ v(t)||**2] s.t. X.T @ Gamma @ X = I."""
+    Y = data['Y_list'][0]
+    V = data['Y_list'][1]
+    Gamma = data['Gamma_list'][0]
+
+    Q = prob_params['Q']
+
+    N = prob_params['nbsamples']
+
+    Ryy = Y @ Y.T / N
+    Ryy = (Ryy + Ryy.T) / 2
+    Rvv = V @ V.T / N
+    Rvv = (Rvv + Rvv.T) / 2
+
+    U_c, S_c, _ = LA.svd(Gamma)
+
+    Kyy = np.diag(np.sqrt(1 / S_c)) @ U_c.T @ Ryy @ U_c @ np.diag(np.sqrt(1 / S_c))
+    Kvv = np.diag(np.sqrt(1 / S_c)) @ U_c.T @ Rvv @ U_c @ np.diag(np.sqrt(1 / S_c))
+    
+    eigvals, eigvecs = LA.eig(Kyy - rho * Kvv)
+    indices = np.argsort(eigvals)[::-1]
+
+    X = eigvecs[:, indices[0:Q]]
+
+    X_star = U_c @ np.diag(np.sqrt(1 / S_c)) @ X
+
+    return X_star
+
+
 def tro_eval(X, data):
     """Evaluate the TRO objective E[||X.T @ y(t)||**2] / E[||X.T @ v(t)||**2]."""
     Y = data['Y_list'][0]

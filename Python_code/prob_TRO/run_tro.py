@@ -1,25 +1,27 @@
 import numpy as np
 import sys
 import matplotlib as mpl
+# Choose plot backend.
+# mpl.use('macosx')
+# mpl.use('Qt5Agg')
+# mpl.use('TkAgg')
+mpl.use('Agg')
 import matplotlib.pyplot as plt
+from time import sleep
 
 sys.path.append('../dasf_toolbox/')
 import tro_functions as tro
 from dasf_toolbox import dasf
+from dasf_toolbox import fdasf
 from dasf_toolbox import dasf_block
-
-# Choose plot backend.
-mpl.use('macosx')
-# mpl.use('Qt5Agg')
-# mpl.use('TkAgg')
 
 # Number of Monte-Carlo runs.
 mc_runs = 5
 
 # Number of nodes.
-nbnodes = 30
+nbnodes = 10
 # Number of channels per node.
-nbsensors_vec = 15 * np.ones(nbnodes)
+nbsensors_vec = 5 * np.ones(nbnodes)
 nbsensors_vec = nbsensors_vec.astype(int)
 # Number of channels in total.
 nbsensors = np.sum(nbsensors_vec)
@@ -31,6 +33,7 @@ nbsamples = 10000
 Q = 5
 
 norm_error = []
+norm_error_fdasf = []
 
 rng = np.random.default_rng()
 
@@ -80,18 +83,37 @@ for k in range(mc_runs):
 
     norm_error.append(norm_err)
 
+    X_est_fdasf, norm_diff_fdasf, norm_err_fdasf, f_seq_fdasf = fdasf(
+        prob_params, data, tro.tro_aux_solver, tro.tro_eval, conv, tro.tro_select_sol)
+    
+    norm_error_fdasf.append(norm_err_fdasf)
+
+    sys.stdout.write('\r')
+    j = (k + 1) / mc_runs
+    sys.stdout.write("[%-20s] %d%%" % ('='*int(20*j), 100*j))
+    sys.stdout.flush()
+    sleep(0.25)
+
+sys.stdout.write('\n')
 
 # Plot the normalized error.
 q5 = np.quantile(norm_error, 0.5, axis=0)
 q25 = np.quantile(norm_error, 0.25, axis=0)
 q75 = np.quantile(norm_error, 0.75, axis=0)
+q5_fdasf = np.quantile(norm_error_fdasf, 0.5, axis=0)
+q25_fdasf = np.quantile(norm_error_fdasf, 0.25, axis=0)
+q75_fdasf = np.quantile(norm_error_fdasf, 0.75, axis=0)
 iterations = np.arange(1, nbiter + 1)
 
 fig = plt.figure()
 ax = fig.add_subplot(1, 1, 1)
-ax.loglog(iterations, q5, color='b')
+ax.loglog(iterations, q5, color='b', label='DASF')
 ax.fill_between(iterations, q25, q75)
+ax.loglog(iterations, q5_fdasf, color='r', label='F-DASF')
+ax.fill_between(iterations, q25_fdasf, q75_fdasf)
 ax.set_xlabel('Iterations')
 ax.set_ylabel('Normalized error')
 ax.grid(True, which='both')
+ax.legend()
 plt.show()
+plt.savefig("tro_convergence.pdf")

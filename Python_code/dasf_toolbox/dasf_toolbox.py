@@ -1,12 +1,12 @@
 import numpy as np
 import matplotlib as mpl
-import matplotlib.pyplot as plt
-import warnings
-
 # Choose plot backend.
-mpl.use('macosx')
+# mpl.use('macosx')
 # mpl.use('Qt5Agg')
 # mpl.use('TkAgg')
+mpl.use('Agg')
+import matplotlib.pyplot as plt
+import warnings
 
 # This module implements in a generic way the DASF algorithm.
 #
@@ -18,7 +18,7 @@ mpl.use('macosx')
 
 def dasf(prob_params, data, prob_solver,
          conv=None, prob_select_sol=None, prob_eval=None):
-    """ Function running the DASF for a given problem.
+    """ Function running the DASF algorithm for a given problem.
 
     INPUTS :
 
@@ -60,7 +60,7 @@ def dasf(prob_params, data, prob_solver,
 
         - nbiter : Maximum number of iterations.
         - tol_f : Tolerance in objective: |f^(i+1)-f^(i)|>tol_f
-        - tol_X : Tolerance in arguments: ||X^(i+1)-X^(i)||_F>tol_f
+        - tol_X : Tolerance in arguments: ||X^(i+1)-X^(i)||_F>tol_X
 
     By default, the number of iterations is 200, unless specified otherwise.
     If other fields are given and valid, the first condition to be achieved
@@ -544,7 +544,7 @@ def update_X_block(X_block, X_tilde, q, prob_params, neighbors, clusters, prob_s
 
 def dasf_block(prob_params, data, prob_solver,
          conv=None, prob_select_sol=None, prob_eval=None):
-    """ Function running the DASF for a given problem.
+    """ Function running the DASF algorithm for a given problem.
 
     INPUTS :
 
@@ -814,7 +814,7 @@ def dasf_multivar(prob_params, data, prob_solver,
 
         - nbiter : Maximum number of iterations.
         - tol_f : Tolerance in objective: |f^(i+1)-f^(i)|>tol_f
-        - tol_X : Tolerance in arguments: ||X^(i+1)-X^(i)||_F>tol_f
+        - tol_X : Tolerance in arguments: ||X^(i+1)-X^(i)||_F>tol_X
 
     By default, the number of iterations is 200, unless specified otherwise.
     If other fields are given and valid, the first condition to be achieved
@@ -1015,3 +1015,233 @@ def dasf_multivar(prob_params, data, prob_solver,
         plt.close()
 
     return X, norm_diff, norm_err, f_seq
+
+
+def fdasf(prob_params, data, prob_aux_solver, prob_eval,
+         conv=None, prob_select_sol=None):
+    """ Function running the F-DASF algorithm for a given problem.
+
+    INPUTS :
+
+    prob_params : Dictionary related to the problem parameters containing the following keys:
+
+        - nbnodes : Number of nodes in the network.
+        - nbsensors_vec : Vector containing the number of sensors for each node.
+        - nbsensors : Sum of the number of sensors for each node (dimension of the network-wide signals).
+            Is equal to sum(nbsensors_vec).
+        - Q : Number of filters to use (dimension of projected space)
+        - nbsamples : Number of time samples of the signals per iteration.
+        - graph_adj : Adjacency (binary) matrix, with graph_adj[i,j]=1 if i and j are connected.
+            Otherwise 0. graph_adj[i,i]=0.
+        - update_path : (Optional) Vector of nodes representing the updating path followed by the algorithm.
+            If not provided, a random path is created.
+        - X_init : (Optional) Initial estimate for X.
+        - X_star : (Optional) Optimal argument solving the problem (for comparison, e.g., to compute norm_err).
+        - compare_opt : (Optional, binary) If "True" and X_star is given, compute norm_err. "False" by default.
+        - plot_dynamic : (Optional, binary) If "True" X_star is given, plot dynamically the first column
+            of X_star and the current estimate X. "False" by default.
+
+    data : Dictionary related to the data containing the following keys:
+
+        - Y_list : List containing matrices of size
+              (nbsensors x nbsamples) corresponding to the
+              stochastic signals.
+        - B_list : List containing matrices or vectors with (nbsamples)
+              rows corresponding to the constant parameters.
+        - Gamma_list : List containing matrices of size
+                  (nbsensors x nbsensors) corresponding to the
+                  quadratic parameters.
+        - Glob_Const_list : List containing the global constants which
+                  are not filtered through X.
+
+    prob_aux_solver : Function solving the auciliary problem.
+
+    prob_eval : Function evaluating the objective of the problem.
+
+    conv:  (Optional) Dictionary related to the convergence and stopping criteria of the algorithm, containing
+    the following keys:
+
+        - nbiter : Maximum number of iterations.
+        - tol_rho : Tolerance in objective: |rho^(i+1)-rho^(i)|>tol_rho
+        - tol_X : Tolerance in arguments: ||X^(i+1)-X^(i)||_F>tol_X
+
+    By default, the number of iterations is 200, unless specified otherwise.
+    If other fields are given and valid, the first condition to be achieved
+    stops the algorithm.
+
+    prob_select_sol : (Optional) Function resolving the uniqueness ambiguity.
+
+    OUTPUTS :
+
+    X               : Estimation of the optimal variable.
+
+    norm_diff       : Sequence of ||X^(i+1)-X^(i)||_F^2/(nbsensors*Q).
+
+    norm_err        : Sequence of ||X^(i)-X_star||_F^2/||X_star||_F^2.
+
+    rho_seq           : Sequence of objective values across iterations.
+    """
+    rng = np.random.default_rng()
+    Q = prob_params['Q']
+    nbsensors = prob_params['nbsensors']
+    nbnodes = prob_params['nbnodes']
+    nbsensors_vec = prob_params['nbsensors_vec']
+    graph_adj = prob_params['graph_adj']
+
+    if "update_path" in prob_params:
+        update_path = prob_params['update_path']
+    else:
+        # Random updating order.
+        update_path = rng.permutation(range(nbnodes))
+        prob_params['update_path'] = update_path
+
+    compare_opt_flag = False
+    plot_dynamic_flag = False
+
+    if "X_star" in prob_params:
+        X_star = prob_params['X_star']
+    else:
+        X_star = []
+        compare_opt_flag = True
+        plot_dynamic_flag = True
+
+    if ("compare_opt" in prob_params) and (not compare_opt_flag):
+        compare_opt = prob_params['compare_opt']
+    else:
+        compare_opt = False
+
+    if ("plot_dynamic" in prob_params) and (not plot_dynamic_flag):
+        plot_dynamic = prob_params['plot_dynamic']
+    else:
+        plot_dynamic = False
+
+    if conv is None:
+        tol_rho_break = False
+        tol_X_break = False
+        nbiter = 200
+        warnings.warn("Performing 200 iterations")
+    elif(("nbiter" in conv and conv['nbiter'] > 0)
+         or ("tol_rho" in conv and conv['tol_rho'] > 0)
+         or ("tol_X" in conv['tol_X'] and conv['tol_X'] > 0)):
+
+        if ("nbiter" not in conv or conv['nbiter'] <= 0):
+            nbiter = 200
+            warnings.warn("Performing at most 200 iterations")
+        else:
+            nbiter = conv['nbiter']
+
+        if ("tol_rho" not in conv or conv['tol_rho'] <= 0):
+            tol_rho_break = False
+        else:
+            tol_rho = conv['tol_f']
+            tol_rho_break = True
+
+        if ("tol_X" not in conv or conv['tol_X'] <= 0):
+            tol_X_break = False
+        else:
+            tol_X = conv['tol_X']
+            tol_X_break = True
+    else:
+        tol_rho_break = False
+        tol_X_break = False
+        nbiter = 200
+        warnings.warn("Performing 200 iterations")
+
+    if "X_init" in prob_params:
+        X = prob_params['X_init']
+    else:
+        X = rng.standard_normal(size=(nbsensors, Q))
+
+    X_old = X[:]
+
+    if prob_eval is None:
+        tol_rho_break = False
+    else:
+        rho = prob_eval(X,data)
+
+    if plot_dynamic:
+        plt.ion()
+        fig, ax = plt.subplots()
+        line1, = ax.plot(X[:, 1], color='r')
+        line2, = ax.plot(X_star[:, 1], color='b')
+        plt.axis([0, nbsensors, 1.2 * np.min(X_star[:, 1]), 1.2 * np.max(X_star[:, 1])])
+        plt.show()
+
+    i = 0
+
+    norm_diff = []
+    rho_seq = []
+
+    X_list = []
+
+    while i < nbiter:
+        # Select updating node.
+        q = update_path[i % nbnodes]
+
+        # Prune the network.
+        # Find shortest path.
+        neighbors, path = find_path(q, graph_adj)
+
+        # Neighborhood clusters.
+        clusters = find_clusters(neighbors, path)
+
+        # Global - local transition matrix.
+        Cq = build_Cq(X, q, prob_params, neighbors, clusters)
+
+        # Compute the compressed data.
+        data_compressed = compress(data, Cq)
+
+        # Compute the local variable.
+        # Solve the local problem with the algorithm for the global problem using the compressed data.
+        X_tilde = prob_aux_solver(prob_params, data_compressed, rho)
+
+        # Select a solution among potential ones if the problem has a non-unique solution.
+        if prob_select_sol is not None:
+            Xq_old = block_q(X_old, q, nbsensors_vec)
+            X_tilde_old = np.concatenate((Xq_old, np.tile(np.eye(Q), (len(neighbors), 1))), axis=0)
+            X_tilde = prob_select_sol(X_tilde_old, X_tilde, prob_params, q)
+
+        # Evaluate the objective.
+        if prob_eval is not None:
+            rho_old = rho
+            rho = prob_eval(X_tilde, data_compressed)
+            rho_seq.append(rho)
+
+        # Global variable.
+        X = Cq @ X_tilde
+
+        if i > 0:
+            norm_diff.append(np.linalg.norm(X - X_old, 'fro')**2 / X.size)
+
+        if plot_dynamic:
+            if prob_select_sol is not None:
+                X_compare = prob_select_sol(X_star, X, nbsensors_vec, q)
+            dynamic_plot(X_compare, X_star, line1, line2)
+
+        X_old = X[:]
+
+        i = i + 1
+
+        X_list.append(X)
+
+        if (tol_rho_break and np.absolute(rho - rho_old) <= tol_rho) \
+                or (tol_X_break and np.linalg.norm(X - X_old, 'fro') <= tol_X):
+            break
+
+    if compare_opt:
+        # Resolve uniqueness ambiguity on X_star for comparison
+        if prob_select_sol is not None:
+            X_star = prob_select_sol(X, X_star, prob_params, q)
+
+        total_iterations = len(X_list)
+        norm_err = [None] * total_iterations
+        for k in range(total_iterations):
+            norm_err[k] = (np.linalg.norm(X_list[k] - X_star, 'fro') ** 2
+                        / np.linalg.norm(X_star, 'fro') ** 2)
+
+    if plot_dynamic:
+        plt.ioff()
+        #plt.show(block=False)
+        plt.close()
+
+    return X, norm_diff, norm_err, rho_seq

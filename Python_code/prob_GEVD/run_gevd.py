@@ -1,17 +1,18 @@
 import numpy as np
 import sys
 import matplotlib as mpl
+# Choose plot backend.
+# mpl.use('macosx')
+# mpl.use('Qt5Agg')
+# mpl.use('TkAgg')
+mpl.use('Agg')
 import matplotlib.pyplot as plt
+from time import sleep
 
 sys.path.append('../dasf_toolbox/')
 import gevd_functions as gevd
 from dasf_toolbox import dasf
 from dasf_toolbox import dasf_block
-
-# Choose plot backend.
-mpl.use('macosx')
-# mpl.use('Qt5Agg')
-# mpl.use('TkAgg')
 
 # Number of Monte-Carlo runs.
 mc_runs = 5
@@ -80,6 +81,14 @@ for k in range(mc_runs):
 
     norm_error.append(norm_err)
 
+    sys.stdout.write('\r')
+    j = (k + 1) / mc_runs
+    sys.stdout.write("[%-20s] %d%%" % ('='*int(20*j), 100*j))
+    sys.stdout.flush()
+    sleep(0.25)
+
+sys.stdout.write('\n')
+
 
 # Plot the normalized error.
 q5 = np.quantile(norm_error, 0.5, axis=0)
@@ -95,3 +104,4 @@ ax.set_xlabel('Iterations')
 ax.set_ylabel('Normalized error')
 ax.grid(True, which='both')
 plt.show()
+plt.savefig("gevd_convergence.pdf")

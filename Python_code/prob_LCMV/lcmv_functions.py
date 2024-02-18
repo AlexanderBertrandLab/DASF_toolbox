@@ -37,13 +37,13 @@ def lcmv_eval(X, data):
     return f
 
 
-def create_data(nbsensors, nbsamples, Q):
+def create_data(nbsensors, nbsamples, Q, L):
     """Create data for the LCMV problem."""
     rng = np.random.default_rng()
 
     Y, A = create_signal(nbsensors, nbsamples)
-    B = A[:, 0:Q]
-    H = rng.standard_normal(size=(Q,Q))
+    B = A[:, 0:L]
+    H = rng.standard_normal(size=(Q,L))
 
     return Y, B, H
 
