@@ -17,7 +17,7 @@ import warnings
 
 
 def dasf(prob_params, data, prob_solver,
-         conv=None, prob_select_sol=None, prob_eval=None):
+         conv=None, solver_params=None, prob_select_sol=None, prob_eval=None):
     """ Function running the DASF algorithm for a given problem.
 
     INPUTS :
@@ -65,6 +65,8 @@ def dasf(prob_params, data, prob_solver,
     By default, the number of iterations is 200, unless specified otherwise.
     If other fields are given and valid, the first condition to be achieved
     stops the algorithm.
+
+    solver_params: (Optional) Internal parameters for the solver for flexibility.
 
     prob_select_sol : (Optional) Function resolving the uniqueness ambiguity.
 
@@ -192,12 +194,12 @@ def dasf(prob_params, data, prob_solver,
 
         # Compute the local variable.
         # Solve the local problem with the algorithm for the global problem using the compressed data.
-        X_tilde = prob_solver(prob_params, data_compressed)
+        Xq_old = block_q(X_old, q, nbsensors_vec)
+        X_tilde_old = np.concatenate((Xq_old, np.tile(np.eye(Q), (len(neighbors), 1))), axis=0)
+        X_tilde = prob_solver(prob_params, data_compressed, X_tilde_old, solver_params)
 
         # Select a solution among potential ones if the problem has a non-unique solution.
         if prob_select_sol is not None:
-            Xq_old = block_q(X_old, q, nbsensors_vec)
-            X_tilde_old = np.concatenate((Xq_old, np.tile(np.eye(Q), (len(neighbors), 1))), axis=0)
             X_tilde = prob_select_sol(X_tilde_old, X_tilde, prob_params, q)
 
         # Evaluate the objective.
@@ -210,7 +212,7 @@ def dasf(prob_params, data, prob_solver,
         X = Cq @ X_tilde
 
         if i > 0:
-            norm_diff.append(np.linalg.norm(X - X_old, 'fro')**2 / X.size)
+            norm_diff.append(np.linalg.norm(X - X_old, 'fro') ** 2 / X.size)
 
         if plot_dynamic:
             if prob_select_sol is not None:
@@ -340,7 +342,6 @@ def find_clusters(neighbors, path):
 
     clusters: List of lists. For each neighbor k of q, there is a corresponding list with the nodes of the subgraph containing k, obtained by cutting the link between nodes q and k.
     """
-    nbneighbors = len(neighbors)
     clusters = []
     for k in neighbors:
         clusters.append([x for x in range(len(path)) if k in path[x]])
@@ -543,7 +544,7 @@ def update_X_block(X_block, X_tilde, q, prob_params, neighbors, clusters, prob_s
 
 
 def dasf_block(prob_params, data, prob_solver,
-         conv=None, prob_select_sol=None, prob_eval=None):
+         conv=None, solver_params=None, prob_select_sol=None, prob_eval=None):
     """ Function running the DASF algorithm for a given problem.
 
     INPUTS :
@@ -591,6 +592,8 @@ def dasf_block(prob_params, data, prob_solver,
     By default, the number of iterations is 200, unless specified otherwise.
     If other fields are given and valid, the first condition to be achieved
     stops the algorithm.
+
+    solver_params: (Optional) Internal parameters for the solver for flexibility.
 
     prob_select_sol : (Optional) Function resolving the uniqueness ambiguity.
 
@@ -719,7 +722,9 @@ def dasf_block(prob_params, data, prob_solver,
 
         # Compute the local variable.
         # Solve the local problem with the algorithm for the global problem using the compressed data.
-        X_tilde = prob_solver(prob_params, data_compressed)
+        Xq_old = block_q(X_old, q, nbsensors_vec)
+        X_tilde_old = np.concatenate((Xq_old, np.tile(np.eye(Q), (len(neighbors), 1))), axis=0)
+        X_tilde = prob_solver(prob_params, data_compressed, X_tilde_old, solver_params)
 
         # Evaluate the objective.
         if prob_eval is not None:
@@ -732,7 +737,7 @@ def dasf_block(prob_params, data, prob_solver,
         X = np.vstack(X_block)
 
         if i > 0:
-            norm_diff.append(np.linalg.norm(X - X_old, 'fro')**2 / X.size)
+            norm_diff.append(np.linalg.norm(X - X_old, 'fro') ** 2 / X.size)
 
         if plot_dynamic:
             if prob_select_sol is not None:
@@ -770,7 +775,7 @@ def dasf_block(prob_params, data, prob_solver,
 
 
 def dasf_multivar(prob_params, data, prob_solver,
-         conv=None, prob_select_sol=None, prob_eval=None):
+         conv=None, solver_params=None, prob_select_sol=None, prob_eval=None):
     """ Function running the DASF for a given problem.
 
     INPUTS :
@@ -819,6 +824,8 @@ def dasf_multivar(prob_params, data, prob_solver,
     By default, the number of iterations is 200, unless specified otherwise.
     If other fields are given and valid, the first condition to be achieved
     stops the algorithm.
+
+    solver_params: (Optional) Internal parameters for the solver for flexibility.
 
     prob_select_sol : (Optional) Function resolving the uniqueness ambiguity.
 
@@ -956,16 +963,16 @@ def dasf_multivar(prob_params, data, prob_solver,
 
         # Compute the local variable.
         # Solve the local problem with the algorithm for the global problem using the compressed data.
-        X_tilde = prob_solver(prob_params, data_compressed)
+        X_tilde_old = []
+        for k in range(nbvariables):
+            Xq_old = block_q(X_old[k], q, nbsensors_vec)
+            X_tilde_old_k = np.concatenate((Xq_old, np.tile(np.eye(Q), (len(neighbors), 1))), axis=0)
+            X_tilde_old.append(X_tilde_old_k)
+
+        X_tilde = prob_solver(prob_params, data_compressed, X_tilde_old, solver_params)
 
         # Select a solution among potential ones if the problem has a non-unique solution.
         if prob_select_sol is not None:
-            X_tilde_old = []
-            for k in range(nbvariables):
-                Xq_old = block_q(X_old[k], q, nbsensors_vec)
-                X_tilde_old_k = np.concatenate((Xq_old, np.tile(np.eye(Q), (len(neighbors), 1))), axis=0)
-                X_tilde_old.append(X_tilde_old_k)
-
             X_tilde = prob_select_sol(X_tilde_old, X_tilde, prob_params, q)
 
         # Evaluate the objective.
@@ -1018,7 +1025,7 @@ def dasf_multivar(prob_params, data, prob_solver,
 
 
 def fdasf(prob_params, data, prob_aux_solver, prob_eval,
-         conv=None, prob_select_sol=None):
+         conv=None, solver_params=None, prob_select_sol=None):
     """ Function running the F-DASF algorithm for a given problem.
 
     INPUTS :
@@ -1054,7 +1061,7 @@ def fdasf(prob_params, data, prob_aux_solver, prob_eval,
         - Glob_Const_list : List containing the global constants which
                   are not filtered through X.
 
-    prob_aux_solver : Function solving the auciliary problem.
+    prob_aux_solver : Function solving the auxiliary problem.
 
     prob_eval : Function evaluating the objective of the problem.
 
@@ -1068,6 +1075,8 @@ def fdasf(prob_params, data, prob_aux_solver, prob_eval,
     By default, the number of iterations is 200, unless specified otherwise.
     If other fields are given and valid, the first condition to be achieved
     stops the algorithm.
+
+    solver_params: (Optional) Internal parameters for the solver for flexibility.
 
     prob_select_sol : (Optional) Function resolving the uniqueness ambiguity.
 
@@ -1193,12 +1202,12 @@ def fdasf(prob_params, data, prob_aux_solver, prob_eval,
 
         # Compute the local variable.
         # Solve the local problem with the algorithm for the global problem using the compressed data.
-        X_tilde = prob_aux_solver(prob_params, data_compressed, rho)
+        Xq_old = block_q(X_old, q, nbsensors_vec)
+        X_tilde_old = np.concatenate((Xq_old, np.tile(np.eye(Q), (len(neighbors), 1))), axis=0)
+        X_tilde = prob_aux_solver(prob_params, data_compressed, X_tilde_old, solver_params)
 
         # Select a solution among potential ones if the problem has a non-unique solution.
         if prob_select_sol is not None:
-            Xq_old = block_q(X_old, q, nbsensors_vec)
-            X_tilde_old = np.concatenate((Xq_old, np.tile(np.eye(Q), (len(neighbors), 1))), axis=0)
             X_tilde = prob_select_sol(X_tilde_old, X_tilde, prob_params, q)
 
         # Evaluate the objective.

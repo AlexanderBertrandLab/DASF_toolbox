@@ -1,7 +1,11 @@
 # Distributed Adaptive Signal Fusion Algorithm
  The distributed adaptive signal fusion (DASF) algorithm framework implementation.
 
- Given an optimization problem fitting the DASF framework:
+ ### Note
+
+For detailed examples, see the folders `CCA`, `GEVD`, `LCMV`, `LS`, `QCQP`, `SCQP` and `TRO`.
+
+Given an optimization problem fitting the DASF framework:
 
         P: min_X f_hat ( X'*y(t), X'*B, X'*Gamma*X ) = f(X)
            s.t.  h_j ( X'*y(t), X'*B, X'*Gamma*X ) <= 0 for inequalities j,
@@ -117,7 +121,3 @@ where `data` is the structure defined above.
 #### 4) Sequence of objectives
 
 `f_seq:`  **Computed only if** `prob_eval` **is provided.** Vector of the sequence of objectives, i.e., `f(X^i)`.
-
-### III - Examples
-
-See the folders `prob_CCA`, `prob_GEVD`, `prob_LCMV`, `prob_LS`, `prob_QCQP`, `prob_SCQP` and `prob_TRO` for examples for an example of each problem.
