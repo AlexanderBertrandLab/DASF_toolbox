@@ -1,4 +1,5 @@
 import numpy as np
+from dataclasses import dataclass
 
 
 class ProblemInputs:
@@ -30,16 +31,11 @@ class NetworkGraph:
         self.nb_sensors_total = np.sum(nb_sensors_per_node)
 
 
+@dataclass
 class ConvergenceParameters:
-    def __init__(
-        self,
-        max_iterations: int,
-        objective_tolerance: float,
-        argument_tolerance: float,
-    ) -> None:
-        self.max_iterations = max_iterations
-        self.objective_tolerance = objective_tolerance
-        self.argument_tolerance = argument_tolerance
+    max_iterations: int = 100
+    objective_tolerance: float = 1e-6
+    argument_tolerance: float = 1e-6
 
 
 class ProblemParameters:
@@ -48,9 +44,7 @@ class ProblemParameters:
         nb_filters: int,
         nb_samples: int,
         network_graph: NetworkGraph,
-        convergence_parameters: ConvergenceParameters,
     ) -> None:
         self.nb_filters = nb_filters
         self.nb_samples = nb_samples
         self.network_graph = network_graph
-        self.convergence_parameters = convergence_parameters
