@@ -19,7 +19,7 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 
-class OptimizationProblem:
+class OptimizationProblem(ABC):
     def __init__(
         self,
         nb_filters: int,
@@ -35,7 +35,11 @@ class OptimizationProblem:
 
     @abstractmethod
     def solve(
-        self, problem_inputs: ProblemInputs | list[ProblemInputs]
+        self,
+        problem_inputs: ProblemInputs | list[ProblemInputs],
+        save_solution: bool = False,
+        convergence_parameters: ConvergenceParameters | None = None,
+        initial_estimate: np.ndarray | None = None,
     ) -> np.ndarray | list[np.ndarray]:
         pass
 
@@ -46,6 +50,14 @@ class OptimizationProblem:
         problem_inputs: ProblemInputs | list[ProblemInputs],
     ) -> float:
         pass
+
+    def resolve_ambiguity(
+        self,
+        X_ref: np.ndarray | list[np.ndarray],
+        X: np.ndarray | list[np.ndarray],
+        q: int | None = None,
+    ) -> np.ndarray | list[np.ndarray]:
+        return X
 
     @property
     def X_star(self):
@@ -61,7 +73,13 @@ class MMSEProblem(OptimizationProblem):
     def __init__(self, nb_filters: int) -> None:
         super().__init__(nb_filters=nb_filters)
 
-    def solve(self, problem_inputs: ProblemInputs) -> np.ndarray:
+    def solve(
+        self,
+        problem_inputs: ProblemInputs,
+        save_solution: bool = False,
+        convergence_parameters=None,
+        initial_estimate=None,
+    ) -> np.ndarray:
         """Solve the MMSE problem min E[||d(t) - X.T @ y(t)||**2]."""
         Y = problem_inputs.fused_data[0]
         D = problem_inputs.global_constants[0]
@@ -69,9 +87,12 @@ class MMSEProblem(OptimizationProblem):
         Ryy = autocorrelation_matrix(Y)
         Ryd = cross_correlation_matrix(Y, D)
 
-        self._X_star = np.linalg.inv(Ryy) @ Ryd
+        X_star = np.linalg.inv(Ryy) @ Ryd
 
-        return self._X_star
+        if save_solution:
+            self._X_star = X_star
+
+        return X_star
 
     def evaluate_objective(self, X: np.ndarray, problem_inputs: ProblemInputs) -> float:
         """Evaluate the MMSE objective E[||d(t) - X.T @ y(t)||**2]."""
@@ -392,7 +413,7 @@ class TROProblem(OptimizationProblem):
 
         convergence_parameters = (
             self.convergence_parameters
-            if self.convergence_parameters
+            if self.convergence_parameters is not None
             else ConvergenceParameters()
         )
 
@@ -612,7 +633,7 @@ class QCQPProblem(OptimizationProblem):
         Ryy = (Ryy + Ryy.T) / 2
         B = rng.standard_normal(size=(nb_sensors, self.nb_filters))
         c = rng.standard_normal(size=(nb_sensors, 1))
-        d = rng.standard_normal(size=(Q, 1))
+        d = rng.standard_normal(size=(self.nb_filters, 1))
         w = (B.T @ np.linalg.inv(Ryy).T @ c - d) / (c.T @ np.linalg.inv(Ryy) @ c)
         X = np.linalg.inv(Ryy) @ (B - c @ w.T)
 

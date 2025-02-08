@@ -61,8 +61,8 @@ class NetworkGraph:
 @dataclass
 class ConvergenceParameters:
     max_iterations: int = 100
-    objective_tolerance: float = 1e-6
-    argument_tolerance: float = 1e-6
+    objective_tolerance: float | None = None
+    argument_tolerance: float | None = None
 
 
 class ProblemParameters:
