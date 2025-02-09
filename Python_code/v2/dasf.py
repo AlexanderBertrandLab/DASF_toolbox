@@ -59,20 +59,10 @@ class DASF:
                 )
             )
         self.dynamic_plot = dynamic_plot
-        self.X_iterates = []
-        if problem.X_star is not None:
-            self.centralized_solution = problem.X_star
-        else:
-            self.centralized_solution = problem.solve(
-                problem_inputs=problem_inputs,
-                save_solution=True,
-                convergence_parameters=problem.convergence_parameters
-                if problem.convergence_parameters is not None
-                else None,
-                initial_estimate=problem.initial_estimate
-                if problem.initial_estimate is not None
-                else None,
-            )
+        self.X_over_iterations = []
+        self.f_over_iterations = []
+        self.X_star_over_iterations = []
+        self.f_star_over_iterations = []
 
         self.data_segmenter = DataSegmenter(
             data=problem_inputs.fused_data,
@@ -81,67 +71,88 @@ class DASF:
 
         self._validate_problem()
 
+    def centralized_solution_for_input(
+        self,
+        problem_inputs: ProblemInputs,
+        initial_estimate: np.ndarray | list[np.ndarray] | None,
+    ) -> np.ndarray | list[np.ndarray]:
+        return self.problem.solve(
+            problem_inputs=problem_inputs,
+            save_solution=False,
+            convergence_parameters=self.problem.convergence_parameters
+            if self.problem.convergence_parameters is not None
+            else None,
+            initial_estimate=initial_estimate,
+        )
+
     @property
-    def objective_over_iterations(self):
+    def X_star(self):
+        if len(self.X_over_iterations) == 0:
+            logger.warning("No iterates have been computed, use the run method first.")
+            return None
+        else:
+            X_star = self.problem.resolve_ambiguity(
+                self.X_over_iterations[-1], self.X_star_over_iterations[-1]
+            )
+            return X_star
+
+    @property
+    def normed_difference_over_iterations(self):
+        if len(self.X_over_iterations) == 0:
+            logger.warning("No iterates have been computed, use the run method first.")
+            return None
+        else:
+            return [
+                np.linalg.norm(X_new - X, "fro") ** 2 / X.size
+                for X, X_new in zip(
+                    self.X_over_iterations[:-1], self.X_over_iterations[1:]
+                )
+            ]
+
+    @property
+    def normed_error_over_iterations(self):
+        if len(self.X_over_iterations) == 0:
+            logger.warning("No iterates have been computed, use the run method first.")
+            return None
+        else:
+            return [
+                np.linalg.norm(X - X_star, "fro") ** 2
+                / np.linalg.norm(X_star, "fro") ** 2
+                for X, X_star in zip(
+                    self.X_over_iterations, self.X_star_over_iterations
+                )
+            ]
+
+    @property
+    def absolute_objective_error_over_iterations(self):
         if hasattr(self.problem, "evaluate_objective"):
-            if len(self.X_iterates) == 0:
+            if len(self.X_over_iterations) == 0:
                 logger.warning(
                     "No iterates have been computed, use the run method first."
                 )
                 return None
             else:
                 return [
-                    self.problem.evaluate_objective(
-                        X=X, problem_inputs=self.problem_inputs
+                    np.abs(f - f_star)
+                    for f, f_star in zip(
+                        self.f_over_iterations[1:], self.f_star_over_iterations[1:]
                     )
-                    for X in self.X_iterates
                 ]
         else:
             logger.warning(
-                "The problem does not have an evaluate_objective method. The objective will not be evaluated."
+                "The problem does not have an evaluate_objective method. The objective has not been evaluated."
             )
             return None
-
-    @property
-    def X_star(self):
-        if len(self.X_iterates) == 0:
-            logger.warning("No iterates have been computed, use the run method first.")
-            return None
-        else:
-            X_star = self.problem.resolve_ambiguity(
-                self.X_iterates[-1], self.centralized_solution
-            )
-            return X_star
-
-    @property
-    def normed_difference_over_iterations(self):
-        if len(self.X_iterates) == 0:
-            logger.warning("No iterates have been computed, use the run method first.")
-            return None
-        else:
-            return [
-                np.linalg.norm(X_new - X, "fro") ** 2 / X.size
-                for X, X_new in zip(self.X_iterates[:-1], self.X_iterates[1:])
-            ]
-
-    @property
-    def normed_error_over_iterations(self):
-        if len(self.X_iterates) == 0:
-            logger.warning("No iterates have been computed, use the run method first.")
-            return None
-        else:
-            return [
-                np.linalg.norm(X - self.centralized_solution, "fro") ** 2
-                / np.linalg.norm(self.centralized_solution, "fro") ** 2
-                for X in self.X_iterates
-            ]
 
     @property
     def total_iterations(self):
-        return len(self.X_iterates)
+        return len(self.X_over_iterations)
 
     def run(self) -> None:
-        self.X_iterates.clear()
+        self.X_over_iterations.clear()
+        self.X_star_over_iterations.clear()
+        self.f_star_over_iterations.clear()
+        self.f_over_iterations.clear()
 
         fused_data_window = self.data_segmenter.get_window(window_id=0)
         problem_inputs = ProblemInputs(
@@ -152,21 +163,31 @@ class DASF:
         )
 
         X = self.initial_estimate
-        self.X_iterates.append(X)
+        self.X_over_iterations.append(X)
+        X_star_current_window = self.centralized_solution_for_input(
+            problem_inputs=problem_inputs, initial_estimate=X
+        )
+        self.X_star_over_iterations.append(X_star_current_window)
         if hasattr(self.problem, "evaluate_objective"):
             f = self.problem.evaluate_objective(X=X, problem_inputs=problem_inputs)
+            self.f_over_iterations.append(f)
+            self.f_star_over_iterations.append(
+                self.problem.evaluate_objective(
+                    X=X_star_current_window, problem_inputs=problem_inputs
+                )
+            )
 
         if self.dynamic_plot:
             plt.ion()
             fig, ax = plt.subplots()
             (line1,) = ax.plot(X[:, 1], color="r")
-            (line2,) = ax.plot(self.centralized_solution[:, 1], color="b")
+            (line2,) = ax.plot(X_star_current_window[:, 1], color="b")
             plt.axis(
                 [
                     0,
                     self.network_graph.nb_sensors_total,
-                    1.2 * np.min(self.centralized_solution[:, 1]),
-                    1.2 * np.max(self.centralized_solution[:, 1]),
+                    1.2 * np.min(X_star_current_window[:, 1]),
+                    1.2 * np.max(X_star_current_window[:, 1]),
                 ]
             )
             plt.show()
@@ -196,6 +217,9 @@ class DASF:
                     fused_quadratics=self.problem_inputs.fused_quadratics,
                     global_parameters=self.problem_inputs.global_parameters,
                 )
+                X_star_current_window = self.centralized_solution_for_input(
+                    problem_inputs=problem_inputs, initial_estimate=X
+                )
                 window_id += 1
 
             # Compute the compressed data
@@ -211,32 +235,37 @@ class DASF:
                 ),
                 axis=0,
             )
-            X_tilde_star = self.problem.solve(
+            X_tilde_new = self.problem.solve(
                 problem_inputs=compressed_inputs,
                 convergence_parameters=self.solver_convergence_parameters,
                 initial_estimate=X_tilde,
             )
 
             # Select a solution among potential ones if the problem has multiple solutions
-            X_tilde_star = self.problem.resolve_ambiguity(
-                X_ref=X_tilde, X=X_tilde_star, updating_node=updating_node
+            X_tilde_new = self.problem.resolve_ambiguity(
+                X_ref=X_tilde, X=X_tilde_new, updating_node=updating_node
             )
 
             # Global variable
-            X_new = Cq @ X_tilde_star
-            self.X_iterates.append(X_new)
+            X_new = Cq @ X_tilde_new
+            self.X_over_iterations.append(X_new)
+            self.X_star_over_iterations.append(X_star_current_window)
             if hasattr(self.problem, "evaluate_objective"):
                 f_new = self.problem.evaluate_objective(
-                    X=X_tilde_star, problem_inputs=compressed_inputs
+                    X=X_tilde_new, problem_inputs=compressed_inputs
+                )
+                self.f_over_iterations.append(f_new)
+                self.f_star_over_iterations.append(
+                    self.problem.evaluate_objective(
+                        X=X_star_current_window, problem_inputs=problem_inputs
+                    )
                 )
 
             if self.dynamic_plot:
                 X_compare = self.problem.resolve_ambiguity(
-                    self.centralized_solution, X, updating_node
+                    X_star_current_window, X, updating_node
                 )
-                self._plot_dynamically(
-                    X_compare, self.centralized_solution, line1, line2
-                )
+                self._plot_dynamically(X_compare, X_star_current_window, line1, line2)
 
             i += 1
 
@@ -684,14 +713,11 @@ class DASF:
         return fig
 
     def plot_objective_error(self) -> Figure:
-        f_star = self.problem.evaluate_objective(
-            X=self.X_star, problem_inputs=self.problem_inputs
-        )
         fig = plt.figure()
         ax = fig.add_subplot(1, 1, 1)
         ax.loglog(
             range(1, self.total_iterations),
-            np.abs(self.objective_over_iterations[1:] - f_star),
+            self.absolute_objective_error_over_iterations,
             color="b",
         )
         ax.set_xlabel(r"Iterations $i$")
