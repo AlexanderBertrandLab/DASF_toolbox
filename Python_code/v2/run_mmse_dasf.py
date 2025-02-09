@@ -6,7 +6,7 @@ mpl.use("macosx")
 # mpl.use('Qt5Agg')
 # mpl.use('TkAgg')
 # mpl.use("Agg")
-from problem_settings import NetworkGraph, ConvergenceParameters, ProblemParameters
+from problem_settings import NetworkGraph, ConvergenceParameters, DataParameters
 from optimization_problems import MMSEProblem
 from synthetic_data import mmse_generate_synthetic_inputs
 from dasf import DASF
@@ -31,9 +31,7 @@ nb_samples = 10000
 
 nb_filters = 5
 
-mmse_params = ProblemParameters(
-    nb_filters=nb_filters, nb_samples=nb_samples, network_graph=network_graph
-)
+mmse_data_params = DataParameters(nb_samples=nb_samples)
 
 mmse_inputs = mmse_generate_synthetic_inputs(
     nb_samples=nb_samples,
@@ -53,7 +51,7 @@ dasf_mmse_solver = DASF(
     problem_inputs=mmse_inputs,
     network_graph=network_graph,
     dasf_convergence_params=dasf_convergence_parameters,
-    problem_params=mmse_params,
+    data_params=mmse_data_params,
     updating_path=update_path,
     rng=rng,
     dynamic_plot=False,

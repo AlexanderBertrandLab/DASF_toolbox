@@ -2,13 +2,17 @@ import numpy as np
 from problem_settings import (
     NetworkGraph,
     ProblemInputs,
-    ProblemParameters,
+    DataParameters,
     ConvergenceParameters,
+    DataSegmenter,
 )
 from optimization_problems import OptimizationProblem
 import logging
 from typing import Tuple
 import matplotlib.pyplot as plt
+from matplotlib.lines import Line2D
+from matplotlib.figure import Figure
+import logging
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -21,7 +25,7 @@ class DASF:
         problem_inputs: ProblemInputs,
         network_graph: NetworkGraph,
         dasf_convergence_params: ConvergenceParameters,
-        problem_params: ProblemParameters,
+        data_params: DataParameters,
         updating_path: np.ndarray | None = None,
         initial_estimate: np.ndarray | None = None,
         rng: np.random.Generator | None = None,
@@ -32,27 +36,26 @@ class DASF:
         self.problem_inputs = problem_inputs
         self.network_graph = network_graph
         self.dasf_convergence_params = dasf_convergence_params
-        self.problem_params = problem_params
+        self.data_params = data_params
         self.solver_convergence_parameters = solver_convergence_parameters
         if updating_path is not None:
             self.updating_path = updating_path
         else:
             self.updating_path = (
-                rng.permutation(range(problem_params.nb_samples))
+                rng.permutation(range(network_graph.nb_nodes))
                 if rng is not None
                 else np.arange(1, network_graph.nb_nodes + 1)
             )
-
         if initial_estimate is not None:
             self.initial_estimate = initial_estimate
         else:
             self.initial_estimate = (
                 rng.standard_normal(
-                    (network_graph.nb_sensors_total, problem_params.nb_filters)
+                    (network_graph.nb_sensors_total, problem.nb_filters)
                 )
                 if rng is not None
                 else np.random.standard_normal(
-                    (network_graph.nb_sensors_total, problem_params.nb_filters)
+                    (network_graph.nb_sensors_total, problem.nb_filters)
                 )
             )
         self.dynamic_plot = dynamic_plot
@@ -70,6 +73,11 @@ class DASF:
                 if problem.initial_estimate is not None
                 else None,
             )
+
+        self.data_segmenter = DataSegmenter(
+            data=problem_inputs.fused_data,
+            data_parameters=data_params,
+        )
 
         self._validate_problem()
 
@@ -135,10 +143,18 @@ class DASF:
     def run(self) -> None:
         self.X_iterates.clear()
 
+        fused_data_window = self.data_segmenter.get_window(window_id=0)
+        problem_inputs = ProblemInputs(
+            fused_data=fused_data_window,
+            fused_constants=self.problem_inputs.fused_constants,
+            fused_quadratics=self.problem_inputs.fused_quadratics,
+            global_parameters=self.problem_inputs.global_parameters,
+        )
+
         X = self.initial_estimate
         self.X_iterates.append(X)
         if hasattr(self.problem, "evaluate_objective"):
-            f = self.problem.evaluate_objective(X=X, problem_inputs=self.problem_inputs)
+            f = self.problem.evaluate_objective(X=X, problem_inputs=problem_inputs)
 
         if self.dynamic_plot:
             plt.ion()
@@ -156,6 +172,7 @@ class DASF:
             plt.show()
 
         i = 0
+        window_id = 0
         while i < self.dasf_convergence_params.max_iterations:
             # Select updating node
             updating_node = self.updating_path[i % self.network_graph.nb_nodes]
@@ -170,8 +187,19 @@ class DASF:
             # Global - local transition matrix
             Cq = self._build_Cq(X, updating_node, neighbors, clusters)
 
+            # Get current data window
+            if i % self.data_params.nb_window_reuse == 0:
+                fused_data_window = self.data_segmenter.get_window(window_id=window_id)
+                problem_inputs = ProblemInputs(
+                    fused_data=fused_data_window,
+                    fused_constants=self.problem_inputs.fused_constants,
+                    fused_quadratics=self.problem_inputs.fused_quadratics,
+                    global_parameters=self.problem_inputs.global_parameters,
+                )
+                window_id += 1
+
             # Compute the compressed data
-            compressed_inputs = self._compress(self.problem_inputs, Cq)
+            compressed_inputs = self._compress(problem_inputs, Cq)
 
             # Compute the local variable
             # Solve the local problem with the algorithm for the global problem using the compressed data
@@ -179,9 +207,7 @@ class DASF:
             X_tilde = np.concatenate(
                 (
                     Xq,
-                    np.tile(
-                        np.eye(self.problem_params.nb_filters), (len(neighbors), 1)
-                    ),
+                    np.tile(np.eye(self.problem.nb_filters), (len(neighbors), 1)),
                 ),
                 axis=0,
             )
@@ -193,7 +219,7 @@ class DASF:
 
             # Select a solution among potential ones if the problem has multiple solutions
             X_tilde_star = self.problem.resolve_ambiguity(
-                X_tilde, X_tilde_star, updating_node
+                X_ref=X_tilde, X=X_tilde_star, updating_node=updating_node
             )
 
             # Global variable
@@ -212,7 +238,7 @@ class DASF:
                     X_compare, self.centralized_solution, line1, line2
                 )
 
-            i = i + 1
+            i += 1
 
             if (
                 hasattr(self.problem, "evaluate_objective")
@@ -372,7 +398,7 @@ class DASF:
         Cq: Transformation matrix making the transition between local and global data.
         """
         nb_sensors_per_node = self.network_graph.nb_sensors_per_node
-        nb_filters = self.problem_params.nb_filters
+        nb_filters = self.problem.nb_filters
         nb_neighbors = len(neighbors)
 
         ind = np.arange(self.network_graph.nb_nodes)
@@ -439,7 +465,7 @@ class DASF:
         fused_data = problem_inputs.fused_data
         fused_constants = problem_inputs.fused_constants
         fused_quadratics = problem_inputs.fused_quadratics
-        global_constants = problem_inputs.global_constants
+        global_constants = problem_inputs.global_parameters
 
         data_list_compressed = []
         nb_data = len(fused_data)
@@ -466,7 +492,7 @@ class DASF:
             fused_data=data_list_compressed,
             fused_constants=constants_list_compressed,
             fused_quadratics=quadratics_list_compressed,
-            global_constants=global_constants,
+            global_parameters=global_constants,
         )
 
         return compressed_inputs
@@ -548,7 +574,7 @@ class DASF:
         """
         nb_nodes = self.network_graph.nb_nodes
         nb_sensors_per_node = self.network_graph.nb_sensors_per_node
-        nb_filters = self.problem_params.nb_filters
+        nb_filters = self.problem.nb_filters
 
         if prob_select_sol is not None:
             Xq_old = X_block[updating_node]
@@ -619,7 +645,7 @@ class DASF:
                     )
         if self.initial_estimate.shape != (
             nb_sensor,
-            self.problem_params.nb_filters,
+            self.problem.nb_filters,
         ):
             raise ValueError(
                 "The initial estimate does not have the correct shape for the problem."
@@ -631,7 +657,7 @@ class DASF:
                 "The problem does not have an evaluate_objective method. The objective will not be evaluated."
             )
 
-    def plot_error(self):
+    def plot_error(self) -> Figure:
         fig = plt.figure()
         ax = fig.add_subplot(1, 1, 1)
         ax.loglog(
@@ -640,11 +666,11 @@ class DASF:
             color="b",
         )
         ax.set_xlabel(r"Iterations $i$")
-        ax.set_ylabel(r"$\varepsilon(i)=\frac{\|\|X^i-X^*\|\|_F^2}{\|\|X^*\|\|_F^2}$")
+        ax.set_ylabel(r"$\varepsilon(i)=\frac{\|X^i-X^*\|_F^2}{\|X^*\|_F^2}$")
         ax.grid(True, which="both")
-        plt.show()
+        return fig
 
-    def plot_iterate_difference(self):
+    def plot_iterate_difference(self) -> Figure:
         fig = plt.figure()
         ax = fig.add_subplot(1, 1, 1)
         ax.loglog(
@@ -653,11 +679,11 @@ class DASF:
             color="b",
         )
         ax.set_xlabel(r"Iterations $i$")
-        ax.set_ylabel(r"$\frac{\|\|X^i-X^{i-1}\|\|_F^2}{MQ}$")
+        ax.set_ylabel(r"$\frac{\|X^i-X^{i-1}\|_F^2}{MQ}$")
         ax.grid(True, which="both")
-        plt.show()
+        return fig
 
-    def plot_objective_error(self):
+    def plot_objective_error(self) -> Figure:
         f_star = self.problem.evaluate_objective(
             X=self.X_star, problem_inputs=self.problem_inputs
         )
@@ -669,6 +695,6 @@ class DASF:
             color="b",
         )
         ax.set_xlabel(r"Iterations $i$")
-        ax.set_ylabel(r"$\|f(X^i)-f(X^*)\|$")
+        ax.set_ylabel(r"$|f(X^i)-f(X^*)|$")
         ax.grid(True, which="both")
-        plt.show()
+        return fig
