@@ -8,17 +8,17 @@ mpl.use("macosx")
 # mpl.use("Agg")
 from problem_settings import NetworkGraph, ConvergenceParameters, DataParameters
 from optimization_problems import MMSEProblem
-from synthetic_data import mmse_generate_synthetic_inputs
+from data_retriever import MMSEDataRetriever
 from dasf import DASF
 
 random_seed = 2025
 rng = np.random.default_rng(random_seed)
 
-
+# Number of nodes
 nb_nodes = 10
-
+# Number of channels per node
 nb_sensors_per_node = (5 * np.ones(nb_nodes)).astype(int)
-
+# Create adjacency matrix (hollow matrix) of a random graph
 adjacency_matrix = rng.integers(0, 1, size=(nb_nodes, nb_nodes), endpoint=True)
 adjacency_matrix = np.triu(adjacency_matrix, 1) + np.tril(adjacency_matrix.T, -1)
 network_graph = NetworkGraph(
@@ -27,35 +27,42 @@ network_graph = NetworkGraph(
     adjacency_matrix=adjacency_matrix,
 )
 
-nb_samples = 10000
+# Number of samples per window of the signals
+nb_samples_per_window = 10000
 
+# Number of windows in total
+nb_windows = 200
+
+# Number of filters of X
 nb_filters = 5
 
-mmse_data_params = DataParameters(nb_samples=nb_samples)
-
-mmse_inputs = mmse_generate_synthetic_inputs(
-    nb_samples=nb_samples,
+mmse_data_retriever = MMSEDataRetriever(
+    nb_samples=nb_samples_per_window,
     nb_sensors=network_graph.nb_sensors_total,
-    rng=rng,
     nb_sources=nb_filters,
+    nb_windows=nb_windows,
+    rng=rng,
 )
 
 mmse_problem = MMSEProblem(nb_filters=nb_filters)
-X_star = mmse_problem.solve(problem_inputs=mmse_inputs, save_solution=True)
-f_star = mmse_problem.evaluate_objective(X_star, problem_inputs=mmse_inputs)
+
+max_iterations = nb_windows
+dasf_convergence_parameters = ConvergenceParameters(max_iterations=max_iterations)
 
 update_path = rng.permutation(range(nb_nodes))
-dasf_convergence_parameters = ConvergenceParameters(max_iterations=500)
-dasf_mmse_solver = DASF(
+mmse_data_params = DataParameters(
+    nb_samples=nb_samples_per_window * nb_windows,
+    window_length=nb_samples_per_window,
+    nb_window_reuse=1,
+)
+dasf_mmse_nonstationary_solver = DASF(
     problem=mmse_problem,
-    problem_inputs=mmse_inputs,
+    data_retriever=mmse_data_retriever,
     network_graph=network_graph,
     dasf_convergence_params=dasf_convergence_parameters,
     data_params=mmse_data_params,
     updating_path=update_path,
     rng=rng,
-    dynamic_plot=False,
+    dynamic_plot=True,
 )
-
-
-dasf_mmse_solver.run()
+dasf_mmse_nonstationary_solver.run()

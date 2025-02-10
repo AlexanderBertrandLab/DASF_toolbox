@@ -1,7 +1,6 @@
 import numpy as np
 from problem_settings import (
     ProblemInputs,
-    DataParameters,
     ConvergenceParameters,
 )
 from abc import ABC, abstractmethod
@@ -79,7 +78,7 @@ class MMSEProblem(OptimizationProblem):
         initial_estimate=None,
     ) -> np.ndarray:
         """Solve the MMSE problem min E[||d(t) - X.T @ y(t)||**2]."""
-        Y = problem_inputs.fused_data[0]
+        Y = problem_inputs.fused_signals[0]
         D = problem_inputs.global_parameters[0]
 
         Ryy = autocorrelation_matrix(Y)
@@ -94,7 +93,7 @@ class MMSEProblem(OptimizationProblem):
 
     def evaluate_objective(self, X: np.ndarray, problem_inputs: ProblemInputs) -> float:
         """Evaluate the MMSE objective E[||d(t) - X.T @ y(t)||**2]."""
-        Y = problem_inputs.fused_data[0]
+        Y = problem_inputs.fused_signals[0]
         D = problem_inputs.global_parameters[0]
 
         Ryy = autocorrelation_matrix(Y)
@@ -134,7 +133,7 @@ class MMSEProblem(OptimizationProblem):
 
         Y = A @ D + noise
 
-        mmse_inputs = ProblemInputs(fused_data=[Y], global_parameters=[D])
+        mmse_inputs = ProblemInputs(fused_signals=[Y], global_parameters=[D])
 
         return mmse_inputs
 
@@ -145,7 +144,7 @@ class LCMVProblem(OptimizationProblem):
 
     def solve(problem_inputs: ProblemInputs) -> np.ndarray:
         """Solve the LCMV problem min E[||X.T @ y(t)||**2] s.t. X.T @ B = H."""
-        Y = problem_inputs.fused_data[0]
+        Y = problem_inputs.fused_signals[0]
         B = problem_inputs.fused_constants[0]
         H = problem_inputs.global_parameters[0]
 
@@ -159,7 +158,7 @@ class LCMVProblem(OptimizationProblem):
 
     def evaluate_objective(X: np.ndarray, problem_inputs: ProblemInputs) -> float:
         """Evaluate the LCMV objective E[||X.T @ y(t)||**2]."""
-        Y = problem_inputs.fused_data[0]
+        Y = problem_inputs.fused_signals[0]
 
         Ryy = autocorrelation_matrix(Y)
 
@@ -195,7 +194,7 @@ class LCMVProblem(OptimizationProblem):
         H = rng.standard_normal(size=(self.nb_filters, nb_steering))
 
         lcmv_inputs = ProblemInputs(
-            fused_data=[Y], fused_constants=[B], global_parameters=[H]
+            fused_signals=[Y], fused_constants=[B], global_parameters=[H]
         )
 
         return lcmv_inputs
@@ -207,8 +206,8 @@ class GEVDProblem(OptimizationProblem):
 
     def solve(self, problem_inputs: ProblemInputs) -> np.ndarray:
         """Solve the GEVD problem max E[||X.T @ y(t)||**2] s.t. E[X.T @ v(t) @ v(t).T @ X] = I."""
-        Y = problem_inputs.fused_data[0]
-        V = problem_inputs.fused_data[1]
+        Y = problem_inputs.fused_signals[0]
+        V = problem_inputs.fused_signals[1]
 
         Ryy = autocorrelation_matrix(Y)
         Rvv = autocorrelation_matrix(V)
@@ -222,7 +221,7 @@ class GEVDProblem(OptimizationProblem):
 
     def evaluate_objective(X: np.ndarray, problem_inputs: ProblemInputs) -> float:
         """Evaluate the GEVD objective E[||X.T @ y(t)||**2]."""
-        Y = problem_inputs.fused_data[0]
+        Y = problem_inputs.fused_signals[0]
 
         Ryy = autocorrelation_matrix(Y)
 
@@ -272,7 +271,7 @@ class GEVDProblem(OptimizationProblem):
         V = B @ S + noise
         Y = A @ D + V
 
-        gevd_inputs = ProblemInputs(fused_data=[Y, V])
+        gevd_inputs = ProblemInputs(fused_signals=[Y, V])
 
         return gevd_inputs
 
@@ -287,8 +286,8 @@ class CCAProblem(OptimizationProblem):
         inputs_X = problem_inputs[0]
         inputs_W = problem_inputs[1]
 
-        Y = inputs_X.fused_data[0]
-        V = inputs_W.fused_data[0]
+        Y = inputs_X.fused_signals[0]
+        V = inputs_W.fused_signals[0]
 
         Ryy = autocorrelation_matrix(Y)
         Rvv = autocorrelation_matrix(V)
@@ -321,8 +320,8 @@ class CCAProblem(OptimizationProblem):
         inputs_X = problem_inputs[0]
         inputs_W = problem_inputs[1]
 
-        Y = inputs_X.fused_data[0]
-        V = inputs_W.fused_data[0]
+        Y = inputs_X.fused_signals[0]
+        V = inputs_W.fused_signals[0]
 
         Ryv = cross_correlation_matrix(Y, V)
 
@@ -374,8 +373,8 @@ class CCAProblem(OptimizationProblem):
         Y = signal[:, 0:nb_samples]
         V = signal[:, lags:None]
 
-        cca_inputs_X = ProblemInputs(fused_data=[Y])
-        cca_inputs_W = ProblemInputs(fused_data=[V])
+        cca_inputs_X = ProblemInputs(fused_signals=[Y])
+        cca_inputs_W = ProblemInputs(fused_signals=[V])
 
         return [cca_inputs_X, cca_inputs_W]
 
@@ -393,8 +392,8 @@ class TROProblem(OptimizationProblem):
 
     def solve(self, problem_inputs: ProblemInputs) -> np.ndarray:
         """Solve the TRO problem max E[||X.T @ y(t)||**2] / E[||X.T @ v(t)||**2] s.t. X.T @ Gamma @ X = I."""
-        Y = problem_inputs.fused_data[0]
-        V = problem_inputs.fused_data[1]
+        Y = problem_inputs.fused_signals[0]
+        V = problem_inputs.fused_signals[1]
         Gamma = problem_inputs.fused_quadratics[0]
 
         rng = np.random.default_rng()
@@ -435,7 +434,7 @@ class TROProblem(OptimizationProblem):
             X = eigvecs[:, indices[0 : self.nb_filters]]
             f_old = f
             Y_list_t = [Y_t, V_t]
-            problem_inputs_t = ProblemInputs(fused_data=Y_list_t)
+            problem_inputs_t = ProblemInputs(fused_signals=Y_list_t)
             f = self.evaluate_objective(X, problem_inputs_t)
 
             i += 1
@@ -455,8 +454,8 @@ class TROProblem(OptimizationProblem):
     def evaluate_objective(self, X: np.ndarray, problem_inputs: ProblemInputs) -> float:
         """Evaluate the TRO objective E[||X.T @ y(t)||**2] / E[||X.T @ v(t)||**2]."""
 
-        Y = problem_inputs.fused_data[0]
-        V = problem_inputs.fused_data[1]
+        Y = problem_inputs.fused_signals[0]
+        V = problem_inputs.fused_signals[1]
 
         Ryy = autocorrelation_matrix(Y)
         Rvv = autocorrelation_matrix(V)
@@ -512,7 +511,7 @@ class TROProblem(OptimizationProblem):
 
         Gamma = np.eye(nb_sensors)
 
-        tro_inputs = ProblemInputs(fused_data=[Y, V], fused_quadratics=[Gamma])
+        tro_inputs = ProblemInputs(fused_signals=[Y, V], fused_quadratics=[Gamma])
 
         return tro_inputs
 
@@ -525,7 +524,7 @@ class QCQPProblem(OptimizationProblem):
         """Solve the QCQP problem min 0.5 * E[||X.T @ y(t)||**2] - trace(X.T @ B) s.t. trace(X.T @ Gamma @ X) <= alpha**2; X.T @ c = d."""
 
         def X_fun(mu: float, problem_inputs: ProblemInputs) -> np.ndarray:
-            Y = problem_inputs.fused_data[0]
+            Y = problem_inputs.fused_signals[0]
             B = problem_inputs.fused_constants[0]
             c = problem_inputs.fused_constants[1]
             Gamma = problem_inputs.fused_quadratics[0]
@@ -580,7 +579,7 @@ class QCQPProblem(OptimizationProblem):
 
     def evaluate_objective(X: np.ndarray, problem_inputs: ProblemInputs) -> float:
         """Evaluate the QCQP objective 0.5 * E[||X.T @ y(t)||**2] - trace(X.T @ B)."""
-        Y = problem_inputs.fused_data[0]
+        Y = problem_inputs.fused_signals[0]
         B = problem_inputs.fused_constants[0]
 
         Ryy = autocorrelation_matrix(Y)
@@ -659,7 +658,7 @@ class QCQPProblem(OptimizationProblem):
                 alpha = np.sqrt(np.linalg.norm(X, ord="fro") ** 2 + alpha**2)
 
         qcqp_inputs = ProblemInputs(
-            fused_data=[Y],
+            fused_signals=[Y],
             fused_constants=[B, c],
             fused_quadratics=[np.eye(nb_sensors)],
             global_parameters=[alpha, d],
@@ -674,7 +673,7 @@ class SCQPProblem(OptimizationProblem):
 
     def solve(self, problem_inputs: ProblemInputs) -> np.ndarray:
         """Solve the SCQP problem min 0.5 * E[||X.T @ y(t)||**2] + trace(X.T @ B) s.t. trace(X.T @ Gamma @ X)=1."""
-        Y = problem_inputs.fused_data[0]
+        Y = problem_inputs.fused_signals[0]
         B = problem_inputs.fused_constants[0]
         Gamma = problem_inputs.fused_quadratics[0]
 
@@ -706,7 +705,7 @@ class SCQPProblem(OptimizationProblem):
 
     def evaluate_objective(X: np.ndarray, problem_inputs: ProblemInputs) -> float:
         """Evaluate the SCQP objective 0.5 * E[||X.T @ y(t)||**2] + trace(X.T @ B)."""
-        Y = problem_inputs.fused_data[0]
+        Y = problem_inputs.fused_signals[0]
         B = problem_inputs.fused_constants[0]
 
         Ryy = autocorrelation_matrix(Y)
@@ -741,7 +740,9 @@ class SCQPProblem(OptimizationProblem):
         B = rng.standard_normal(size=(nb_sensors, self.nb_filters))
 
         scqp_inputs = ProblemInputs(
-            fused_data=[Y], fused_constants=[B], fused_quadratics=[np.eye(nb_sensors)]
+            fused_signals=[Y],
+            fused_constants=[B],
+            fused_quadratics=[np.eye(nb_sensors)],
         )
 
         return scqp_inputs
@@ -760,7 +761,7 @@ class RTLSProblem(OptimizationProblem):
 
     def solve(self, problem_inputs: ProblemInputs) -> np.ndarray:
         """Solve the RTLS problem max rho = E[|X.T @ y(t) - d(t)|**2] / (1 + X.T @ X) s.t. ||X.T @ L|| <= delta ** 2."""
-        Y = problem_inputs.fused_data[0]
+        Y = problem_inputs.fused_signals[0]
         L = problem_inputs.fused_constants[0]
         Gamma = problem_inputs.fused_quadratics[0]
         d = problem_inputs.global_parameters[0]
@@ -829,7 +830,7 @@ class RTLSProblem(OptimizationProblem):
 
     def evaluate_objective(X: np.ndarray, problem_inputs: ProblemInputs) -> float:
         """Evaluate the RTLS objective E[|X.T @ y(t) - d(t)|**2] / (1 + X.T @ Gamma @ X)."""
-        Y = problem_inputs.fused_data[0]
+        Y = problem_inputs.fused_signals[0]
         Gamma = problem_inputs.fused_quadratics[0]
         d = problem_inputs.global_parameters[0]
 

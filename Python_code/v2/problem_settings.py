@@ -11,12 +11,12 @@ logger = logging.getLogger(__name__)
 class ProblemInputs:
     def __init__(
         self,
-        fused_data: list[np.ndarray],
+        fused_signals: list[np.ndarray],
         fused_constants: list[np.ndarray] | None = None,
         fused_quadratics: list[np.ndarray] | None = None,
         global_parameters: list[np.ndarray] | None = None,
     ) -> None:
-        self.fused_data = fused_data
+        self.fused_signals = fused_signals
         self.fused_constants = fused_constants
         self.fused_quadratics = fused_quadratics
         self.global_parameters = global_parameters
@@ -81,28 +81,3 @@ class DataParameters:
             self.window_length = self.nb_samples
         if self.sliding_window_offset is None:
             self.sliding_window_offset = self.window_length
-
-
-class DataSegmenter:
-    def __init__(self, data: list[np.ndarray], data_parameters: DataParameters) -> None:
-        self.data = data
-        self.data_parameters = data_parameters
-        self.end_of_data_reached = [False] * len(data)
-
-    def get_window(self, window_id) -> list[np.ndarray]:
-        start = window_id * self.data_parameters.sliding_window_offset
-        end = start + self.data_parameters.window_length
-        nb_data = len(self.data)
-        data_window = []
-        for ind in range(nb_data):
-            data_ind = self.data[ind]
-            if start > np.size(data_ind, 1) - self.data_parameters.window_length:
-                if self.end_of_data_reached[ind] is False:
-                    self.end_of_data_reached[ind] = True
-                    logger.warning(
-                        f"Reached end of data at window {window_id}, last window will be reused"
-                    )
-                start = np.size(data_ind, 1) - self.data_parameters.window_length
-            data_window.append(data_ind[:, start:end])
-
-        return data_window

@@ -4,8 +4,8 @@ from problem_settings import (
     ProblemInputs,
     DataParameters,
     ConvergenceParameters,
-    DataSegmenter,
 )
+from data_retriever import DataRetriever
 from optimization_problems import OptimizationProblem
 import logging
 from typing import Tuple
@@ -22,10 +22,10 @@ class DASF:
     def __init__(
         self,
         problem: OptimizationProblem,
-        problem_inputs: ProblemInputs,
+        data_retriever: DataRetriever,
         network_graph: NetworkGraph,
-        dasf_convergence_params: ConvergenceParameters,
         data_params: DataParameters,
+        dasf_convergence_params: ConvergenceParameters,
         updating_path: np.ndarray | None = None,
         initial_estimate: np.ndarray | None = None,
         rng: np.random.Generator | None = None,
@@ -33,7 +33,7 @@ class DASF:
         dynamic_plot: bool = False,
     ):
         self.problem = problem
-        self.problem_inputs = problem_inputs
+        self.data_retriever = data_retriever
         self.network_graph = network_graph
         self.dasf_convergence_params = dasf_convergence_params
         self.data_params = data_params
@@ -63,11 +63,6 @@ class DASF:
         self.f_over_iterations = []
         self.X_star_over_iterations = []
         self.f_star_over_iterations = []
-
-        self.data_segmenter = DataSegmenter(
-            data=problem_inputs.fused_data,
-            data_parameters=data_params,
-        )
 
         self._validate_problem()
 
@@ -154,13 +149,7 @@ class DASF:
         self.f_star_over_iterations.clear()
         self.f_over_iterations.clear()
 
-        fused_data_window = self.data_segmenter.get_window(window_id=0)
-        problem_inputs = ProblemInputs(
-            fused_data=fused_data_window,
-            fused_constants=self.problem_inputs.fused_constants,
-            fused_quadratics=self.problem_inputs.fused_quadratics,
-            global_parameters=self.problem_inputs.global_parameters,
-        )
+        problem_inputs = self.data_retriever.get_current_window(window_id=0)
 
         X = self.initial_estimate
         self.X_over_iterations.append(X)
@@ -180,16 +169,25 @@ class DASF:
         if self.dynamic_plot:
             plt.ion()
             fig, ax = plt.subplots()
-            (line1,) = ax.plot(X[:, 1], color="r")
-            (line2,) = ax.plot(X_star_current_window[:, 1], color="b")
+            (line1,) = ax.plot(X[:, 1], color="r", marker="x", label="Current estimate")
+            (line2,) = ax.plot(
+                X_star_current_window[:, 1],
+                color="b",
+                label="Centralized solution",
+            )
             plt.axis(
                 [
                     0,
                     self.network_graph.nb_sensors_total,
-                    1.2 * np.min(X_star_current_window[:, 1]),
-                    1.2 * np.max(X_star_current_window[:, 1]),
+                    2 * np.min(X_star_current_window[:, 1]),
+                    2 * np.max(X_star_current_window[:, 1]),
                 ]
             )
+            ax.legend()
+            ax.set_xlabel("Sensors")
+            ax.set_ylabel("Weight values")
+            ax.set_title("Weights per sensor for first filter")
+            ax.grid()
             plt.show()
 
         i = 0
@@ -210,12 +208,8 @@ class DASF:
 
             # Get current data window
             if i % self.data_params.nb_window_reuse == 0:
-                fused_data_window = self.data_segmenter.get_window(window_id=window_id)
-                problem_inputs = ProblemInputs(
-                    fused_data=fused_data_window,
-                    fused_constants=self.problem_inputs.fused_constants,
-                    fused_quadratics=self.problem_inputs.fused_quadratics,
-                    global_parameters=self.problem_inputs.global_parameters,
+                problem_inputs = self.data_retriever.get_current_window(
+                    window_id=window_id
                 )
                 X_star_current_window = self.centralized_solution_for_input(
                     problem_inputs=problem_inputs, initial_estimate=X
@@ -491,7 +485,7 @@ class DASF:
 
         data_compressed: Dictionary containing the compressed data. Contains the same keys as 'data'.
         """
-        fused_data = problem_inputs.fused_data
+        fused_data = problem_inputs.fused_signals
         fused_constants = problem_inputs.fused_constants
         fused_quadratics = problem_inputs.fused_quadratics
         global_constants = problem_inputs.global_parameters
@@ -518,7 +512,7 @@ class DASF:
             quadratics_list_compressed = None
 
         compressed_inputs = ProblemInputs(
-            fused_data=data_list_compressed,
+            fused_signals=data_list_compressed,
             fused_constants=constants_list_compressed,
             fused_quadratics=quadratics_list_compressed,
             global_parameters=global_constants,
@@ -652,20 +646,21 @@ class DASF:
         return X_block_updated
 
     def _validate_problem(self):
+        problem_inputs = self.data_retriever.get_current_window(window_id=0)
         nb_sensor = self.network_graph.nb_sensors_total
-        for index, signal in enumerate(self.problem_inputs.fused_data):
+        for index, signal in enumerate(problem_inputs.fused_signals):
             if np.size(signal, 0) != nb_sensor:
                 raise ValueError(
                     f"The number of rows in data {index} does not match the number of sensors in the network graph."
                 )
-        if self.problem_inputs.fused_constants is not None:
-            for index, constant in enumerate(self.problem_inputs.fused_constants):
+        if problem_inputs.fused_constants is not None:
+            for index, constant in enumerate(problem_inputs.fused_constants):
                 if np.size(constant, 0) != nb_sensor:
                     raise ValueError(
                         f"The number of rows in the fused constant {index} does not match the number of sensors in the network graph."
                     )
-        if self.problem_inputs.fused_quadratics is not None:
-            for index, quadratic in enumerate(self.problem_inputs.fused_quadratics):
+        if problem_inputs.fused_quadratics is not None:
+            for index, quadratic in enumerate(problem_inputs.fused_quadratics):
                 if (np.size(quadratic, 0) != nb_sensor) or (
                     np.size(quadratic, 1) != nb_sensor
                 ):
