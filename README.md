@@ -2,14 +2,12 @@
 
 **News:**
 
-- The DASF toolbox has been featured in the [AI toolbox list](https://www.flandersairesearch.be/en/research/list-of-toolboxes/dasf) of the Flanders AI Research Programme! 
+- The DASF toolbox has been featured in the [AI toolbox list](https://www.flandersairesearch.be/en/research/list-of-toolboxes/dasf) of the Flanders AI Research Program! 
 - v2 is here! The DASF toolbox gets a brand new look with a much more practical and flexible design! With this version, Python is the main supported language, while the previous version can be accessed from the archive, where the MATLAB implementation can also be found.
 
 ![](https://github.com/CemMusluoglu/DASF_toolbox/blob/main/dasf_gif.gif)
 
  The distributed adaptive signal fusion (DASF) algorithm framework implementation based on [1] and [2].
-
- The DASF toolbox has been featured in the [AI toolbox list](https://www.flandersairesearch.be/en/research/list-of-toolboxes/dasf) of the Flanders AI Research Programme! 
 
  Given an optimization problem fitting the DASF framework:
 
