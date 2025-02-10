@@ -9,6 +9,8 @@
 
 the DASF algorithm solves the problem in a distributed setting such as a wireless sensor network consisting of nodes connected to each other in a certain way. This is done by creating a local problem at node `q` and iteration `i` and has the advantage that the local problem is a **parameterized** version of problem `P`. Therefore, a solver for problem `P` is used for the distributed implementation.
 
+![](https://github.com/CemMusluoglu/DASF_toolbox/blob/main/dasf_gif.gif)
+
 **Note:** There can be more than one `y(t)`, `B` and `Gamma` which are not represented for conciseness. 
 
 The `dasf` function implements the DASF algorithm and is called in the following way:
