@@ -64,20 +64,34 @@ class NetworkGraph:
 
 @dataclass
 class ConvergenceParameters:
-    max_iterations: int = 100
+    max_iterations: int | None = None
     objective_tolerance: float | None = None
     argument_tolerance: float | None = None
 
+    def __post_init__(self) -> None:
+        if (
+            self.max_iterations is None
+            and self.objective_tolerance is None
+            and self.argument_tolerance is None
+        ):
+            self.max_iterations = 100
+            logger.warning(
+                "No convergence conditions specified, setting max iterations to 100"
+            )
+
 
 @dataclass
-class DataParameters:
-    nb_samples: int
-    window_length: int | None = None
+class DataWindowParameters:
+    window_length: int
     nb_window_reuse: int = 1
     sliding_window_offset: int | None = None
 
     def __post_init__(self) -> None:
-        if self.window_length is None:
-            self.window_length = self.nb_samples
         if self.sliding_window_offset is None:
             self.sliding_window_offset = self.window_length
+
+
+def get_stationary_setting(window_length: int, iterations: int) -> DataWindowParameters:
+    return DataWindowParameters(
+        window_length=window_length, nb_window_reuse=iterations, sliding_window_offset=0
+    )

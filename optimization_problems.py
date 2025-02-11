@@ -13,6 +13,7 @@ from pymanopt import Problem
 from pymanopt.optimizers import TrustRegions
 import autograd
 import logging
+import scipy
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -62,9 +63,6 @@ class OptimizationProblem(ABC):
             logger.warning("The problem has not been solved yet.")
         return self._X_star
 
-    # def resolve_ambiguity(self, X_ref, X, prob_params, q):
-    #     return X
-
 
 class MMSEProblem(OptimizationProblem):
     def __init__(self, nb_filters: int) -> None:
@@ -104,45 +102,18 @@ class MMSEProblem(OptimizationProblem):
 
         return f
 
-    def generate_synthetic_inputs(
-        self,
-        signal_var: float = 0.5,
-        noise_var: float = 0.1,
-        offset: float = 0.5,
-        nb_sources: int | None = None,
-    ) -> ProblemInputs:
-        """Generate synthetic inputs for the MMSE problem."""
-        rng = np.random.default_rng()
-
-        if self.problem_parameters is None:
-            raise ValueError(
-                "Problem parameters must be set to generate synthetic inputs."
-            )
-
-        nb_samples = self.problem_parameters.nb_samples
-        nb_sensors = self.problem_parameters.network_graph.nb_sensors_total
-
-        if nb_sources is None:
-            nb_sources = self.nb_filters
-
-        D = rng.normal(loc=0, scale=np.sqrt(signal_var), size=(nb_sources, nb_samples))
-        A = rng.uniform(low=-offset, high=offset, size=(nb_sensors, nb_sources))
-        noise = rng.normal(
-            loc=0, scale=np.sqrt(noise_var), size=(nb_sensors, nb_samples)
-        )
-
-        Y = A @ D + noise
-
-        mmse_inputs = ProblemInputs(fused_signals=[Y], global_parameters=[D])
-
-        return mmse_inputs
-
 
 class LCMVProblem(OptimizationProblem):
-    def __init__(self) -> None:
-        super().__init__()
+    def __init__(self, nb_filters: int) -> None:
+        super().__init__(nb_filters=nb_filters)
 
-    def solve(problem_inputs: ProblemInputs) -> np.ndarray:
+    def solve(
+        self,
+        problem_inputs: ProblemInputs,
+        save_solution: bool = False,
+        convergence_parameters=None,
+        initial_estimate=None,
+    ) -> np.ndarray:
         """Solve the LCMV problem min E[||X.T @ y(t)||**2] s.t. X.T @ B = H."""
         Y = problem_inputs.fused_signals[0]
         B = problem_inputs.fused_constants[0]
@@ -154,9 +125,12 @@ class LCMVProblem(OptimizationProblem):
             np.linalg.inv(Ryy) @ B @ np.linalg.inv(B.T @ np.linalg.inv(Ryy) @ B) @ H.T
         )
 
+        if save_solution:
+            self._X_star = X_star
+
         return X_star
 
-    def evaluate_objective(X: np.ndarray, problem_inputs: ProblemInputs) -> float:
+    def evaluate_objective(self, X: np.ndarray, problem_inputs: ProblemInputs) -> float:
         """Evaluate the LCMV objective E[||X.T @ y(t)||**2]."""
         Y = problem_inputs.fused_signals[0]
 
@@ -166,45 +140,18 @@ class LCMVProblem(OptimizationProblem):
 
         return f
 
-    def generate_synthetic_inputs(
-        self,
-        nb_steering: int,
-        signal_var: float = 0.5,
-        noise_var: float = 0.1,
-        offset: float = 0.5,
-        nb_sources: int | None = None,
-    ) -> ProblemInputs:
-        """Generate synthetic inputs for the LCMV problem."""
-        rng = np.random.default_rng()
-
-        nb_samples = self.problem_parameters.nb_samples
-        nb_sensors = self.problem_parameters.network_graph.nb_sensors_total
-
-        if nb_sources is None:
-            nb_sources = self.nb_filters
-
-        D = rng.normal(loc=0, scale=np.sqrt(signal_var), size=(nb_sources, nb_samples))
-        A = rng.uniform(low=-offset, high=offset, size=(nb_sensors, nb_sources))
-        noise = rng.normal(
-            loc=0, scale=np.sqrt(noise_var), size=(nb_sensors, nb_samples)
-        )
-
-        Y = A @ D + noise
-        B = A[:, 0:nb_steering]
-        H = rng.standard_normal(size=(self.nb_filters, nb_steering))
-
-        lcmv_inputs = ProblemInputs(
-            fused_signals=[Y], fused_constants=[B], global_parameters=[H]
-        )
-
-        return lcmv_inputs
-
 
 class GEVDProblem(OptimizationProblem):
-    def __init__(self) -> None:
-        super().__init__()
+    def __init__(self, nb_filters: int) -> None:
+        super().__init__(nb_filters=nb_filters)
 
-    def solve(self, problem_inputs: ProblemInputs) -> np.ndarray:
+    def solve(
+        self,
+        problem_inputs: ProblemInputs,
+        save_solution: bool = False,
+        convergence_parameters=None,
+        initial_estimate=None,
+    ) -> np.ndarray:
         """Solve the GEVD problem max E[||X.T @ y(t)||**2] s.t. E[X.T @ v(t) @ v(t).T @ X] = I."""
         Y = problem_inputs.fused_signals[0]
         V = problem_inputs.fused_signals[1]
@@ -212,14 +159,14 @@ class GEVDProblem(OptimizationProblem):
         Ryy = autocorrelation_matrix(Y)
         Rvv = autocorrelation_matrix(V)
 
-        eigvals, eigvecs = np.linalg.eigh(Ryy, Rvv)
+        eigvals, eigvecs = scipy.linalg.eigh(Ryy, Rvv)
         indices = np.argsort(eigvals)[::-1]
 
         X_star = eigvecs[:, indices[0 : self.nb_filters]]
 
         return X_star
 
-    def evaluate_objective(X: np.ndarray, problem_inputs: ProblemInputs) -> float:
+    def evaluate_objective(self, X: np.ndarray, problem_inputs: ProblemInputs) -> float:
         """Evaluate the GEVD objective E[||X.T @ y(t)||**2]."""
         Y = problem_inputs.fused_signals[0]
 
@@ -229,51 +176,16 @@ class GEVDProblem(OptimizationProblem):
 
         return f
 
-    def resolve_ambiguity(self, X_ref, X, prob_params, q):
+    def resolve_ambiguity(self, X_ref, X, updating_node):
         """Resolve the sign ambiguity for the GEVD problem."""
 
-        for l in range(self.nb_filters):
-            if np.linalg.norm(X_ref[:, l] - X[:, l]) > np.linalg.norm(
-                -X_ref[:, l] - X[:, l]
+        for i in range(self.nb_filters):
+            if np.linalg.norm(X_ref[:, i] - X[:, i]) > np.linalg.norm(
+                -X_ref[:, i] - X[:, i]
             ):
-                X[:, l] = -X[:, l]
+                X[:, i] = -X[:, i]
 
         return X
-
-    def generate_synthetic_inputs(
-        self,
-        signal_var: float = 0.5,
-        noise_var: float = 0.1,
-        offset: float = 0.5,
-        latent_dim: int = 10,
-        nb_sources: int | None = None,
-    ) -> ProblemInputs:
-        """Generate data for the GEVD problem."""
-        rng = np.random.default_rng()
-
-        nb_samples = self.problem_parameters.nb_samples
-        nb_sensors = self.problem_parameters.network_graph.nb_sensors_total
-
-        if nb_sources is None:
-            nb_sources = self.nb_filters
-
-        D = rng.normal(loc=0, scale=np.sqrt(signal_var), size=(nb_sources, nb_samples))
-        S = rng.normal(
-            loc=0, scale=np.sqrt(signal_var), size=(latent_dim - nb_sources, nb_samples)
-        )
-        A = rng.uniform(low=-offset, high=offset, size=(nb_sensors, nb_sources))
-        B = rng.uniform(
-            low=offset, high=offset, size=(nb_sensors, latent_dim - nb_sources)
-        )
-        noise = rng.normal(
-            loc=0, scale=np.sqrt(noise_var), size=(nb_sensors, nb_samples)
-        )
-        V = B @ S + noise
-        Y = A @ D + V
-
-        gevd_inputs = ProblemInputs(fused_signals=[Y, V])
-
-        return gevd_inputs
 
 
 class CCAProblem(OptimizationProblem):

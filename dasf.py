@@ -2,7 +2,7 @@ import numpy as np
 from problem_settings import (
     NetworkGraph,
     ProblemInputs,
-    DataParameters,
+    DataWindowParameters,
     ConvergenceParameters,
 )
 from data_retriever import DataRetriever
@@ -24,7 +24,7 @@ class DASF:
         problem: OptimizationProblem,
         data_retriever: DataRetriever,
         network_graph: NetworkGraph,
-        data_params: DataParameters,
+        data_window_params: DataWindowParameters,
         dasf_convergence_params: ConvergenceParameters,
         updating_path: np.ndarray | None = None,
         initial_estimate: np.ndarray | None = None,
@@ -36,7 +36,7 @@ class DASF:
         self.data_retriever = data_retriever
         self.network_graph = network_graph
         self.dasf_convergence_params = dasf_convergence_params
-        self.data_params = data_params
+        self.data_window_params = data_window_params
         self.solver_convergence_parameters = solver_convergence_parameters
         if updating_path is not None:
             self.updating_path = updating_path
@@ -141,7 +141,7 @@ class DASF:
 
     @property
     def total_iterations(self):
-        return len(self.X_over_iterations)
+        return len(self.X_over_iterations) - 1
 
     def run(self) -> None:
         self.X_over_iterations.clear()
@@ -207,7 +207,7 @@ class DASF:
             Cq = self._build_Cq(X, updating_node, neighbors, clusters)
 
             # Get current data window
-            if i % self.data_params.nb_window_reuse == 0:
+            if i % self.data_window_params.nb_window_reuse == 0:
                 problem_inputs = self.data_retriever.get_current_window(
                     window_id=window_id
                 )
@@ -685,8 +685,27 @@ class DASF:
         fig = plt.figure()
         ax = fig.add_subplot(1, 1, 1)
         ax.loglog(
-            range(1, self.total_iterations),
+            range(1, self.total_iterations + 1),
             self.normed_error_over_iterations[1:],
+            color="b",
+        )
+        ax.set_xlabel(r"Iterations $i$")
+        ax.set_ylabel(r"$\varepsilon(i)=\frac{\|X^i-X^*\|_F^2}{\|X^*\|_F^2}$")
+        ax.grid(True, which="both")
+        return fig
+
+    def plot_error_over_batches(self) -> Figure:
+        fig = plt.figure()
+        ax = fig.add_subplot(1, 1, 1)
+        ax.loglog(
+            range(
+                1,
+                int(self.total_iterations / self.data_window_params.nb_window_reuse)
+                + 1,
+            ),
+            self.normed_error_over_iterations[
+                1 :: self.data_window_params.nb_window_reuse
+            ],
             color="b",
         )
         ax.set_xlabel(r"Iterations $i$")
