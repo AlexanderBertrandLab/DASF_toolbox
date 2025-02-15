@@ -7,6 +7,7 @@ from problem_settings import (
 )
 from data_retriever import DataRetriever
 from optimization_problems import OptimizationProblem
+import logging
 from typing import Tuple
 import matplotlib.pyplot as plt
 from matplotlib.lines import Line2D
@@ -23,7 +24,7 @@ class DASF:
         problem: OptimizationProblem,
         data_retriever: DataRetriever,
         network_graph: NetworkGraph,
-        data_window_params: DataWindowParameters,
+        data_params: DataWindowParameters,
         dasf_convergence_params: ConvergenceParameters,
         updating_path: np.ndarray | None = None,
         initial_estimate: np.ndarray | None = None,
@@ -35,16 +36,8 @@ class DASF:
         self.data_retriever = data_retriever
         self.network_graph = network_graph
         self.dasf_convergence_params = dasf_convergence_params
-        self.data_window_params = data_window_params
+        self.data_params = data_params
         self.solver_convergence_parameters = solver_convergence_parameters
-        if solver_convergence_parameters is None:
-            if problem.convergence_parameters is not None:
-                self.solver_convergence_parameters = solver_convergence_parameters
-                logger.warning(
-                    "Using same convergence parameters as centralized solver"
-                )
-            else:
-                self.solver_convergence_parameters = ConvergenceParameters()
         if updating_path is not None:
             self.updating_path = updating_path
         else:
@@ -71,12 +64,11 @@ class DASF:
         self.X_star_over_iterations = []
         self.f_star_over_iterations = []
 
-        def __post_init__(self) -> None:
-            self._validate_problem()
+        self._validate_problem()
 
     def centralized_solution_for_input(
         self,
-        problem_inputs: ProblemInputs | list[ProblemInputs],
+        problem_inputs: ProblemInputs,
         initial_estimate: np.ndarray | list[np.ndarray] | None,
     ) -> np.ndarray | list[np.ndarray]:
         return self.problem.solve(
@@ -89,7 +81,7 @@ class DASF:
         )
 
     @property
-    def X_estimate(self):
+    def X_star(self):
         if len(self.X_over_iterations) == 0:
             logger.warning("No iterates have been computed, use the run method first.")
             return None
@@ -149,13 +141,13 @@ class DASF:
 
     @property
     def total_iterations(self):
-        return len(self.X_over_iterations) - 1
+        return len(self.X_over_iterations)
 
     def run(self) -> None:
         self.X_over_iterations.clear()
-        self.f_over_iterations.clear()
         self.X_star_over_iterations.clear()
         self.f_star_over_iterations.clear()
+        self.f_over_iterations.clear()
 
         problem_inputs = self.data_retriever.get_current_window(window_id=0)
 
@@ -215,7 +207,7 @@ class DASF:
             Cq = self._build_Cq(X, updating_node, neighbors, clusters)
 
             # Get current data window
-            if i % self.data_window_params.nb_window_reuse == 0:
+            if i % self.data_params.nb_window_reuse == 0:
                 problem_inputs = self.data_retriever.get_current_window(
                     window_id=window_id
                 )
@@ -251,11 +243,6 @@ class DASF:
             # Global variable
             X_new = Cq @ X_tilde_new
             self.X_over_iterations.append(X_new)
-            X_star_current_window = self.problem.resolve_ambiguity(
-                X_reference=X_new,
-                X_current=X_star_current_window,
-                updating_node=updating_node,
-            )
             self.X_star_over_iterations.append(X_star_current_window)
             if hasattr(self.problem, "evaluate_objective"):
                 f_new = self.problem.evaluate_objective(
@@ -269,7 +256,10 @@ class DASF:
                 )
 
             if self.dynamic_plot:
-                self._plot_dynamically(X_new, X_star_current_window, line1, line2)
+                X_compare = self.problem.resolve_ambiguity(
+                    X_star_current_window, X, updating_node
+                )
+                self._plot_dynamically(X_compare, X_star_current_window, line1, line2)
 
             i += 1
 
@@ -695,27 +685,8 @@ class DASF:
         fig = plt.figure()
         ax = fig.add_subplot(1, 1, 1)
         ax.loglog(
-            range(1, self.total_iterations + 1),
+            range(1, self.total_iterations),
             self.normed_error_over_iterations[1:],
-            color="b",
-        )
-        ax.set_xlabel(r"Iterations $i$")
-        ax.set_ylabel(r"$\varepsilon(i)=\frac{\|X^i-X^*\|_F^2}{\|X^*\|_F^2}$")
-        ax.grid(True, which="both")
-        return fig
-
-    def plot_error_over_batches(self) -> Figure:
-        fig = plt.figure()
-        ax = fig.add_subplot(1, 1, 1)
-        ax.loglog(
-            range(
-                1,
-                int(self.total_iterations / self.data_window_params.nb_window_reuse)
-                + 1,
-            ),
-            self.normed_error_over_iterations[
-                1 :: self.data_window_params.nb_window_reuse
-            ],
             color="b",
         )
         ax.set_xlabel(r"Iterations $i$")
@@ -740,316 +711,11 @@ class DASF:
         fig = plt.figure()
         ax = fig.add_subplot(1, 1, 1)
         ax.loglog(
-            range(1, self.total_iterations + 1),
-            self.absolute_objective_error_over_iterations[1:],
+            range(1, self.total_iterations),
+            self.absolute_objective_error_over_iterations,
             color="b",
         )
         ax.set_xlabel(r"Iterations $i$")
         ax.set_ylabel(r"$|f(X^i)-f(X^*)|$")
         ax.grid(True, which="both")
         return fig
-
-
-class DASFMultiVar(DASF):
-    def __init__(
-        self,
-        problem: OptimizationProblem,
-        data_retriever: DataRetriever,
-        network_graph: NetworkGraph,
-        data_window_params: DataWindowParameters,
-        dasf_convergence_params: ConvergenceParameters,
-        updating_path: np.ndarray | None = None,
-        initial_estimate: list[np.ndarray] | None = None,
-        rng: np.random.Generator | None = None,
-        solver_convergence_parameters: ConvergenceParameters | None = None,
-        dynamic_plot: bool = False,
-    ) -> None:
-        super().__init__(
-            problem=problem,
-            data_retriever=data_retriever,
-            network_graph=network_graph,
-            data_window_params=data_window_params,
-            dasf_convergence_params=dasf_convergence_params,
-            updating_path=updating_path,
-            rng=rng,
-            solver_convergence_parameters=solver_convergence_parameters,
-            dynamic_plot=dynamic_plot,
-        )
-        self.nb_variables = problem.nb_variables
-
-        if initial_estimate is not None:
-            self.initial_estimate = initial_estimate
-        else:
-            initial_estimate = []
-            for k in range(problem.nb_variables):
-                initial_estimate.append(
-                    rng.standard_normal(
-                        (network_graph.nb_sensors_total, problem.nb_filters)
-                    )
-                    if rng is not None
-                    else np.random.standard_normal(
-                        (network_graph.nb_sensors_total, problem.nb_filters)
-                    )
-                )
-            self.initial_estimate = initial_estimate
-
-        def __post_init__(self) -> None:
-            self._validate_problem()
-
-    @property
-    def normed_difference_over_iterations(self):
-        if len(self.X_over_iterations) == 0:
-            logger.warning("No iterates have been computed, use the run method first.")
-            return None
-        else:
-            return [
-                np.linalg.norm(np.vstack(X_new) - np.vstack(X), "fro") ** 2
-                / np.vstack(X).size
-                for X, X_new in zip(
-                    self.X_over_iterations[:-1], self.X_over_iterations[1:]
-                )
-            ]
-
-    @property
-    def normed_error_over_iterations(self):
-        if len(self.X_over_iterations) == 0:
-            logger.warning("No iterates have been computed, use the run method first.")
-            return None
-        else:
-            return [
-                np.linalg.norm(np.vstack(X) - np.vstack(X_star), "fro") ** 2
-                / np.linalg.norm(np.vstack(X_star), "fro") ** 2
-                for X, X_star in zip(
-                    self.X_over_iterations, self.X_star_over_iterations
-                )
-            ]
-
-    def run(self) -> None:
-        self.X_over_iterations.clear()
-        self.f_over_iterations.clear()
-        self.X_star_over_iterations.clear()
-        self.f_star_over_iterations.clear()
-
-        problem_inputs = self.data_retriever.get_current_window(window_id=0)
-
-        X = self.initial_estimate
-        self.X_over_iterations.append(X)
-        X_star_current_window = self.centralized_solution_for_input(
-            problem_inputs=problem_inputs, initial_estimate=X
-        )
-        self.X_star_over_iterations.append(X_star_current_window)
-        if hasattr(self.problem, "evaluate_objective"):
-            f = self.problem.evaluate_objective(X=X, problem_inputs=problem_inputs)
-            self.f_over_iterations.append(f)
-            self.f_star_over_iterations.append(
-                self.problem.evaluate_objective(
-                    X=X_star_current_window, problem_inputs=problem_inputs
-                )
-            )
-
-        if self.dynamic_plot:
-            plt.ion()
-            fig, ax = plt.subplots()
-            (line1,) = ax.plot(
-                np.vstack(X)[:, 1], color="r", marker="x", label="Current estimate"
-            )
-            (line2,) = ax.plot(
-                np.vstack(X_star_current_window)[:, 1],
-                color="b",
-                label="Centralized solution",
-            )
-            plt.axis(
-                [
-                    0,
-                    self.network_graph.nb_sensors_total,
-                    2 * np.min(np.vstack(X_star_current_window)[:, 1]),
-                    2 * np.max(np.vstack(X_star_current_window)[:, 1]),
-                ]
-            )
-            ax.legend()
-            ax.set_xlabel("Sensors")
-            ax.set_ylabel("Weight values")
-            ax.set_title("Weights per sensor for first filter")
-            ax.grid()
-            plt.show()
-
-        i = 0
-        window_id = 0
-        while i < self.dasf_convergence_params.max_iterations:
-            # Select updating node
-            updating_node = self.updating_path[i % self.network_graph.nb_nodes]
-
-            # Prune the network
-            # Find shortest path
-            neighbors, path = self._find_path(updating_node)
-
-            # Neighborhood clusters
-            clusters = self._find_clusters(neighbors, path)
-
-            # Get current data window
-            if i % self.data_window_params.nb_window_reuse == 0:
-                problem_inputs = self.data_retriever.get_current_window(
-                    window_id=window_id
-                )
-                X_star_current_window = self.centralized_solution_for_input(
-                    problem_inputs=problem_inputs, initial_estimate=X
-                )
-                window_id += 1
-
-            # Global - local transition matrix
-            Cq = []
-
-            compressed_inputs = []
-            X_tilde = []
-            for k in range(self.nb_variables):
-                Cq_k = self._build_Cq(X[k], updating_node, neighbors, clusters)
-                Cq.append(Cq_k)
-                # Compute the compressed data for each input
-                compressed_inputs_k = self._compress(problem_inputs[k], Cq[k])
-                compressed_inputs.append(compressed_inputs_k)
-
-                # Compute each local variable
-                Xq_k = self._get_block_q(X[k], updating_node)
-                X_tilde_k = np.concatenate(
-                    (
-                        Xq_k,
-                        np.tile(np.eye(self.problem.nb_filters), (len(neighbors), 1)),
-                    ),
-                    axis=0,
-                )
-                X_tilde.append(X_tilde_k)
-
-            # Solve the local problem with the algorithm for the global problem using the compressed data
-            X_tilde_new = self.problem.solve(
-                problem_inputs=compressed_inputs,
-                convergence_parameters=self.solver_convergence_parameters,
-                initial_estimate=X_tilde,
-            )
-
-            # Select a solution among potential ones if the problem has multiple solutions
-            X_tilde_new = self.problem.resolve_ambiguity(
-                X_reference=X_tilde, X_current=X_tilde_new, updating_node=updating_node
-            )
-
-            # Global variable
-            X_new = []
-            for k in range(self.nb_variables):
-                X_new.append(Cq[k] @ X_tilde_new[k])
-            self.X_over_iterations.append(X_new)
-            X_star_current_window = self.problem.resolve_ambiguity(
-                X_reference=X_new,
-                X_current=X_star_current_window,
-                updating_node=updating_node,
-            )
-            self.X_star_over_iterations.append(X_star_current_window)
-            if hasattr(self.problem, "evaluate_objective"):
-                f_new = self.problem.evaluate_objective(
-                    X=X_tilde_new, problem_inputs=compressed_inputs
-                )
-                self.f_over_iterations.append(f_new)
-                self.f_star_over_iterations.append(
-                    self.problem.evaluate_objective(
-                        X=X_star_current_window, problem_inputs=problem_inputs
-                    )
-                )
-
-            if self.dynamic_plot:
-                self._plot_dynamically(X_new, X_star_current_window, line1, line2)
-
-            i += 1
-
-            if (
-                hasattr(self.problem, "evaluate_objective")
-                and (self.dasf_convergence_params.objective_tolerance is not None)
-                and (
-                    np.absolute(f_new - f)
-                    <= self.dasf_convergence_params.objective_tolerance
-                )
-            ):
-                logger.warning(
-                    f"Stopped after {i} iterations due to reaching the threshold in difference in objectives"
-                )
-                break
-
-            if (self.dasf_convergence_params.argument_tolerance is not None) and (
-                np.linalg.norm(np.vstack(X_new) - np.vstack(X), "fro")
-                <= self.dasf_convergence_params.argument_tolerance
-            ):
-                logger.warning(
-                    f"Stopped after {i} iterations due to reaching the threshold in difference in arguments"
-                )
-                break
-
-            X = X_new.copy()
-            if hasattr(self.problem, "evaluate_objective"):
-                f = f_new
-
-        if self.dynamic_plot:
-            plt.ioff()
-            # plt.show(block=False)
-            plt.close()
-
-        return None
-
-    def _plot_dynamically(self, X, X_star, line1, line2):
-        """Plot the first column of X and X_star.
-
-        INPUTS:
-
-        X (nbsensors x Q): Global variable equal.
-
-        X_star (nbsensors x Q): Optimal solution.
-
-        line1: Figure handle for X.
-
-        line2: Figure handle for X_star.
-        """
-        line1.set_ydata(np.vstack(X)[:, 1])
-        line2.set_ydata(np.vstack(X_star)[:, 1])
-        plt.draw()
-        plt.pause(0.05)
-
-    def _validate_problem(self):
-        problem_inputs = self.data_retriever.get_current_window(window_id=0)
-        if self.nb_variables != len(problem_inputs):
-            raise ValueError(
-                f"The number of variables {self.nb_variables} does not match the number of problem inputs {len(problem_inputs)}"
-            )
-        nb_sensor = self.network_graph.nb_sensors_total
-        for input_id in range(len(problem_inputs)):
-            for index, signal in enumerate(problem_inputs[input_id].fused_signals):
-                if np.size(signal, 0) != nb_sensor:
-                    raise ValueError(
-                        f"The number of rows in data {index} does not match the number of sensors in the network graph for input {input_id}."
-                    )
-            if problem_inputs[input_id].fused_constants is not None:
-                for index, constant in enumerate(
-                    problem_inputs[input_id].fused_constants
-                ):
-                    if np.size(constant, 0) != nb_sensor:
-                        raise ValueError(
-                            f"The number of rows in the fused constant {index} does not match the number of sensors in the network graph for input {input_id}."
-                        )
-            if problem_inputs[input_id].fused_quadratics is not None:
-                for index, quadratic in enumerate(
-                    problem_inputs[input_id].fused_quadratics
-                ):
-                    if (np.size(quadratic, 0) != nb_sensor) or (
-                        np.size(quadratic, 1) != nb_sensor
-                    ):
-                        raise ValueError(
-                            f"The number of rows or columns in the fused quadratic {index} does not match the number of sensors in the network graph for input {input_id}."
-                        )
-            if self.initial_estimate[input_id].shape != (
-                nb_sensor,
-                self.problem.nb_filters,
-            ):
-                raise ValueError(
-                    f"The initial estimate of the variable corresponding to input {input_id} does not have the correct shape for the problem."
-                )
-        if not hasattr(self.problem, "solve"):
-            raise ValueError("The problem does not have a solve method.")
-        if not hasattr(self.problem, "evaluate_objective"):
-            logger.warning(
-                "The problem does not have an evaluate_objective method. The objective will not be evaluated."
-            )

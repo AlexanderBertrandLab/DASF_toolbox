@@ -399,39 +399,6 @@ class CCAProblem(OptimizationProblem):
 
         return [X, W]
 
-    def generate_synthetic_inputs(
-        self,
-        signal_var: float = 0.5,
-        noise_var: float = 0.1,
-        offset: float = 0.5,
-        lags: int = 3,
-        nb_sources: int | None = None,
-    ) -> list[ProblemInputs]:
-        """Generate synthetic inputs for the CCA problem."""
-        rng = np.random.default_rng()
-        nb_samples = self.problem_parameters.nb_samples
-        nb_sensors = self.problem_parameters.network_graph.nb_sensors_total
-
-        if nb_sources is None:
-            nb_sources = self.nb_filters
-
-        D = rng.normal(
-            loc=0, scale=np.sqrt(signal_var), size=(nb_sources, nb_samples + lags)
-        )
-        A = rng.uniform(low=-offset, high=offset, size=(nb_sensors, nb_sources))
-        noise = rng.normal(
-            loc=0, scale=np.sqrt(noise_var), size=(nb_sensors, nb_samples + lags)
-        )
-
-        signal = A @ D + noise
-        Y = signal[:, 0:nb_samples]
-        V = signal[:, lags:None]
-
-        cca_inputs_X = ProblemInputs(fused_signals=[Y])
-        cca_inputs_W = ProblemInputs(fused_signals=[V])
-
-        return [cca_inputs_X, cca_inputs_W]
-
 
 class QCQPProblem(OptimizationProblem):
     def __init__(self) -> None:
