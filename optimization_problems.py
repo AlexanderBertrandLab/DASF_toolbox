@@ -327,7 +327,7 @@ class CCAProblem(OptimizationProblem):
         save_solution: bool = False,
         convergence_parameters=None,
         initial_estimate=None,
-    ) -> np.ndarray:
+    ) -> list[np.ndarray]:
         """Solve the CCA problem max_(X,W) E[trace(X.T @ y(t) @ v(t).T @ W)]
         s.t. E[X.T @ y(t) @ y(t).T @ X] = I, E[W.T @ v(t) @ v(t).T @ W] = I."""
         inputs_X = problem_inputs[0]

@@ -30,7 +30,7 @@ class DASF:
         rng: np.random.Generator | None = None,
         solver_convergence_parameters: ConvergenceParameters | None = None,
         dynamic_plot: bool = False,
-    ):
+    ) -> None:
         self.problem = problem
         self.data_retriever = data_retriever
         self.network_graph = network_graph
@@ -79,6 +79,7 @@ class DASF:
         problem_inputs: ProblemInputs | list[ProblemInputs],
         initial_estimate: np.ndarray | list[np.ndarray] | None,
     ) -> np.ndarray | list[np.ndarray]:
+        """Solves the centralized problem, used for comparison"""
         return self.problem.solve(
             problem_inputs=problem_inputs,
             save_solution=False,
@@ -90,17 +91,19 @@ class DASF:
 
     @property
     def X_estimate(self):
+        """Final estimate of te optimal solution using DASF"""
         if len(self.X_over_iterations) == 0:
             logger.warning("No iterates have been computed, use the run method first.")
             return None
         else:
-            X_star = self.problem.resolve_ambiguity(
+            X_estimate = self.problem.resolve_ambiguity(
                 self.X_over_iterations[-1], self.X_star_over_iterations[-1]
             )
-            return X_star
+            return X_estimate
 
     @property
     def normed_difference_over_iterations(self):
+        """Returns the sequence ||X{i+1}-X^i||_F^2/X.size"""
         if len(self.X_over_iterations) == 0:
             logger.warning("No iterates have been computed, use the run method first.")
             return None
@@ -114,6 +117,7 @@ class DASF:
 
     @property
     def normed_error_over_iterations(self):
+        """Returns the sequence ||X^i-X^*||_F^2/||X^*||_F^2"""
         if len(self.X_over_iterations) == 0:
             logger.warning("No iterates have been computed, use the run method first.")
             return None
@@ -128,6 +132,7 @@ class DASF:
 
     @property
     def absolute_objective_error_over_iterations(self):
+        """Returns the sequence |f(X^{i+1})-f(X^i)|"""
         if hasattr(self.problem, "evaluate_objective"):
             if len(self.X_over_iterations) == 0:
                 logger.warning(
@@ -306,20 +311,18 @@ class DASF:
 
         return None
 
-    def _find_path(self, updating_node: int) -> Tuple[list, list]:
-        """Function finding the neighbors of node q and the shortest path to other every other node in the network.
+    def _find_path(self, updating_node: int) -> Tuple[list[int], list[list[int]]]:
+        """
+        Finds the neighbors of a given node and determines the shortest path to every other node in the network.
 
-        INPUTS:
+        Args:
+            updating_node (int): The source node for which neighbors and shortest paths are computed.
 
-        q: Source node.
-
-        adj (nbnodes x nbnodes): Adjacency (binary) matrix with adj[i,j]=1 if i and j are  connected. Otherwise 0. adj[i,i]=0.
-
-        OUTPUTS:
-
-        neighbors: List containing the neighbors of node q.
-
-        path (nbnodes x 1): List of lists containining at index k the shortest path from node q to node k.
+        Returns:
+            A tuple containing:
+                - `neighbors` (list[int]): A sorted list of nodes that are direct neighbors of `updating_node`.
+                - `path` (list[list[int]]): A list where the element at index `k` contains the shortest path
+                from `updating_node` to node `k`.
         """
         dist, path = self._shortest_path(updating_node)
         neighbors = [x for x in range(len(path)) if len(path[x]) == 2]
@@ -327,23 +330,24 @@ class DASF:
 
         return neighbors, path
 
-    def _shortest_path(self, updating_node: int) -> Tuple[np.ndarray, list]:
-        """Function computing the shortest path distance between a source node and all nodes
-        in the network using Dijkstra's method.
-        Note: This implementation is only for graphs for which the weight at each edge is equal to 1.
+    def _shortest_path(self, updating_node: int) -> Tuple[np.ndarray, list[list[int]]]:
+        """
+        Computes the shortest path distances from a given source node to all other nodes
+        in the network using Dijkstra's algorithm.
 
-        INPUTS:
+        Note:
+            - This implementation assumes that all edges have a weight of 1.
+            - Uses an adjacency matrix representation for the graph.
 
-        q: Source node.
+        Args:
+            updating_node (int): The source node from which shortest paths are calculated.
 
-        adj (nbnodes x nbnodes): Adjacency (binary) matrix where K is the number of nodes
-        in the network with adj[i,j]=1 if i and j are  connected. Otherwise 0. adj[i,i]=0.
-
-        OUTPUTS:
-
-        dist (nbnodes x 1): Distances between the source node and other nodes.
-
-        path (nbnodes x 1): List of lists containining at index k the shortest path from node q to node k.
+        Returns:
+            A tuple containing:
+                - `dist` (np.ndarray): A 1D array where the value at index `k` represents
+                the shortest distance from `updating_node` to node `k`.
+                - `path` (list[list[int]]): A list where the element at index `k` contains
+                the shortest path from `updating_node` to node `k`.
         """
         nb_nodes = self.network_graph.nb_nodes
         dist = np.inf * np.ones(self.network_graph.nb_nodes)
@@ -388,18 +392,21 @@ class DASF:
 
         return dist, path
 
-    def _find_clusters(self, neighbors: list, path: list) -> list:
-        """Function to obtain clusters of nodes for each neighbor.
+    def _find_clusters(
+        self, neighbors: list[int], path: list[list[int]]
+    ) -> list[list[int]]:
+        """
+        Obtains clusters of nodes for each neighbor by removing their direct connection to the source node.
 
-        INPUTS:
+        Args:
+            neighbors (list[int]): List of neighbors of the source node.
+            path (list[list[int]]): A list where the element at index `k` contains the shortest path
+                                    from the source node to node `k`.
 
-        neighbors: List containing the neighbors of node q.
-
-        adj (nbnodes x nbnodes): Adjacency (binary) matrix where K is the number of nodes in the network with adj[i,j]=1 if i and j are  connected. Otherwise 0. adj[i,i]=0.
-
-        OUTPUTS:
-
-        clusters: List of lists. For each neighbor k of q, there is a corresponding list with the nodes of the subgraph containing k, obtained by cutting the link between nodes q and k.
+        Returns:
+            `clusters` (list[list[int]]): A list of clusters. Each sublist corresponds to a neighbor
+                and contains the nodes that belong to the subgraph formed after removing the direct connection
+                between the source node and that neighbor.
         """
         clusters = []
         for k in neighbors:
@@ -410,25 +417,21 @@ class DASF:
     def _build_Cq(
         self, X: np.ndarray, updating_node: int, neighbors: list, clusters: list
     ) -> np.ndarray:
-        """Function to construct the transition matrix between the local data and
-        variables and the global ones.
+        """
+        Constructs the transition matrix that maps the local data and variables to the global ones.
 
-        INPUTS:
+        Args:
+            X (np.ndarray): A matrix of shape (nb_sensors, nb_filters) representing the global variable,
+                            structured as [X1; ...; Xq; ...; XK].
+            updating_node (int): The current updating node.
+            neighbors (list[int]): A list of neighbors of the updating node.
+            clusters (list[list[int]]): A list of clusters, where each sublist corresponds to a neighbor
+                                        and contains nodes in the subgraph formed by cutting the link
+                                        between the updating node and that neighbor.
 
-        X (nbsensors x Q): Global variable equal to [X1;...;Xq;...;XK].
-
-        q: Updating node.
-
-        prob_params: Dictionary related to the problem parameters.
-
-        neighbors: List containing the neighbors of node q.
-
-        clusters: List of lists. For each neighbor k of q, there is a corresponding
-        list with the nodes of the subgraph containing k, obtained by cutting the link between nodes q and k.
-
-        OUTPUTS:
-
-        Cq: Transformation matrix making the transition between local and global data.
+        Returns:
+            np.ndarray: The transition matrix `Cq`, which facilitates the transition between
+                        local and global data representations.
         """
         nb_sensors_per_node = self.network_graph.nb_sensors_per_node
         nb_filters = self.problem.nb_filters
@@ -483,17 +486,23 @@ class DASF:
         return Cq
 
     def _compress(self, problem_inputs: ProblemInputs, Cq: np.ndarray) -> ProblemInputs:
-        """Function to compress the data.
+        """
+        Compresses the data using the transition matrix `Cq`.
 
-        INPUTS:
+        Args:
+            problem_inputs (ProblemInputs): An object containing the original problem data, including:
+                - `fused_signals`: List of signal to be fused.
+                - `fused_constants`: List of constants to be fused (if present).
+                - `fused_quadratics`: List of quadratic matrices to be fused (if present).
+                - `global_parameters`: Additional global parameters (if present).
+            Cq (np.ndarray): The transition matrix that maps the local data to the global one.
 
-        data: Dictionary related to the data.
-
-        Cq: Transformation matrix making the transition between local and global data.
-
-        OUTPUTS:
-
-        data_compressed: Dictionary containing the compressed data. Contains the same keys as 'data'.
+        Returns:
+            ProblemInputs: A new instance of `ProblemInputs` containing the compressed versions of:
+                - `fused_signals`
+                - `fused_constants`
+                - `fused_quadratics`
+                - `global_parameters` (unchanged)
         """
         fused_data = problem_inputs.fused_signals
         fused_constants = problem_inputs.fused_constants
@@ -531,19 +540,17 @@ class DASF:
         return compressed_inputs
 
     def _get_block_q(self, X: np.ndarray, updating_node: int):
-        """Function to extract the block of X corresponding to node q.
+        """
+        Extracts the block of `X` corresponding to the specified updating node.
 
-        INPUTS:
+        Args:
+            X (np.ndarray): A matrix of shape (nb_sensors, nb_filters) representing the global variable,
+                            structured as [X1; ...; Xq; ...; XK].
+            updating_node (int): The node for which the corresponding block of `X` is extracted.
 
-        X (nbsensors x Q): Global variable equal to [X1;...;Xq;...;XK].
-
-        q: Updating node.
-
-        nbsensors_vec (nbnodes x nbnodes): Vector containing the number of sensors for each node.
-
-        OUTPUTS:
-
-        Xq (nbsensors_vec(q) x Q): Block of X corresponding to node q.
+        Returns:
+            np.ndarray: A matrix `Xq` of shape (nb_sensors_per_node[updating_node], nb_filters), containing the block of `X`
+                        corresponding to `updating_node`.
         """
         Mq = self.network_graph.nb_sensors_per_node[updating_node]
         row_blk = np.cumsum(self.network_graph.nb_sensors_per_node)
@@ -554,17 +561,17 @@ class DASF:
         return Xq
 
     def _plot_dynamically(self, X, X_star, line1, line2):
-        """Plot the first column of X and X_star.
+        """
+        Plots the first column of `X` and `X_star` for visual comparison.
 
-        INPUTS:
+        Args:
+            X (np.ndarray): A matrix of shape (nb_sensors, nb_filters) representing the global variable.
+            X_star (np.ndarray): A matrix of shape (nb_sensors, nb_filters) representing the optimal solution.
+            line1: Figure handle for plotting `X`.
+            line2: Figure handle for plotting `X_star`.
 
-        X (nbsensors x Q): Global variable equal.
-
-        X_star (nbsensors x Q): Optimal solution.
-
-        line1: Figure handle for X.
-
-        line2: Figure handle for X_star.
+        Returns:
+            None: This function generates a plot but does not return a value.
         """
         line1.set_ydata(X[:, 1])
         line2.set_ydata(X_star[:, 1])
