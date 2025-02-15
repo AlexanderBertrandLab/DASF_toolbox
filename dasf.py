@@ -7,7 +7,6 @@ from problem_settings import (
 )
 from data_retriever import DataRetriever
 from optimization_problems import OptimizationProblem
-import logging
 from typing import Tuple
 import matplotlib.pyplot as plt
 from matplotlib.lines import Line2D
@@ -38,6 +37,14 @@ class DASF:
         self.dasf_convergence_params = dasf_convergence_params
         self.data_window_params = data_window_params
         self.solver_convergence_parameters = solver_convergence_parameters
+        if solver_convergence_parameters is None:
+            if problem.convergence_parameters is not None:
+                self.solver_convergence_parameters = solver_convergence_parameters
+                logger.warning(
+                    "Using same convergence parameters as centralized solver"
+                )
+            else:
+                self.solver_convergence_parameters = ConvergenceParameters()
         if updating_path is not None:
             self.updating_path = updating_path
         else:
@@ -81,7 +88,7 @@ class DASF:
         )
 
     @property
-    def X_star(self):
+    def X_estimate(self):
         if len(self.X_over_iterations) == 0:
             logger.warning("No iterates have been computed, use the run method first.")
             return None
@@ -145,9 +152,9 @@ class DASF:
 
     def run(self) -> None:
         self.X_over_iterations.clear()
+        self.f_over_iterations.clear()
         self.X_star_over_iterations.clear()
         self.f_star_over_iterations.clear()
-        self.f_over_iterations.clear()
 
         problem_inputs = self.data_retriever.get_current_window(window_id=0)
 
@@ -243,6 +250,9 @@ class DASF:
             # Global variable
             X_new = Cq @ X_tilde_new
             self.X_over_iterations.append(X_new)
+            X_star_current_window = self.problem.resolve_ambiguity(
+                X_ref=X_new, X=X_star_current_window, updating_node=updating_node
+            )
             self.X_star_over_iterations.append(X_star_current_window)
             if hasattr(self.problem, "evaluate_objective"):
                 f_new = self.problem.evaluate_objective(
@@ -256,10 +266,7 @@ class DASF:
                 )
 
             if self.dynamic_plot:
-                X_compare = self.problem.resolve_ambiguity(
-                    X_star_current_window, X, updating_node
-                )
-                self._plot_dynamically(X_compare, X_star_current_window, line1, line2)
+                self._plot_dynamically(X_new, X_star_current_window, line1, line2)
 
             i += 1
 
@@ -730,8 +737,8 @@ class DASF:
         fig = plt.figure()
         ax = fig.add_subplot(1, 1, 1)
         ax.loglog(
-            range(1, self.total_iterations),
-            self.absolute_objective_error_over_iterations,
+            range(1, self.total_iterations + 1),
+            self.absolute_objective_error_over_iterations[1:],
             color="b",
         )
         ax.set_xlabel(r"Iterations $i$")

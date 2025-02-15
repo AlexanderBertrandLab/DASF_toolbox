@@ -25,10 +25,12 @@ class OptimizationProblem(ABC):
         nb_filters: int,
         convergence_parameters: ConvergenceParameters | None = None,
         initial_estimate: np.ndarray | None = None,
+        rng: np.random.Generator | None = None,
     ) -> None:
         self.nb_filters = nb_filters
         self.convergence_parameters = convergence_parameters
         self.initial_estimate = initial_estimate
+        self.rng = rng
         self._X_star = None
 
     @abstractmethod
@@ -142,7 +144,10 @@ class LCMVProblem(OptimizationProblem):
 
 
 class GEVDProblem(OptimizationProblem):
-    def __init__(self, nb_filters: int) -> None:
+    def __init__(
+        self,
+        nb_filters: int,
+    ) -> None:
         super().__init__(nb_filters=nb_filters)
 
     def solve(
@@ -164,6 +169,9 @@ class GEVDProblem(OptimizationProblem):
 
         X_star = eigvecs[:, indices[0 : self.nb_filters]]
 
+        if save_solution:
+            self._X_star = X_star
+
         return X_star
 
     def evaluate_objective(self, X: np.ndarray, problem_inputs: ProblemInputs) -> float:
@@ -176,8 +184,124 @@ class GEVDProblem(OptimizationProblem):
 
         return f
 
-    def resolve_ambiguity(self, X_ref, X, updating_node):
+    def resolve_ambiguity(
+        self,
+        X_ref: np.ndarray | list[np.ndarray],
+        X: np.ndarray | list[np.ndarray],
+        updating_node: int | None = None,
+    ) -> np.ndarray | list[np.ndarray]:
         """Resolve the sign ambiguity for the GEVD problem."""
+
+        for i in range(self.nb_filters):
+            if np.linalg.norm(X_ref[:, i] - X[:, i]) > np.linalg.norm(
+                -X_ref[:, i] - X[:, i]
+            ):
+                X[:, i] = -X[:, i]
+
+        return X
+
+
+class TROProblem(OptimizationProblem):
+    def __init__(
+        self, nb_filters: int, convergence_parameters: ConvergenceParameters
+    ) -> None:
+        super().__init__(
+            nb_filters=nb_filters, convergence_parameters=convergence_parameters
+        )
+
+    def solve(
+        self,
+        problem_inputs: ProblemInputs,
+        save_solution: bool = False,
+        convergence_parameters=None,
+        initial_estimate=None,
+    ) -> np.ndarray:
+        """Solve the TRO problem max E[||X.T @ y(t)||**2] / E[||X.T @ v(t)||**2] s.t. X.T @ Gamma @ X = I."""
+        Y = problem_inputs.fused_signals[0]
+        V = problem_inputs.fused_signals[1]
+        Gamma = problem_inputs.fused_quadratics[0]
+
+        if initial_estimate is None:
+            rng = self.rng if self.rng is not None else np.random.default_rng()
+            X = rng.normal(
+                size=(
+                    np.size(Y, 0),
+                    self.nb_filters,
+                )
+            )
+            logger.warning("Initializing first estimate randomly")
+        else:
+            X = initial_estimate
+        f = self.evaluate_objective(X, problem_inputs)
+
+        if convergence_parameters is None:
+            if self.convergence_parameters is not None:
+                convergence_parameters = self.convergence_parameters
+            else:
+                convergence_parameters = ConvergenceParameters()
+
+        Ryy = autocorrelation_matrix(Y)
+        Rvv = autocorrelation_matrix(V)
+
+        U_c, S_c, _ = np.linalg.svd(Gamma)
+
+        Y_t = np.diag(np.sqrt(1 / S_c)) @ U_c.T @ Y
+        V_t = np.diag(np.sqrt(1 / S_c)) @ U_c.T @ V
+
+        Kyy = np.diag(np.sqrt(1 / S_c)) @ U_c.T @ Ryy @ U_c @ np.diag(np.sqrt(1 / S_c))
+        Kvv = np.diag(np.sqrt(1 / S_c)) @ U_c.T @ Rvv @ U_c @ np.diag(np.sqrt(1 / S_c))
+
+        i = 0
+        while i < convergence_parameters.max_iterations:
+            eigvals, eigvecs = np.linalg.eig(Kyy - f * Kvv)
+            indices = np.argsort(eigvals)[::-1]
+
+            X_old = X
+            X = eigvecs[:, indices[0 : self.nb_filters]]
+            f_old = f
+            Y_list_t = [Y_t, V_t]
+            problem_inputs_t = ProblemInputs(fused_signals=Y_list_t)
+            f = self.evaluate_objective(X, problem_inputs_t)
+
+            i += 1
+
+            if (convergence_parameters.objective_tolerance is not None) and (
+                np.absolute(f - f_old) <= convergence_parameters.objective_tolerance
+            ):
+                break
+            if (convergence_parameters.argument_tolerance is not None) and (
+                np.linalg.norm(X - X_old, "fro")
+                <= convergence_parameters.argument_tolerance
+            ):
+                break
+
+        X_star = U_c @ np.diag(np.sqrt(1 / S_c)) @ X
+
+        if save_solution:
+            self._X_star = X_star
+
+        return X_star
+
+    def evaluate_objective(self, X: np.ndarray, problem_inputs: ProblemInputs) -> float:
+        """Evaluate the TRO objective E[||X.T @ y(t)||**2] / E[||X.T @ v(t)||**2]."""
+
+        Y = problem_inputs.fused_signals[0]
+        V = problem_inputs.fused_signals[1]
+
+        Ryy = autocorrelation_matrix(Y)
+        Rvv = autocorrelation_matrix(V)
+
+        f = np.trace(X.T @ Ryy @ X) / np.trace(X.T @ Rvv @ X)
+
+        return f
+
+    def resolve_ambiguity(
+        self,
+        X_ref: np.ndarray | list[np.ndarray],
+        X: np.ndarray | list[np.ndarray],
+        updating_node: int | None = None,
+    ) -> np.ndarray | list[np.ndarray]:
+        """Resolve the sign ambiguity for the TRO problem."""
 
         for i in range(self.nb_filters):
             if np.linalg.norm(X_ref[:, i] - X[:, i]) > np.linalg.norm(
@@ -289,143 +413,6 @@ class CCAProblem(OptimizationProblem):
         cca_inputs_W = ProblemInputs(fused_signals=[V])
 
         return [cca_inputs_X, cca_inputs_W]
-
-
-class TROProblem(OptimizationProblem):
-    def __init__(
-        self,
-        convergence_parameters: ConvergenceParameters | None,
-        initial_estimate: np.ndarray | None = None,
-    ) -> None:
-        super().__init__(
-            convergence_parameters=convergence_parameters,
-            initial_estimate=initial_estimate,
-        )
-
-    def solve(self, problem_inputs: ProblemInputs) -> np.ndarray:
-        """Solve the TRO problem max E[||X.T @ y(t)||**2] / E[||X.T @ v(t)||**2] s.t. X.T @ Gamma @ X = I."""
-        Y = problem_inputs.fused_signals[0]
-        V = problem_inputs.fused_signals[1]
-        Gamma = problem_inputs.fused_quadratics[0]
-
-        rng = np.random.default_rng()
-        if self.initial_estimate is None:
-            X = rng.normal(
-                size=(
-                    np.size(Y, 0),
-                    self.nb_filters,
-                )
-            )
-        else:
-            X = self.initial_estimate
-        f = self.evaluate_objective(X, problem_inputs)
-
-        convergence_parameters = (
-            self.convergence_parameters
-            if self.convergence_parameters is not None
-            else ConvergenceParameters()
-        )
-
-        Ryy = autocorrelation_matrix(Y)
-        Rvv = autocorrelation_matrix(V)
-
-        U_c, S_c, _ = np.linalg.svd(Gamma)
-
-        Y_t = np.diag(np.sqrt(1 / S_c)) @ U_c.T @ Y
-        V_t = np.diag(np.sqrt(1 / S_c)) @ U_c.T @ V
-
-        Kyy = np.diag(np.sqrt(1 / S_c)) @ U_c.T @ Ryy @ U_c @ np.diag(np.sqrt(1 / S_c))
-        Kvv = np.diag(np.sqrt(1 / S_c)) @ U_c.T @ Rvv @ U_c @ np.diag(np.sqrt(1 / S_c))
-
-        i = 0
-        while i < convergence_parameters.max_iterations:
-            eigvals, eigvecs = np.linalg.eig(Kyy - f * Kvv)
-            indices = np.argsort(eigvals)[::-1]
-
-            X_old = X
-            X = eigvecs[:, indices[0 : self.nb_filters]]
-            f_old = f
-            Y_list_t = [Y_t, V_t]
-            problem_inputs_t = ProblemInputs(fused_signals=Y_list_t)
-            f = self.evaluate_objective(X, problem_inputs_t)
-
-            i += 1
-
-            if (
-                np.absolute(f - f_old) <= convergence_parameters.objective_tolerance
-            ) or (
-                np.linalg.norm(X - X_old, "fro")
-                <= convergence_parameters.argument_tolerance
-            ):
-                break
-
-        X_star = U_c @ np.diag(np.sqrt(1 / S_c)) @ X
-
-        return X_star
-
-    def evaluate_objective(self, X: np.ndarray, problem_inputs: ProblemInputs) -> float:
-        """Evaluate the TRO objective E[||X.T @ y(t)||**2] / E[||X.T @ v(t)||**2]."""
-
-        Y = problem_inputs.fused_signals[0]
-        V = problem_inputs.fused_signals[1]
-
-        Ryy = autocorrelation_matrix(Y)
-        Rvv = autocorrelation_matrix(V)
-
-        f = np.trace(X.T @ Ryy @ X) / np.trace(X.T @ Rvv @ X)
-
-        return f
-
-    def resolve_ambiguity(self, X_ref, X, prob_params, q):
-        """Resolve the sign ambiguity for the TRO problem."""
-
-        for l in range(self.nb_filters):
-            if np.linalg.norm(X_ref[:, l] - X[:, l]) > np.linalg.norm(
-                -X_ref[:, l] - X[:, l]
-            ):
-                X[:, l] = -X[:, l]
-
-        return X
-
-    def generate_synthetic_inputs(
-        self,
-        signal_var: float = 0.5,
-        noise_var: float = 0.1,
-        offset: float = 0.5,
-        latent_dimensions: int = 10,
-        nb_sources: int | None = None,
-    ) -> list[ProblemInputs]:
-        """Generate synthetic inputs for the TRO problem."""
-        rng = np.random.default_rng()
-
-        nb_samples = self.problem_parameters.nb_samples
-        nb_sensors = self.problem_parameters.network_graph.nb_sensors_total
-
-        if nb_sources is None:
-            nb_sources = self.nb_filters
-
-        D = rng.normal(loc=0, scale=np.sqrt(signal_var), size=(nb_sources, nb_samples))
-        S = rng.normal(
-            loc=0,
-            scale=np.sqrt(signal_var),
-            size=(latent_dimensions - nb_sources, nb_samples),
-        )
-        A = rng.uniform(low=-offset, high=offset, size=(nb_sensors, nb_sources))
-        B = rng.uniform(
-            low=offset, high=offset, size=(nb_sensors, latent_dimensions - nb_sources)
-        )
-        noise = rng.normal(
-            loc=0, scale=np.sqrt(noise_var), size=(nb_sensors, nb_samples)
-        )
-
-        V = B @ S + noise
-        Y = A @ D + V
-
-        Gamma = np.eye(nb_sensors)
-
-        tro_inputs = ProblemInputs(fused_signals=[Y, V], fused_quadratics=[Gamma])
-
-        return tro_inputs
 
 
 class QCQPProblem(OptimizationProblem):

@@ -38,9 +38,9 @@ nb_windows = 200
 nb_filters = 5
 
 # Number of times each window will be repeated
-nb_window_reuse = 3
+nb_window_reuse = 2
 
-lcmv_data_retriever = GEVDDataRetriever(
+gevd_data_retriever = GEVDDataRetriever(
     nb_samples=nb_samples_per_window,
     nb_sensors=network_graph.nb_sensors_total,
     nb_sources=nb_filters,
@@ -52,7 +52,7 @@ data_window_params = DataWindowParameters(
     window_length=nb_samples_per_window,
     nb_window_reuse=nb_window_reuse,
 )
-lcmv_problem = GEVDProblem(nb_filters=nb_filters)
+gevd_problem = GEVDProblem(nb_filters=nb_filters)
 
 max_iterations = nb_windows * data_window_params.nb_window_reuse
 dasf_convergence_parameters = ConvergenceParameters(max_iterations=max_iterations)
@@ -60,8 +60,8 @@ dasf_convergence_parameters = ConvergenceParameters(max_iterations=max_iteration
 update_path = rng.permutation(range(nb_nodes))
 
 dasf_solver = DASF(
-    problem=lcmv_problem,
-    data_retriever=lcmv_data_retriever,
+    problem=gevd_problem,
+    data_retriever=gevd_data_retriever,
     network_graph=network_graph,
     dasf_convergence_params=dasf_convergence_parameters,
     data_window_params=data_window_params,
@@ -75,6 +75,13 @@ fig = dasf_solver.plot_error_over_batches()
 ax = plt.gca()
 ax.set_xscale("linear")
 ax2 = ax.twinx()
-ax2.plot(lcmv_data_retriever.weight_function(nb_windows), "r")
+ax2.plot(
+    range(
+        1,
+        int(dasf_solver.total_iterations / data_window_params.nb_window_reuse) + 1,
+    ),
+    gevd_data_retriever.weight_function(nb_windows),
+    "r",
+)
 ax2.set_ylabel("Weight function", color="r")
 plt.show()

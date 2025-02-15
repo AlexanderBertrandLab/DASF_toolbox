@@ -76,6 +76,13 @@ fig = dasf_solver.plot_error_over_batches()
 ax = plt.gca()
 ax.set_xscale("linear")
 ax2 = ax.twinx()
-ax2.plot(lcmv_data_retriever.weight_function(nb_windows), "r")
+ax2.plot(
+    range(
+        1,
+        int(dasf_solver.total_iterations / data_window_params.nb_window_reuse) + 1,
+    ),
+    lcmv_data_retriever.weight_function(nb_windows),
+    "r",
+)
 ax2.set_ylabel("Weight function", color="r")
 plt.show()

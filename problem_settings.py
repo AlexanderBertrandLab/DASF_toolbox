@@ -76,7 +76,7 @@ class ConvergenceParameters:
         ):
             self.max_iterations = 100
             logger.warning(
-                "No convergence conditions specified, setting max iterations to 100"
+                f"No convergence conditions specified, setting max iterations to {self.max_iterations}"
             )
 
 
