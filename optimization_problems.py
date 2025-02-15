@@ -24,13 +24,15 @@ class OptimizationProblem(ABC):
         self,
         nb_filters: int,
         convergence_parameters: ConvergenceParameters | None = None,
-        initial_estimate: np.ndarray | None = None,
+        initial_estimate: np.ndarray | list[np.ndarray] | None = None,
         rng: np.random.Generator | None = None,
+        nb_variables: int = 1,
     ) -> None:
         self.nb_filters = nb_filters
         self.convergence_parameters = convergence_parameters
         self.initial_estimate = initial_estimate
         self.rng = rng
+        self.nb_variables = nb_variables
         self._X_star = None
 
     @abstractmethod
@@ -39,7 +41,7 @@ class OptimizationProblem(ABC):
         problem_inputs: ProblemInputs | list[ProblemInputs],
         save_solution: bool = False,
         convergence_parameters: ConvergenceParameters | None = None,
-        initial_estimate: np.ndarray | None = None,
+        initial_estimate: np.ndarray | list[np.ndarray] | None = None,
     ) -> np.ndarray | list[np.ndarray]:
         pass
 
@@ -53,11 +55,11 @@ class OptimizationProblem(ABC):
 
     def resolve_ambiguity(
         self,
-        X_ref: np.ndarray | list[np.ndarray],
-        X: np.ndarray | list[np.ndarray],
+        X_reference: np.ndarray | list[np.ndarray],
+        X_current: np.ndarray | list[np.ndarray],
         updating_node: int | None = None,
     ) -> np.ndarray | list[np.ndarray]:
-        return X
+        return X_current
 
     @property
     def X_star(self):
@@ -186,19 +188,19 @@ class GEVDProblem(OptimizationProblem):
 
     def resolve_ambiguity(
         self,
-        X_ref: np.ndarray | list[np.ndarray],
-        X: np.ndarray | list[np.ndarray],
+        X_reference: np.ndarray | list[np.ndarray],
+        X_current: np.ndarray | list[np.ndarray],
         updating_node: int | None = None,
     ) -> np.ndarray | list[np.ndarray]:
         """Resolve the sign ambiguity for the GEVD problem."""
 
         for i in range(self.nb_filters):
-            if np.linalg.norm(X_ref[:, i] - X[:, i]) > np.linalg.norm(
-                -X_ref[:, i] - X[:, i]
+            if np.linalg.norm(X_reference[:, i] - X_current[:, i]) > np.linalg.norm(
+                -X_reference[:, i] - X_current[:, i]
             ):
-                X[:, i] = -X[:, i]
+                X_current[:, i] = -X_current[:, i]
 
-        return X
+        return X_current
 
 
 class TROProblem(OptimizationProblem):
@@ -297,26 +299,35 @@ class TROProblem(OptimizationProblem):
 
     def resolve_ambiguity(
         self,
-        X_ref: np.ndarray | list[np.ndarray],
-        X: np.ndarray | list[np.ndarray],
+        X_reference: np.ndarray | list[np.ndarray],
+        X_current: np.ndarray | list[np.ndarray],
         updating_node: int | None = None,
     ) -> np.ndarray | list[np.ndarray]:
         """Resolve the sign ambiguity for the TRO problem."""
 
         for i in range(self.nb_filters):
-            if np.linalg.norm(X_ref[:, i] - X[:, i]) > np.linalg.norm(
-                -X_ref[:, i] - X[:, i]
+            if np.linalg.norm(X_reference[:, i] - X_current[:, i]) > np.linalg.norm(
+                -X_reference[:, i] - X_current[:, i]
             ):
-                X[:, i] = -X[:, i]
+                X_current[:, i] = -X_current[:, i]
 
-        return X
+        return X_current
 
 
 class CCAProblem(OptimizationProblem):
-    def __init__(self) -> None:
-        super().__init__()
+    def __init__(
+        self,
+        nb_filters: int,
+    ) -> None:
+        super().__init__(nb_filters=nb_filters, nb_variables=2)
 
-    def solve(self, problem_inputs: list[ProblemInputs]) -> np.ndarray:
+    def solve(
+        self,
+        problem_inputs: list[ProblemInputs],
+        save_solution: bool = False,
+        convergence_parameters=None,
+        initial_estimate=None,
+    ) -> np.ndarray:
         """Solve the CCA problem max_(X,W) E[trace(X.T @ y(t) @ v(t).T @ W)]
         s.t. E[X.T @ y(t) @ y(t).T @ X] = I, E[W.T @ v(t) @ v(t).T @ W] = I."""
         inputs_X = problem_inputs[0]
@@ -331,11 +342,11 @@ class CCAProblem(OptimizationProblem):
         Rvy = Ryv.T
 
         inv_Rvv = np.linalg.inv(Rvv)
-        inv_Rvv = (inv_Rvv + inv_Rvv.T) / 2
+        inv_Rvv = make_symmetric(inv_Rvv)
         A_X = Ryv @ inv_Rvv @ Rvy
-        A_X = (A_X + A_X.T) / 2
+        A_X = make_symmetric(A_X)
 
-        eigvals_X, eigvecs_X = np.linalg.eigh(A_X, Ryy)
+        eigvals_X, eigvecs_X = scipy.linalg.eigh(A_X, Ryy)
         indices_X = np.argsort(eigvals_X)[::-1]
         eigvals_X = eigvals_X[indices_X]
         eigvecs_X = eigvecs_X[:, indices_X]
@@ -347,10 +358,13 @@ class CCAProblem(OptimizationProblem):
         W = eigvecs_W[:, 0 : self.nb_filters]
         X_star = [X, W]
 
+        if save_solution:
+            self._X_star = X_star
+
         return X_star
 
     def evaluate_objective(
-        X: list[np.ndarray], problem_inputs: list[ProblemInputs]
+        self, X: list[np.ndarray], problem_inputs: list[ProblemInputs]
     ) -> float:
         """Evaluate the CCA objective E[trace(X.T @ y(t) @ v(t).T @ W)]."""
         inputs_X = problem_inputs[0]
@@ -365,19 +379,23 @@ class CCAProblem(OptimizationProblem):
 
         return f
 
-    def resolve_ambiguity(self, X_ref, X, prob_params, q):
+    def resolve_ambiguity(
+        self,
+        X_reference: list[np.ndarray],
+        X_current: list[np.ndarray],
+        updating_node: int | None = None,
+    ) -> list[np.ndarray]:
         """Resolve the sign ambiguity for the CCA problem."""
-        X = X[0]
-        W = X[1]
-        X_ref = X_ref[0]
-        Q = np.size(X, 1)
+        X = X_current[0]
+        W = X_current[1]
+        X_ref = X_reference[0]
 
-        for l in range(Q):
-            if np.linalg.norm(X_ref[:, l] - X[:, l]) > np.linalg.norm(
-                -X_ref[:, l] - X[:, l]
+        for i in range(self.nb_filters):
+            if np.linalg.norm(X_ref[:, i] - X[:, i]) > np.linalg.norm(
+                -X_ref[:, i] - X[:, i]
             ):
-                X[:, l] = -X[:, l]
-                W[:, l] = -W[:, l]
+                X[:, i] = -X[:, i]
+                W[:, i] = -W[:, i]
 
         return [X, W]
 
