@@ -539,7 +539,7 @@ class DASF:
 
         return compressed_inputs
 
-    def _get_block_q(self, X: np.ndarray, updating_node: int):
+    def _get_block_q(self, X: np.ndarray, updating_node: int) -> np.ndarray:
         """
         Extracts the block of `X` corresponding to the specified updating node.
 
@@ -560,7 +560,9 @@ class DASF:
 
         return Xq
 
-    def _plot_dynamically(self, X, X_star, line1, line2):
+    def _plot_dynamically(
+        self, X: np.ndarray, X_star: np.ndarray, line1: Line2D, line2: Line2D
+    ) -> None:
         """
         Plots the first column of `X` and `X_star` for visual comparison.
 
@@ -569,9 +571,6 @@ class DASF:
             X_star (np.ndarray): A matrix of shape (nb_sensors, nb_filters) representing the optimal solution.
             line1: Figure handle for plotting `X`.
             line2: Figure handle for plotting `X_star`.
-
-        Returns:
-            None: This function generates a plot but does not return a value.
         """
         line1.set_ydata(X[:, 1])
         line2.set_ydata(X_star[:, 1])
@@ -998,18 +997,21 @@ class DASFMultiVar(DASF):
 
         return None
 
-    def _plot_dynamically(self, X, X_star, line1, line2):
-        """Plot the first column of X and X_star.
+    def _plot_dynamically(
+        self,
+        X: list[np.ndarray],
+        X_star: list[np.ndarray],
+        line1: Line2D,
+        line2: Line2D,
+    ) -> None:
+        """
+        Plots the stacked first columns of `X` and `X_star` for visual comparison.
 
-        INPUTS:
-
-        X (nbsensors x Q): Global variable equal.
-
-        X_star (nbsensors x Q): Optimal solution.
-
-        line1: Figure handle for X.
-
-        line2: Figure handle for X_star.
+        Args:
+            X (list[np.ndarray]): A list of matrices of shape (nb_sensors, nb_filters) representing the global variable.
+            X_star (list[np.ndarray]): A list of matrices of shape (nb_sensors, nb_filters) representing the optimal solution.
+            line1: Figure handle for plotting `X`.
+            line2: Figure handle for plotting `X_star`.
         """
         line1.set_ydata(np.vstack(X)[:, 1])
         line2.set_ydata(np.vstack(X_star)[:, 1])
