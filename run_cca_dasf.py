@@ -14,7 +14,7 @@ from problem_settings import (
 )
 from optimization_problems import CCAProblem
 from data_retriever import CCADataRetriever
-from dasf import DASFMultiVar
+from dasf import DASFMultiVar, DynamicPlotParameters
 
 random_seed = 2025
 rng = np.random.default_rng(random_seed)
@@ -69,6 +69,11 @@ data_window_params = get_stationary_setting(
     window_length=nb_samples_per_window, iterations=dasf_iterations
 )
 
+# Dynamic plotting parameters
+dynamic_plot_params = DynamicPlotParameters(
+    tau=5, show_x=True, show_xTY=True, X_col=0, XTY_col=0, Y_id=0
+)
+
 update_path = rng.permutation(range(nb_nodes))
 
 dasf_solver = DASFMultiVar(
@@ -80,6 +85,7 @@ dasf_solver = DASFMultiVar(
     updating_path=update_path,
     rng=rng,
     dynamic_plot=True,
+    dynamic_plot_params=dynamic_plot_params,
 )
 dasf_solver.run()
 

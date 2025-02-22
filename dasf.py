@@ -21,11 +21,12 @@ logger = logging.getLogger(__name__)
 
 @dataclass
 class DynamicPlotParameters:
-    tau: int = 100
+    tau: int = 10
     show_x: bool = True
     show_xTY: bool = True
     X_col: int = 0
     XTY_col: int = 0
+    Y_id: int = 0
 
     def apply_correction(
         self, nb_filters: int, nb_samples: int
@@ -33,9 +34,9 @@ class DynamicPlotParameters:
         new_values = self.__dict__.copy()
 
         if self.tau > nb_samples / 2:
-            new_values["tau"] = 100
+            new_values["tau"] = 10
             logger.warning(
-                "Subsample value exceeds the total number of samples, setting it to 100"
+                "Subsample value exceeds the total number of samples, setting it to 10"
             )
         if self.X_col >= nb_filters:
             new_values["X_col"] = nb_filters - 1
@@ -226,89 +227,9 @@ class DASF:
             )
 
         if self.dynamic_plot:
-            plt.ion()
-            fig, axes = plt.subplots(2, 1, figsize=(10, 8))
-
-            ax1 = axes[0]
-            (line1,) = ax1.plot(
-                X[:, self.dynamic_plot_params.X_col],
-                color="orange",
-                marker="x",
-                label="Current estimate",
+            line_x, line_xs, line_xTY, line_xsTY = self._init_dynamic_plot(
+                X, X_star_current_window, problem_inputs
             )
-            (line2,) = ax1.plot(
-                X_star_current_window[:, self.dynamic_plot_params.X_col],
-                color="b",
-                label="Centralized solution",
-            )
-            ax1.set_xlim(0, X.shape[0])
-            ax1.set_ylim(
-                2 * np.min(X_star_current_window[:, self.dynamic_plot_params.X_col]),
-                2 * np.max(X_star_current_window[:, self.dynamic_plot_params.X_col]),
-            )
-            ax1.legend()
-            ax1.set_xlabel("Sensors")
-            ax1.set_ylabel("Weight values")
-            ax1.set_title(
-                f"Weights per sensor for filter {self.dynamic_plot_params.X_col}"
-            )
-            ax1.grid()
-
-            Y = problem_inputs.fused_signals[0]
-            ax2 = axes[1]
-            xTY = X[:, [self.dynamic_plot_params.XTY_col]].T @ Y
-            xsTY = X_star_current_window[:, [self.dynamic_plot_params.XTY_col]].T @ Y
-            sampled_indices = np.arange(0, xTY.shape[1], self.dynamic_plot_params.tau)
-            (line3,) = ax2.plot(
-                sampled_indices,
-                xTY[0, sampled_indices],
-                color="orange",
-                marker="x",
-                label="Filtered signal estimation",
-            )
-            (line4,) = ax2.plot(
-                sampled_indices,
-                xsTY[0, sampled_indices],
-                color="b",
-                label="Filtered signal target",
-            )
-            ax2.set_xlim(0, len(sampled_indices))
-            ax2.set_ylim(
-                2 * np.min(xsTY[0, :]),
-                2 * np.max(xsTY[0, :]),
-            )
-            ax2.legend()
-            ax2.set_xlabel("Samples")
-            ax2.set_ylabel("Filtered signal values")
-            ax2.set_title(
-                f"Filtered signal for filter {self.dynamic_plot_params.XTY_col}, sampled at {self.dynamic_plot_params.tau}"
-            )
-            ax2.grid()
-
-            plt.show()
-
-            # plt.ion()
-            # fig, ax = plt.subplots()
-            # (line1,) = ax.plot(X[:, 1], color="r", marker="x", label="Current estimate")
-            # (line2,) = ax.plot(
-            #     X_star_current_window[:, 1],
-            #     color="b",
-            #     label="Centralized solution",
-            # )
-            # plt.axis(
-            #     [
-            #         0,
-            #         self.network_graph.nb_sensors_total,
-            #         2 * np.min(X_star_current_window[:, 1]),
-            #         2 * np.max(X_star_current_window[:, 1]),
-            #     ]
-            # )
-            # ax.legend()
-            # ax.set_xlabel("Sensors")
-            # ax.set_ylabel("Weight values")
-            # ax.set_title("Weights per sensor for first filter")
-            # ax.grid()
-            # plt.show()
 
         i = 0
         window_id = 0
@@ -381,16 +302,14 @@ class DASF:
                 )
 
             if self.dynamic_plot:
-                # self._plot_dynamically(X_new, X_star_current_window, line1, line2)
-                self._plot_dynamically(
+                self._update_dynamic_plot(
                     X=X_new,
                     X_star=X_star_current_window,
                     problem_inputs=problem_inputs,
-                    tau=self.dynamic_plot_params.tau,
-                    line1=line1,
-                    line2=line2,
-                    line3=line3,
-                    line4=line4,
+                    line_x=line_x,
+                    line_xs=line_xs,
+                    line_xTY=line_xTY,
+                    line_xsTY=line_xsTY,
                 )
 
             i += 1
@@ -677,144 +596,124 @@ class DASF:
 
         return Xq
 
-    def _plot_dynamically(
-        self,
-        X: np.ndarray,
-        X_star: np.ndarray,
-        problem_inputs: ProblemInputs,
-        tau: int,
-        line1: Line2D,
-        line2: Line2D,
-        line3: Line2D,
-        line4: Line2D,
-    ) -> None:
+    def _init_dynamic_plot(
+        self, X: np.ndarray, X_star: np.ndarray, problem_inputs: ProblemInputs
+    ) -> Tuple[Line2D]:
         """
-        Updates the plots dynamically.
+        Initializes the dynamic plot.
 
         Args:
             X (np.ndarray): Current estimate matrix.
             X_star (np.ndarray): Optimal solution matrix.
             problem_inputs (ProblemInputs): Problem inputs.
-            tau (int): Sampling interval for the second plot.
-            line1: Line object for X.
-            line2: Line object for X_star.
-            line3: Line object for X[:, 0].T @ Y.
-            line4: Line object for X_star[:, 0].T * Y.
         """
-        Y = problem_inputs.fused_signals[0]
-        xTY = X[:, [self.dynamic_plot_params.XTY_col]].T @ Y
-        xsTY = X_star[:, [self.dynamic_plot_params.XTY_col]].T @ Y
-        sampled_indices = np.arange(0, xTY.shape[1], tau)
+        plt.ion()
+        if self.dynamic_plot_params.show_x & self.dynamic_plot_params.show_xTY:
+            fig, axes = plt.subplots(2, 1, figsize=(10, 8))
+        else:
+            fig, axes = plt.subplots(1, 1, figsize=(7, 4))
 
-        line1.set_ydata(X[:, self.dynamic_plot_params.X_col])
-        line2.set_ydata(X_star[:, self.dynamic_plot_params.X_col])
-        line3.set_xdata(sampled_indices)
-        line3.set_ydata(xTY[0, sampled_indices])
-        line4.set_ydata(xsTY[0, sampled_indices])
+        (line_x, line_xs, line_xTY, line_xsTY) = (None, None, None, None)
+        if self.dynamic_plot_params.show_x:
+            ax1 = axes[0] if self.dynamic_plot_params.show_xTY else axes
+            (line_x,) = ax1.plot(
+                X[:, self.dynamic_plot_params.X_col],
+                color="orange",
+                marker="x",
+                label="Current estimate",
+            )
+            (line_xs,) = ax1.plot(
+                X_star[:, self.dynamic_plot_params.X_col],
+                color="b",
+                label="Centralized solution",
+            )
+            ax1.set_xlim(1, X.shape[0])
+            ax1.set_ylim(
+                2 * np.min(X_star[:, self.dynamic_plot_params.X_col]),
+                2 * np.max(X_star[:, self.dynamic_plot_params.X_col]),
+            )
+            ax1.legend(loc="upper right")
+            ax1.set_xlabel("Sensors")
+            ax1.set_ylabel("Weight values")
+            ax1.set_title(
+                f"Weights per sensor for filter {self.dynamic_plot_params.X_col}"
+            )
+            ax1.grid()
+
+        if self.dynamic_plot_params.show_xTY:
+            Y = problem_inputs.fused_signals[self.dynamic_plot_params.Y_id]
+            ax2 = axes[1] if self.dynamic_plot_params.show_x else axes
+            xTY = X[:, [self.dynamic_plot_params.XTY_col]].T @ Y
+            xsTY = X_star[:, [self.dynamic_plot_params.XTY_col]].T @ Y
+            sampled_indices = np.arange(0, xTY.shape[1], self.dynamic_plot_params.tau)
+            (line_xTY,) = ax2.plot(
+                sampled_indices,
+                xTY[0, sampled_indices],
+                color="orange",
+                marker="x",
+                label="Filtered signal estimation",
+            )
+            (line_xsTY,) = ax2.plot(
+                sampled_indices,
+                xsTY[0, sampled_indices],
+                color="b",
+                label="Filtered signal target",
+            )
+            ax2.set_xlim(0, len(sampled_indices))
+            ax2.set_ylim(
+                2 * np.min(xsTY[0, :]),
+                2 * np.max(xsTY[0, :]),
+            )
+            ax2.legend(loc="upper right")
+            ax2.set_xlabel("Samples")
+            ax2.set_ylabel("Filtered signal values")
+            ax2.set_title(
+                f"Filtered signal for filter {self.dynamic_plot_params.XTY_col}, sampled every {self.dynamic_plot_params.tau} samples"
+            )
+            ax2.grid()
+
+        plt.subplots_adjust(hspace=0.4)
+        plt.show()
+        return line_x, line_xs, line_xTY, line_xsTY
+
+    def _update_dynamic_plot(
+        self,
+        X: np.ndarray,
+        X_star: np.ndarray,
+        problem_inputs: ProblemInputs,
+        line_x: Line2D | None,
+        line_xs: Line2D | None,
+        line_xTY: Line2D | None,
+        line_xsTY: Line2D | None,
+    ) -> None:
+        """
+        Updates the dynamic plot.
+
+        Args:
+            X (np.ndarray): Current estimate matrix.
+            X_star (np.ndarray): Optimal solution matrix.
+            problem_inputs (ProblemInputs): Problem inputs.
+            line_x: Line object for X.
+            line_xs: Line object for X_star.
+            line_xTY: Line object for X[:, 0].T @ Y.
+            line_xsTY: Line object for X_star[:, 0].T @ Y.
+        """
+
+        if self.dynamic_plot_params.show_x:
+            line_x.set_ydata(X[:, self.dynamic_plot_params.X_col])
+            line_xs.set_ydata(X_star[:, self.dynamic_plot_params.X_col])
+
+        if self.dynamic_plot_params.show_xTY:
+            Y = problem_inputs.fused_signals[self.dynamic_plot_params.Y_id]
+            xTY = X[:, [self.dynamic_plot_params.XTY_col]].T @ Y
+            xsTY = X_star[:, [self.dynamic_plot_params.XTY_col]].T @ Y
+            sampled_indices = np.arange(0, xTY.shape[1], self.dynamic_plot_params.tau)
+            line_xTY.set_xdata(sampled_indices)
+            line_xTY.set_ydata(xTY[0, sampled_indices])
+            line_xsTY.set_ydata(xsTY[0, sampled_indices])
 
         plt.draw()
         plt.pause(0.05)
-
-    # def _plot_dynamically(
-    #     self, X: np.ndarray, X_star: np.ndarray, line1: Line2D, line2: Line2D
-    # ) -> None:
-    #     """
-    #     Plots the first column of `X` and `X_star` for visual comparison.
-
-    #     Args:
-    #         X (np.ndarray): A matrix of shape (nb_sensors, nb_filters) representing the global variable.
-    #         X_star (np.ndarray): A matrix of shape (nb_sensors, nb_filters) representing the optimal solution.
-    #         line1: Figure handle for plotting `X`.
-    #         line2: Figure handle for plotting `X_star`.
-    #     """
-    #     line1.set_ydata(X[:, 0])
-    #     line2.set_ydata(X_star[:, 0])
-    #     plt.draw()
-    #     plt.pause(0.05)
-
-    def _update_X_block(
-        self,
-        X_block: np.ndarray,
-        X_tilde: np.ndarray,
-        updating_node: int,
-        prob_params,
-        neighbors,
-        clusters,
-        prob_select_sol,
-    ):
-        """Function to update the cell containing the blocks of X for each corresponding node.
-
-        INPUTS:
-
-        X_block (nbnodes x 1): Vector of cells containing the current blocks Xk^i at each cell k, where X=[X1;...;Xk;...;XK].
-
-        X_tilde: Solution of the local problem at the current updating node.
-
-        q: Updating node.
-
-        prob_params: Structure related to the problem parameters.
-
-        neighbors: Vector containing the neighbors of node q.
-
-        Nu: List of lists. For each neighbor k of q, there is a corresponding
-            list with the nodes of the subgraph containing k, obtained by cutting
-            the link between nodes q and k.
-
-        prob_select_sol : (Optional) Function resolving the uniqueness ambiguity.
-
-        OUTPUTS:
-
-        X_block_upd (nbnodes x 1): Vector of cells with updated block Xk^(i+1).
-        """
-        nb_nodes = self.network_graph.nb_nodes
-        nb_sensors_per_node = self.network_graph.nb_sensors_per_node
-        nb_filters = self.problem.nb_filters
-
-        if prob_select_sol is not None:
-            Xq_old = X_block[updating_node]
-            X_tilde_old = np.concatenate(
-                (Xq_old, np.tile(np.eye(nb_filters), (len(neighbors), 1))), axis=0
-            )
-            X_tilde = prob_select_sol(X_tilde_old, X_tilde, prob_params, updating_node)
-
-        X_block_updated = []
-
-        nb_neighbors = len(neighbors)
-        ind = np.arange(nb_nodes)
-
-        for node_id in range(updating_node):
-            for neighbor_id in range(nb_neighbors):
-                if node_id in clusters[neighbor_id]:
-                    start_r = (
-                        nb_sensors_per_node[updating_node]
-                        + ind[neighbor_id] * nb_filters
-                    )
-                    stop_r = (
-                        nb_sensors_per_node[updating_node]
-                        + ind[neighbor_id] * nb_filters
-                        + nb_filters
-                    )
-
-            X_block_updated.append(X_block[node_id] @ X_tilde[start_r:stop_r, :])
-
-        X_block_updated.append(X_tilde[0 : nb_sensors_per_node[updating_node], :])
-
-        for node_id in range(updating_node + 1, nb_nodes):
-            for neighbor_id in range(nb_neighbors):
-                if node_id in clusters[neighbor_id]:
-                    start_r = (
-                        nb_sensors_per_node[updating_node]
-                        + ind[neighbor_id] * nb_filters
-                    )
-                    stop_r = (
-                        nb_sensors_per_node[updating_node]
-                        + ind[neighbor_id] * nb_filters
-                        + nb_filters
-                    )
-
-            X_block_updated.append(X_block[node_id] @ X_tilde[start_r:stop_r, :])
-
-        return X_block_updated
 
     def _validate_problem(self):
         problem_inputs = self.data_retriever.get_current_window(window_id=0)
@@ -924,6 +823,7 @@ class DASFMultiVar(DASF):
         rng: np.random.Generator | None = None,
         solver_convergence_parameters: ConvergenceParameters | None = None,
         dynamic_plot: bool = False,
+        dynamic_plot_params: DynamicPlotParameters | None = None,
     ) -> None:
         super().__init__(
             problem=problem,
@@ -935,6 +835,7 @@ class DASFMultiVar(DASF):
             rng=rng,
             solver_convergence_parameters=solver_convergence_parameters,
             dynamic_plot=dynamic_plot,
+            dynamic_plot_params=dynamic_plot_params,
         )
         self.nb_variables = problem.nb_variables
 
@@ -1009,30 +910,11 @@ class DASFMultiVar(DASF):
             )
 
         if self.dynamic_plot:
-            plt.ion()
-            fig, ax = plt.subplots()
-            (line1,) = ax.plot(
-                np.vstack(X)[:, 1], color="r", marker="x", label="Current estimate"
+            line_x, line_xs, line_xTY, line_xsTY = self._init_dynamic_plot(
+                X_list=X,
+                X_star_list=X_star_current_window,
+                problem_inputs_list=problem_inputs,
             )
-            (line2,) = ax.plot(
-                np.vstack(X_star_current_window)[:, 1],
-                color="b",
-                label="Centralized solution",
-            )
-            plt.axis(
-                [
-                    0,
-                    self.network_graph.nb_sensors_total,
-                    2 * np.min(np.vstack(X_star_current_window)[:, 1]),
-                    2 * np.max(np.vstack(X_star_current_window)[:, 1]),
-                ]
-            )
-            ax.legend()
-            ax.set_xlabel("Sensors")
-            ax.set_ylabel("Weight values")
-            ax.set_title("Weights per sensor for first filter")
-            ax.grid()
-            plt.show()
 
         i = 0
         window_id = 0
@@ -1115,7 +997,15 @@ class DASFMultiVar(DASF):
                 )
 
             if self.dynamic_plot:
-                self._plot_dynamically(X_new, X_star_current_window, line1, line2)
+                self._update_dynamic_plot(
+                    X_list=X_new,
+                    X_star_list=X_star_current_window,
+                    problem_inputs_list=problem_inputs,
+                    line_x=line_x,
+                    line_xs=line_xs,
+                    line_xTY=line_xTY,
+                    line_xsTY=line_xsTY,
+                )
 
             i += 1
 
@@ -1152,24 +1042,138 @@ class DASFMultiVar(DASF):
 
         return None
 
-    def _plot_dynamically(
+    def _init_dynamic_plot(
         self,
-        X: list[np.ndarray],
-        X_star: list[np.ndarray],
-        line1: Line2D,
-        line2: Line2D,
-    ) -> None:
+        X_list: list[np.ndarray],
+        X_star_list: list[np.ndarray],
+        problem_inputs_list: list[ProblemInputs],
+    ) -> Tuple[Line2D]:
         """
-        Plots the stacked first columns of `X` and `X_star` for visual comparison.
+        Initializes the dynamic plot.
 
         Args:
-            X (list[np.ndarray]): A list of matrices of shape (nb_sensors, nb_filters) representing the global variable.
-            X_star (list[np.ndarray]): A list of matrices of shape (nb_sensors, nb_filters) representing the optimal solution.
-            line1: Figure handle for plotting `X`.
-            line2: Figure handle for plotting `X_star`.
+            X_list (list[np.ndarray]): Current estimate matrix.
+            X_star_list (list[np.ndarray]): Optimal solution matrix.
+            problem_inputs_list (list[ProblemInputs]): Problem inputs.
         """
-        line1.set_ydata(np.vstack(X)[:, 1])
-        line2.set_ydata(np.vstack(X_star)[:, 1])
+        X = np.vstack(X_list)
+        X_star = np.vstack(X_star_list)
+        plt.ion()
+        if self.dynamic_plot_params.show_x & self.dynamic_plot_params.show_xTY:
+            fig, axes = plt.subplots(2, 1, figsize=(10, 8))
+        else:
+            fig, axes = plt.subplots(1, 1, figsize=(7, 4))
+
+        (line_x, line_xs, line_xTY, line_xsTY) = (None, None, None, None)
+        if self.dynamic_plot_params.show_x:
+            ax1 = axes[0] if self.dynamic_plot_params.show_xTY else axes
+            (line_x,) = ax1.plot(
+                X[:, self.dynamic_plot_params.X_col],
+                color="orange",
+                marker="x",
+                label="Current estimate",
+            )
+            (line_xs,) = ax1.plot(
+                X_star[:, self.dynamic_plot_params.X_col],
+                color="b",
+                label="Centralized solution",
+            )
+            ax1.set_xlim(0, X.shape[0] - 1)
+            ax1.set_ylim(
+                2 * np.min(X_star[:, self.dynamic_plot_params.X_col]),
+                2 * np.max(X_star[:, self.dynamic_plot_params.X_col]),
+            )
+            ax1.legend(loc="upper right")
+            ax1.set_xlabel("Sensors")
+            ax1.set_ylabel("Weight values")
+            ax1.set_title(
+                f"Weights per sensor for filter {self.dynamic_plot_params.X_col}"
+            )
+            ax1.grid()
+
+        if self.dynamic_plot_params.show_xTY:
+            Y = np.vstack(
+                [
+                    problem_inputs.fused_signals[self.dynamic_plot_params.Y_id]
+                    for problem_inputs in problem_inputs_list
+                ]
+            )
+            ax2 = axes[1] if self.dynamic_plot_params.show_x else axes
+            xTY = X[:, [self.dynamic_plot_params.XTY_col]].T @ Y
+            xsTY = X_star[:, [self.dynamic_plot_params.XTY_col]].T @ Y
+            sampled_indices = np.arange(0, xTY.shape[1], self.dynamic_plot_params.tau)
+            (line_xTY,) = ax2.plot(
+                sampled_indices,
+                xTY[0, sampled_indices],
+                color="orange",
+                marker="x",
+                label="Filtered signal estimation",
+            )
+            (line_xsTY,) = ax2.plot(
+                sampled_indices,
+                xsTY[0, sampled_indices],
+                color="b",
+                label="Filtered signal target",
+            )
+            ax2.set_xlim(0, len(sampled_indices))
+            ax2.set_ylim(
+                2 * np.min(xsTY[0, :]),
+                2 * np.max(xsTY[0, :]),
+            )
+            ax2.legend(loc="upper right")
+            ax2.set_xlabel("Samples")
+            ax2.set_ylabel("Filtered signal values")
+            ax2.set_title(
+                f"Filtered signal for filter {self.dynamic_plot_params.XTY_col}, sampled every {self.dynamic_plot_params.tau} samples"
+            )
+            ax2.grid()
+
+        plt.subplots_adjust(hspace=0.4)
+        plt.show()
+        return line_x, line_xs, line_xTY, line_xsTY
+
+    def _update_dynamic_plot(
+        self,
+        X_list: np.ndarray,
+        X_star_list: np.ndarray,
+        problem_inputs_list: ProblemInputs,
+        line_x: Line2D | None,
+        line_xs: Line2D | None,
+        line_xTY: Line2D | None,
+        line_xsTY: Line2D | None,
+    ) -> None:
+        """
+        Updates the dynamic plot.
+
+        Args:
+            X_list (list[np.ndarray]): Current estimate matrix.
+            X_star_list (list[np.ndarray]): Optimal solution matrix.
+            problem_inputs_list (list[ProblemInputs]): Problem inputs.
+            line_x: Line object for X.
+            line_xs: Line object for X_star.
+            line_xTY: Line object for X[:, 0].T @ Y.
+            line_xsTY: Line object for X_star[:, 0].T @ Y.
+        """
+        X = np.vstack(X_list)
+        X_star = np.vstack(X_star_list)
+        if self.dynamic_plot_params.show_x:
+            line_x.set_ydata(X[:, self.dynamic_plot_params.X_col])
+            line_xs.set_ydata(X_star[:, self.dynamic_plot_params.X_col])
+
+        if self.dynamic_plot_params.show_xTY:
+            Y = np.vstack(
+                [
+                    problem_inputs.fused_signals[self.dynamic_plot_params.Y_id]
+                    for problem_inputs in problem_inputs_list
+                ]
+            )
+            xTY = X[:, [self.dynamic_plot_params.XTY_col]].T @ Y
+            xsTY = X_star[:, [self.dynamic_plot_params.XTY_col]].T @ Y
+            sampled_indices = np.arange(0, xTY.shape[1], self.dynamic_plot_params.tau)
+            line_xTY.set_xdata(sampled_indices)
+            line_xTY.set_ydata(xTY[0, sampled_indices])
+            line_xsTY.set_ydata(xsTY[0, sampled_indices])
+
         plt.draw()
         plt.pause(0.05)
 
