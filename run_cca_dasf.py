@@ -7,13 +7,9 @@ mpl.use("macosx")
 # mpl.use('Qt5Agg')
 # mpl.use('TkAgg')
 # mpl.use("Agg")
-from problem_settings import (
-    NetworkGraph,
-    ConvergenceParameters,
-    get_stationary_setting,
-)
+from problem_settings import NetworkGraph, ConvergenceParameters
 from optimization_problems import CCAProblem
-from data_retriever import CCADataRetriever
+from data_retriever import CCADataRetriever, get_stationary_setting
 from dasf import DASFMultiVar, DynamicPlotParameters
 
 random_seed = 2025
@@ -41,16 +37,6 @@ nb_windows = 1
 # Number of filters of X
 nb_filters = 2
 
-cca_data_retriever = CCADataRetriever(
-    nb_samples=nb_samples_per_window,
-    nb_sensors=network_graph.nb_sensors_total,
-    nb_sources=nb_filters,
-    nb_windows=nb_windows,
-    rng=rng,
-)
-
-cca_problem = CCAProblem(nb_filters=nb_filters)
-
 # DASF solver convergence parameters
 dasf_iterations = 300
 dasf_convergence_parameters = ConvergenceParameters(max_iterations=dasf_iterations)
@@ -58,6 +44,16 @@ dasf_convergence_parameters = ConvergenceParameters(max_iterations=dasf_iteratio
 data_window_params = get_stationary_setting(
     window_length=nb_samples_per_window, iterations=dasf_iterations
 )
+
+cca_data_retriever = CCADataRetriever(
+    data_window_params=data_window_params,
+    nb_sensors=network_graph.nb_sensors_total,
+    nb_sources=nb_filters,
+    nb_windows=nb_windows,
+    rng=rng,
+)
+
+cca_problem = CCAProblem(nb_filters=nb_filters)
 
 update_path = rng.permutation(range(nb_nodes))
 
@@ -81,7 +77,6 @@ dasf_solver = DASFMultiVar(
     data_retriever=cca_data_retriever,
     network_graph=network_graph,
     dasf_convergence_params=dasf_convergence_parameters,
-    data_window_params=data_window_params,
     updating_path=update_path,
     rng=rng,
     dynamic_plot=True,

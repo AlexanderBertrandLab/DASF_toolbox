@@ -7,13 +7,9 @@ mpl.use("macosx")
 # mpl.use('Qt5Agg')
 # mpl.use('TkAgg')
 # mpl.use("Agg")
-from problem_settings import (
-    NetworkGraph,
-    ConvergenceParameters,
-    get_stationary_setting,
-)
+from problem_settings import NetworkGraph, ConvergenceParameters
 from optimization_problems import TROProblem
-from data_retriever import TRODataRetriever
+from data_retriever import TRODataRetriever, get_stationary_setting
 from dasf import DASF
 
 random_seed = 2025
@@ -41,8 +37,16 @@ nb_windows = 1
 # Number of filters of X
 nb_filters = 2
 
+# DASF solver convergence parameters
+dasf_iterations = 300
+dasf_convergence_parameters = ConvergenceParameters(max_iterations=dasf_iterations)
+
+data_window_params = get_stationary_setting(
+    window_length=nb_samples_per_window, iterations=dasf_iterations
+)
+
 tro_data_retriever = TRODataRetriever(
-    nb_samples=nb_samples_per_window,
+    data_window_params=data_window_params,
     nb_sensors=network_graph.nb_sensors_total,
     nb_sources=nb_filters,
     nb_windows=nb_windows,
@@ -54,14 +58,6 @@ tro_iterations = 200
 tro_convergence_parameters = ConvergenceParameters(max_iterations=tro_iterations)
 tro_problem = TROProblem(
     nb_filters=nb_filters, convergence_parameters=tro_convergence_parameters
-)
-
-# DASF solver convergence parameters
-dasf_iterations = 300
-dasf_convergence_parameters = ConvergenceParameters(max_iterations=dasf_iterations)
-
-data_window_params = get_stationary_setting(
-    window_length=nb_samples_per_window, iterations=dasf_iterations
 )
 
 update_path = rng.permutation(range(nb_nodes))
@@ -76,7 +72,6 @@ dasf_solver = DASF(
     data_retriever=tro_data_retriever,
     network_graph=network_graph,
     dasf_convergence_params=dasf_convergence_parameters,
-    data_window_params=data_window_params,
     updating_path=update_path,
     solver_convergence_parameters=solver_convergence_parameters,
     rng=rng,

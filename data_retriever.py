@@ -3,10 +3,30 @@ from problem_settings import ProblemInputs
 from utils import normalize
 from abc import ABC, abstractmethod
 from scipy import signal
+from dataclasses import dataclass
+
+
+@dataclass
+class DataWindowParameters:
+    window_length: int
+    nb_window_reuse: int = 1
+    sliding_window_offset: int | None = None
+
+    def __post_init__(self) -> None:
+        if self.sliding_window_offset is None:
+            self.sliding_window_offset = self.window_length
+
+
+def get_stationary_setting(window_length: int, iterations: int) -> DataWindowParameters:
+    return DataWindowParameters(
+        window_length=window_length, nb_window_reuse=iterations, sliding_window_offset=0
+    )
 
 
 class DataRetriever:
-    def __init__(self, *args, **kwargs) -> None:
+    def __init__(
+        self, data_window_params: DataWindowParameters, *args, **kwargs
+    ) -> None:
         return None
 
     @abstractmethod
@@ -17,7 +37,7 @@ class DataRetriever:
 class MMSEDataRetriever(DataRetriever):
     def __init__(
         self,
-        nb_samples: int,
+        data_window_params: DataWindowParameters,
         nb_sensors: int,
         nb_sources: int,
         nb_windows: int,
@@ -27,6 +47,8 @@ class MMSEDataRetriever(DataRetriever):
         mixture_var: float = 0.5,
         diff_var: float = 1,
     ) -> None:
+        self.data_window_params = data_window_params
+        nb_samples = data_window_params.window_length
         self.D = rng.normal(
             loc=0,
             scale=np.sqrt(signal_var),
@@ -77,7 +99,7 @@ class MMSEDataRetriever(DataRetriever):
 class LCMVDataRetriever(DataRetriever):
     def __init__(
         self,
-        nb_samples: int,
+        data_window_params: DataWindowParameters,
         nb_sensors: int,
         nb_sources: int,
         nb_windows: int,
@@ -89,6 +111,8 @@ class LCMVDataRetriever(DataRetriever):
         mixture_var: float = 0.5,
         diff_var: float = 1,
     ) -> None:
+        self.data_window_params = data_window_params
+        nb_samples = data_window_params.window_length
         self.D = rng.normal(
             loc=0,
             scale=np.sqrt(signal_var),
@@ -145,7 +169,7 @@ class LCMVDataRetriever(DataRetriever):
 class GEVDDataRetriever(DataRetriever):
     def __init__(
         self,
-        nb_samples: int,
+        data_window_params: DataWindowParameters,
         nb_sensors: int,
         nb_sources: int,
         nb_windows: int,
@@ -156,6 +180,8 @@ class GEVDDataRetriever(DataRetriever):
         mixture_var: float = 0.5,
         diff_var: float = 1,
     ) -> None:
+        self.data_window_params = data_window_params
+        nb_samples = data_window_params.window_length
         self.latent_dim = latent_dim if latent_dim is not None else 2 * nb_sources
         self.D1 = rng.normal(
             loc=0,
@@ -217,7 +243,7 @@ class GEVDDataRetriever(DataRetriever):
 class TRODataRetriever(DataRetriever):
     def __init__(
         self,
-        nb_samples: int,
+        data_window_params: DataWindowParameters,
         nb_sensors: int,
         nb_sources: int,
         nb_windows: int,
@@ -228,6 +254,8 @@ class TRODataRetriever(DataRetriever):
         mixture_var: float = 0.5,
         diff_var: float = 1,
     ) -> None:
+        self.data_window_params = data_window_params
+        nb_samples = data_window_params.window_length
         self.latent_dim = latent_dim if latent_dim is not None else 2 * nb_sources
         self.D1 = rng.normal(
             loc=0,
@@ -293,7 +321,7 @@ class TRODataRetriever(DataRetriever):
 class CCADataRetriever(DataRetriever):
     def __init__(
         self,
-        nb_samples: int,
+        data_window_params: DataWindowParameters,
         nb_sensors: int,
         nb_sources: int,
         nb_windows: int,
@@ -304,12 +332,13 @@ class CCADataRetriever(DataRetriever):
         mixture_var: float = 0.5,
         diff_var: float = 1,
     ) -> None:
-        self.nb_samples = nb_samples
+        self.data_window_params = data_window_params
+        self.nb_samples = data_window_params.window_length
         self.lags = lags
         self.D = rng.normal(
             loc=0,
             scale=np.sqrt(signal_var),
-            size=(nb_sources, nb_samples + lags),
+            size=(nb_sources, self.nb_samples + lags),
         )
 
         self.A_0 = rng.normal(
@@ -328,7 +357,7 @@ class CCADataRetriever(DataRetriever):
         self.noise = rng.normal(
             loc=0,
             scale=np.sqrt(noise_var),
-            size=(nb_sensors, nb_samples + lags),
+            size=(nb_sensors, self.nb_samples + lags),
         )
 
         self.weights = self.weight_function(nb_windows)
@@ -361,15 +390,16 @@ class CCADataRetriever(DataRetriever):
 class ICADataRetriever(DataRetriever):
     def __init__(
         self,
-        nb_samples: int,
+        data_window_params: DataWindowParameters,
         nb_sensors: int,
-        nb_sources: int,
         nb_windows: int,
         rng: np.random.Generator,
         signal_var: float = 1,
         mixture_var: float = 0.5,
         diff_var: float = 0.1,
     ) -> None:
+        self.data_window_params = data_window_params
+        nb_samples = data_window_params.window_length
         coef = 1 / np.linspace(start=1, stop=nb_sensors, num=nb_sensors)
         coef = np.expand_dims(coef, axis=1)
         self.D = coef * (rng.random(size=(nb_sensors, nb_samples)) - 0.5) + (

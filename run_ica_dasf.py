@@ -10,11 +10,12 @@ mpl.use("macosx")
 from problem_settings import (
     NetworkGraph,
     ConvergenceParameters,
-    DataWindowParameters,
-    get_stationary_setting,
 )
 from optimization_problems import ICAProblem
-from data_retriever import ICADataRetriever
+from data_retriever import (
+    ICADataRetriever,
+    get_stationary_setting,
+)
 from dasf import DASF, DynamicPlotParameters
 
 random_seed = 2025
@@ -42,10 +43,17 @@ nb_windows = 1
 # Number of filters of X
 nb_filters = 2
 
+# DASF solver convergence parameters
+dasf_iterations = 300
+dasf_convergence_parameters = ConvergenceParameters(max_iterations=dasf_iterations)
+
+data_window_params = get_stationary_setting(
+    window_length=nb_samples_per_window, iterations=dasf_iterations
+)
+
 ica_data_retriever = ICADataRetriever(
-    nb_samples=nb_samples_per_window,
+    data_window_params=data_window_params,
     nb_sensors=network_graph.nb_sensors_total,
-    nb_sources=nb_filters,
     nb_windows=nb_windows,
     rng=rng,
 )
@@ -56,14 +64,6 @@ ica_convergence_parameters = ConvergenceParameters(max_iterations=ica_iterations
 ica_problem = ICAProblem(
     nb_filters=nb_filters,
     convergence_parameters=ica_convergence_parameters,
-)
-
-# DASF solver convergence parameters
-dasf_iterations = 300
-dasf_convergence_parameters = ConvergenceParameters(max_iterations=dasf_iterations)
-
-data_window_params = get_stationary_setting(
-    window_length=nb_samples_per_window, iterations=dasf_iterations
 )
 
 update_path = rng.permutation(range(nb_nodes))
@@ -79,7 +79,6 @@ dasf_solver = DASF(
     data_retriever=ica_data_retriever,
     network_graph=network_graph,
     dasf_convergence_params=dasf_convergence_parameters,
-    data_window_params=data_window_params,
     updating_path=update_path,
     rng=rng,
     dynamic_plot=True,

@@ -78,20 +78,3 @@ class ConvergenceParameters:
             logger.warning(
                 f"No convergence conditions specified, setting max iterations to {self.max_iterations}"
             )
-
-
-@dataclass
-class DataWindowParameters:
-    window_length: int
-    nb_window_reuse: int = 1
-    sliding_window_offset: int | None = None
-
-    def __post_init__(self) -> None:
-        if self.sliding_window_offset is None:
-            self.sliding_window_offset = self.window_length
-
-
-def get_stationary_setting(window_length: int, iterations: int) -> DataWindowParameters:
-    return DataWindowParameters(
-        window_length=window_length, nb_window_reuse=iterations, sliding_window_offset=0
-    )

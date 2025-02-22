@@ -7,9 +7,9 @@ mpl.use("macosx")
 # mpl.use('Qt5Agg')
 # mpl.use('TkAgg')
 # mpl.use("Agg")
-from problem_settings import NetworkGraph, ConvergenceParameters, DataWindowParameters
+from problem_settings import NetworkGraph, ConvergenceParameters
 from optimization_problems import GEVDProblem
-from data_retriever import GEVDDataRetriever
+from data_retriever import GEVDDataRetriever, DataWindowParameters
 from dasf import DASF
 
 random_seed = 2025
@@ -40,17 +40,17 @@ nb_filters = 5
 # Number of times each window will be repeated
 nb_window_reuse = 2
 
+data_window_params = DataWindowParameters(
+    window_length=nb_samples_per_window,
+    nb_window_reuse=nb_window_reuse,
+)
+
 gevd_data_retriever = GEVDDataRetriever(
-    nb_samples=nb_samples_per_window,
+    data_window_params=data_window_params,
     nb_sensors=network_graph.nb_sensors_total,
     nb_sources=nb_filters,
     nb_windows=nb_windows,
     rng=rng,
-)
-
-data_window_params = DataWindowParameters(
-    window_length=nb_samples_per_window,
-    nb_window_reuse=nb_window_reuse,
 )
 gevd_problem = GEVDProblem(nb_filters=nb_filters)
 
@@ -64,7 +64,6 @@ dasf_solver = DASF(
     data_retriever=gevd_data_retriever,
     network_graph=network_graph,
     dasf_convergence_params=dasf_convergence_parameters,
-    data_window_params=data_window_params,
     updating_path=update_path,
     rng=rng,
     dynamic_plot=True,

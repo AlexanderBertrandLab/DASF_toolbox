@@ -3,7 +3,6 @@ import numpy as np
 from problem_settings import (
     NetworkGraph,
     ProblemInputs,
-    DataWindowParameters,
     ConvergenceParameters,
 )
 from data_retriever import DataRetriever
@@ -61,7 +60,6 @@ class DASF:
         problem: OptimizationProblem,
         data_retriever: DataRetriever,
         network_graph: NetworkGraph,
-        data_window_params: DataWindowParameters,
         dasf_convergence_params: ConvergenceParameters,
         updating_path: np.ndarray | None = None,
         initial_estimate: np.ndarray | None = None,
@@ -74,7 +72,6 @@ class DASF:
         self.data_retriever = data_retriever
         self.network_graph = network_graph
         self.dasf_convergence_params = dasf_convergence_params
-        self.data_window_params = data_window_params
         self.solver_convergence_parameters = solver_convergence_parameters
         if solver_convergence_parameters is None:
             if problem.convergence_parameters is not None:
@@ -110,7 +107,7 @@ class DASF:
             if dynamic_plot_params is not None:
                 self.dynamic_plot_params = dynamic_plot_params.apply_correction(
                     nb_filters=self.problem.nb_filters,
-                    nb_samples=self.data_window_params.window_length,
+                    nb_samples=self.data_retriever.data_window_params.window_length,
                 )
             else:
                 self.dynamic_plot_params = DynamicPlotParameters()
@@ -249,7 +246,7 @@ class DASF:
             Cq = self._build_Cq(X, updating_node, neighbors, clusters)
 
             # Get current data window
-            if i % self.data_window_params.nb_window_reuse == 0:
+            if i % self.data_retriever.data_window_params.nb_window_reuse == 0:
                 problem_inputs = self.data_retriever.get_current_window(
                     window_id=window_id
                 )
@@ -788,11 +785,14 @@ class DASF:
         ax.loglog(
             range(
                 1,
-                int(self.total_iterations / self.data_window_params.nb_window_reuse)
+                int(
+                    self.total_iterations
+                    / self.data_retriever.data_window_params.nb_window_reuse
+                )
                 + 1,
             ),
             self.normed_error_over_iterations[
-                1 :: self.data_window_params.nb_window_reuse
+                1 :: self.data_retriever.data_window_params.nb_window_reuse
             ],
             color="b",
         )
@@ -834,7 +834,6 @@ class DASFMultiVar(DASF):
         problem: OptimizationProblem,
         data_retriever: DataRetriever,
         network_graph: NetworkGraph,
-        data_window_params: DataWindowParameters,
         dasf_convergence_params: ConvergenceParameters,
         updating_path: np.ndarray | None = None,
         initial_estimate: list[np.ndarray] | None = None,
@@ -864,7 +863,6 @@ class DASFMultiVar(DASF):
             problem=problem,
             data_retriever=data_retriever,
             network_graph=network_graph,
-            data_window_params=data_window_params,
             dasf_convergence_params=dasf_convergence_params,
             updating_path=updating_path,
             initial_estimate=initial_estimate,
@@ -954,7 +952,7 @@ class DASFMultiVar(DASF):
             clusters = self._find_clusters(neighbors, path)
 
             # Get current data window
-            if i % self.data_window_params.nb_window_reuse == 0:
+            if i % self.data_retriever.data_window_params.nb_window_reuse == 0:
                 problem_inputs = self.data_retriever.get_current_window(
                     window_id=window_id
                 )
