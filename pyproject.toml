@@ -8,7 +8,7 @@ dynamic = ["version"]
 description = "A toolbox for the distributed adaptive signal fusion (DASF) framework"
 authors = [{ name = "Cem Musluoglu", email = "musluoglucem@gmail.com" }]
 readme = "README.md"
-license = { text = "" }
+license = { text = "Custom license" }
 dependencies = [
     "numpy",
     "matplotlib",
