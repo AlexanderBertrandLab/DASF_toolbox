@@ -1,10 +1,14 @@
 import numpy as np
-from problem_settings import (
+from dasf_tbx.problem_settings import (
     ProblemInputs,
     ConvergenceParameters,
 )
+from dasf_tbx.utils import (
+    make_symmetric,
+    autocorrelation_matrix,
+    cross_correlation_matrix,
+)
 from abc import ABC, abstractmethod
-from utils import make_symmetric, autocorrelation_matrix, cross_correlation_matrix
 import scipy.optimize as opt
 import warnings
 import pymanopt

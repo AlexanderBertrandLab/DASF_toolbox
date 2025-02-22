@@ -1,3 +1,17 @@
+Metadata-Version: 2.2
+Name: dasf_tbx
+Version: 0.0.0
+Summary: A toolbox for the distributed adaptive signal fusion (DASF) framework
+Author-email: Cem Musluoglu <musluoglucem@gmail.com>
+Project-URL: Homepage, https://github.com/CemMusluoglu/DASF_toolbox
+Project-URL: Documentation, https://github.com/CemMusluoglu/DASF_toolbox
+Project-URL: Repository, https://github.com/CemMusluoglu/DASF_toolbox
+Description-Content-Type: text/markdown
+License-File: LICENSE.md
+Requires-Dist: numpy
+Requires-Dist: matplotlib
+Requires-Dist: scipy
+
 # Distributed Adaptive Signal Fusion Algorithm
 
 **News:**

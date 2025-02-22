@@ -1,0 +1,24 @@
+[build-system]
+requires = ["setuptools", "wheel", "setuptools_scm"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "dasf_tbx"
+dynamic = ["version"]
+description = "A toolbox for the distributed adaptive signal fusion (DASF) framework"
+authors = [{ name = "Cem Musluoglu", email = "musluoglucem@gmail.com" }]
+readme = "README.md"
+license = { text = "" }
+dependencies = [
+    "numpy",
+    "matplotlib",
+    "scipy"
+]
+
+[tool.setuptools]
+packages = ["dasf_tbx"]
+
+[project.urls]
+Homepage = "https://github.com/CemMusluoglu/DASF_toolbox"
+Documentation = "https://github.com/CemMusluoglu/DASF_toolbox"
+Repository = "https://github.com/CemMusluoglu/DASF_toolbox"

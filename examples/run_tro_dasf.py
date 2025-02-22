@@ -7,10 +7,10 @@ mpl.use("macosx")
 # mpl.use('Qt5Agg')
 # mpl.use('TkAgg')
 # mpl.use("Agg")
-from problem_settings import NetworkGraph, ConvergenceParameters
-from optimization_problems import TROProblem
-from data_retriever import TRODataRetriever, get_stationary_setting
-from dasf import DASF
+from dasf_tbx.problem_settings import NetworkGraph, ConvergenceParameters
+from dasf_tbx.optimization_problems import TROProblem
+from dasf_tbx.data_retriever import TRODataRetriever, get_stationary_setting
+from dasf_tbx.dasf import DASF
 
 random_seed = 2025
 rng = np.random.default_rng(random_seed)

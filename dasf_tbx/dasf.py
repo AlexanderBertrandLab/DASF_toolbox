@@ -1,12 +1,12 @@
 from __future__ import annotations
 import numpy as np
-from problem_settings import (
+from dasf_tbx.problem_settings import (
     NetworkGraph,
     ProblemInputs,
     ConvergenceParameters,
 )
-from data_retriever import DataRetriever
-from optimization_problems import OptimizationProblem
+from dasf_tbx.data_retriever import DataRetriever
+from dasf_tbx.optimization_problems import OptimizationProblem
 from typing import Tuple
 import matplotlib.pyplot as plt
 from matplotlib.lines import Line2D
@@ -711,8 +711,8 @@ class DASF:
             Y (np.ndarray): Signal fused using X.
             line_x: Line object for X.
             line_xs: Line object for X_star.
-            line_xTY: Line object for X[:, 0].T @ Y.
-            line_xsTY: Line object for X_star[:, 0].T @ Y.
+            line_xTY: Line object for X.T @ Y.
+            line_xsTY: Line object for X_star.T @ Y.
         """
 
         if self.dynamic_plot_params.show_x:

@@ -7,16 +7,16 @@ mpl.use("macosx")
 # mpl.use('Qt5Agg')
 # mpl.use('TkAgg')
 # mpl.use("Agg")
-from problem_settings import (
+from dasf_tbx.problem_settings import (
     NetworkGraph,
     ConvergenceParameters,
 )
-from optimization_problems import ICAProblem
-from data_retriever import (
+from dasf_tbx.optimization_problems import ICAProblem
+from dasf_tbx.data_retriever import (
     ICADataRetriever,
     get_stationary_setting,
 )
-from dasf import DASF, DynamicPlotParameters
+from dasf_tbx.dasf import DASF, DynamicPlotParameters
 
 random_seed = 2025
 rng = np.random.default_rng(random_seed)

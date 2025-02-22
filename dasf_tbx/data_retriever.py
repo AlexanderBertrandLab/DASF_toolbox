@@ -1,6 +1,6 @@
 import numpy as np
-from problem_settings import ProblemInputs
-from utils import normalize
+from dasf_tbx.problem_settings import ProblemInputs
+from dasf_tbx.utils import normalize
 from abc import ABC, abstractmethod
 from scipy import signal
 from dataclasses import dataclass
