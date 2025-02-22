@@ -368,7 +368,7 @@ class ICADataRetriever(DataRetriever):
         rng: np.random.Generator,
         signal_var: float = 1,
         mixture_var: float = 0.5,
-        diff_var: float = 1,
+        diff_var: float = 0.1,
     ) -> None:
         coef = 1 / np.linspace(start=1, stop=nb_sensors, num=nb_sensors)
         coef = np.expand_dims(coef, axis=1)
