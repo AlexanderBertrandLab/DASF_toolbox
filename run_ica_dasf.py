@@ -15,7 +15,7 @@ from problem_settings import (
 )
 from optimization_problems import ICAProblem
 from data_retriever import ICADataRetriever
-from dasf import DASF
+from dasf import DASF, DynamicPlotParameters
 
 random_seed = 2025
 rng = np.random.default_rng(random_seed)
@@ -32,9 +32,6 @@ network_graph = NetworkGraph(
     nb_sensors_per_node=nb_sensors_per_node,
     adjacency_matrix=adjacency_matrix,
 )
-
-# Number of samples per window of the signals
-nb_samples_per_window = 10000
 
 # Number of samples per window of the signals
 nb_samples_per_window = 10000
@@ -71,6 +68,12 @@ data_window_params = get_stationary_setting(
 
 update_path = rng.permutation(range(nb_nodes))
 
+# Dynamic plotting parameters
+dynamic_plot_params = DynamicPlotParameters(
+    tau=100, show_x=True, show_xTY=True, X_col=0, XTY_col=0
+)
+
+
 dasf_solver = DASF(
     problem=ica_problem,
     data_retriever=ica_data_retriever,
@@ -80,6 +83,7 @@ dasf_solver = DASF(
     updating_path=update_path,
     rng=rng,
     dynamic_plot=True,
+    dynamic_plot_params=dynamic_plot_params,
 )
 dasf_solver.run()
 
