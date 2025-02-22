@@ -70,7 +70,7 @@ update_path = rng.permutation(range(nb_nodes))
 
 # Dynamic plotting parameters
 dynamic_plot_params = DynamicPlotParameters(
-    tau=5, show_x=True, show_xTY=True, X_col=0, XTY_col=0, Y_id=0
+    tau=50, show_x=True, show_xTY=True, X_col=1, XTY_col=1, Y_id=0
 )
 
 

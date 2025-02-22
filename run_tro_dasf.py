@@ -39,7 +39,7 @@ nb_samples_per_window = 10000
 nb_windows = 1
 
 # Number of filters of X
-nb_filters = 5
+nb_filters = 2
 
 tro_data_retriever = TRODataRetriever(
     nb_samples=nb_samples_per_window,

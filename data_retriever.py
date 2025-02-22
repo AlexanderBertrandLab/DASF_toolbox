@@ -376,7 +376,7 @@ class ICADataRetriever(DataRetriever):
             1 - coef
         ) * rng.normal(loc=0, scale=signal_var, size=(nb_sensors, nb_samples))
 
-        self.D[0, :] = np.sin(np.linspace(-np.pi, np.pi, nb_samples) * 30)
+        self.D[0, :] = np.sin(np.linspace(-np.pi, np.pi, nb_samples) * 9)
         self.D[1, :] = signal.square(
             np.linspace(-5 * np.pi, 5 * np.pi, nb_samples) * 5, duty=0.5
         )
