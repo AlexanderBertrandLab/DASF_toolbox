@@ -7,10 +7,10 @@ mpl.use("macosx")
 # mpl.use('Qt5Agg')
 # mpl.use('TkAgg')
 # mpl.use("Agg")
-from dasf_tbx.problem_settings import NetworkGraph, ConvergenceParameters
-from dasf_tbx.optimization_problems import GEVDProblem
-from dasf_tbx.data_retriever import GEVDDataRetriever, DataWindowParameters
-from dasf_tbx.dasf import DASF
+from dasftoolbox.problem_settings import NetworkGraph, ConvergenceParameters
+from dasftoolbox.optimization_problems import GEVDProblem
+from dasftoolbox.data_retriever import GEVDDataRetriever, DataWindowParameters
+from dasftoolbox.dasf import DASF
 
 random_seed = 2025
 rng = np.random.default_rng(random_seed)

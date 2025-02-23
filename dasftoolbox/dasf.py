@@ -1,12 +1,12 @@
 from __future__ import annotations
 import numpy as np
-from dasf_tbx.problem_settings import (
+from dasftoolbox.problem_settings import (
     NetworkGraph,
     ProblemInputs,
     ConvergenceParameters,
 )
-from dasf_tbx.data_retriever import DataRetriever
-from dasf_tbx.optimization_problems import OptimizationProblem
+from dasftoolbox.data_retriever import DataRetriever
+from dasftoolbox.optimization_problems import OptimizationProblem
 from typing import Tuple
 import matplotlib.pyplot as plt
 from matplotlib.lines import Line2D

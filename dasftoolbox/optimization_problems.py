@@ -1,9 +1,9 @@
 import numpy as np
-from dasf_tbx.problem_settings import (
+from dasftoolbox.problem_settings import (
     ProblemInputs,
     ConvergenceParameters,
 )
-from dasf_tbx.utils import (
+from dasftoolbox.utils import (
     make_symmetric,
     autocorrelation_matrix,
     cross_correlation_matrix,

@@ -10,6 +10,6 @@ except ImportError:
     from pkg_resources import get_distribution as version
 
 try:
-    __version__ = version("dasf_tbx")
+    __version__ = version("dasftoolbox")
 except Exception:
     __version__ = "0.0.0"

@@ -1,6 +1,6 @@
 import numpy as np
-from dasf_tbx.problem_settings import ProblemInputs
-from dasf_tbx.utils import normalize, autocorrelation_matrix
+from dasftoolbox.problem_settings import ProblemInputs
+from dasftoolbox.utils import normalize, autocorrelation_matrix
 from abc import ABC, abstractmethod
 from scipy import signal
 from dataclasses import dataclass
