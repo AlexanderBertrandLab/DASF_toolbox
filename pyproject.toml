@@ -12,7 +12,8 @@ license = { text = "Custom license" }
 dependencies = [
     "numpy",
     "matplotlib",
-    "scipy"
+    "scipy",
+    "networkx",
 ]
 
 [tool.setuptools]

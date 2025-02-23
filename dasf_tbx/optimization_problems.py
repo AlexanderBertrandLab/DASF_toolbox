@@ -11,11 +11,6 @@ from dasf_tbx.utils import (
 from abc import ABC, abstractmethod
 import scipy.optimize as opt
 import warnings
-import pymanopt
-from pymanopt.manifolds import Sphere
-from pymanopt import Problem
-from pymanopt.optimizers import TrustRegions
-import autograd
 import logging
 import scipy
 from typing import Literal
@@ -524,8 +519,6 @@ class ICAProblem(OptimizationProblem):
 
         Y_t = eigvecs @ eigvals_t @ eigvecs.T @ Y
 
-        alpha = 1
-
         for col in range(self.nb_filters):
             x = X[:, col].copy()
             x = np.expand_dims(x, axis=1)
@@ -587,10 +580,19 @@ class ICAProblem(OptimizationProblem):
 
 
 class QCQPProblem(OptimizationProblem):
-    def __init__(self) -> None:
-        super().__init__()
+    def __init__(
+        self,
+        nb_filters: int,
+    ) -> None:
+        super().__init__(nb_filters=nb_filters)
 
-    def solve(self, problem_inputs: ProblemInputs) -> np.ndarray:
+    def solve(
+        self,
+        problem_inputs: ProblemInputs,
+        save_solution: bool = False,
+        convergence_parameters=None,
+        initial_estimate=None,
+    ) -> np.ndarray:
         """Solve the QCQP problem min 0.5 * E[||X.T @ y(t)||**2] - trace(X.T @ B) s.t. trace(X.T @ Gamma @ X) <= alpha**2; X.T @ c = d."""
 
         def X_fun(mu: float, problem_inputs: ProblemInputs) -> np.ndarray:
@@ -637,17 +639,20 @@ class QCQPProblem(OptimizationProblem):
             > np.linalg.norm(d) ** 2
             / np.linalg.norm(np.linalg.inv(sqrt_Gamma).T @ c) ** 2
         ):
-            if norm_fun(0, problem_inputs) < 0:
+            if norm_fun(mu=0, problem_inputs=problem_inputs) < 0:
                 X_star = X_fun(0, problem_inputs)
             else:
                 mu_star = opt.fsolve(norm_fun, 0, problem_inputs)
-                X_star = X_fun(mu_star, problem_inputs)
+                X_star = X_fun(mu=mu_star, problem_inputs=problem_inputs)
         else:
-            warnings.warn("Infeasible")
+            warnings.warn("Infeasible problem")
+
+        if save_solution:
+            self._X_star = X_star
 
         return X_star
 
-    def evaluate_objective(X: np.ndarray, problem_inputs: ProblemInputs) -> float:
+    def evaluate_objective(self, X: np.ndarray, problem_inputs: ProblemInputs) -> float:
         """Evaluate the QCQP objective 0.5 * E[||X.T @ y(t)||**2] - trace(X.T @ B)."""
         Y = problem_inputs.fused_signals[0]
         B = problem_inputs.fused_constants[0]
@@ -658,178 +663,27 @@ class QCQPProblem(OptimizationProblem):
 
         return f
 
-    def generate_synthetic_inputs(
-        self,
-        signal_var: float = 0.5,
-        noise_var: float = 0.1,
-        offset: float = 0.5,
-        nb_sources: int | None = None,
-    ) -> ProblemInputs:
-        """Generate synthetic inputs for the QCQP problem."""
-
-        def create_signal(
-            signal_var: float,
-            noise_var: float,
-            offset: float,
-            nb_sources: int,
-            nb_sensors: int,
-            nb_samples: int,
-        ):
-            """Create signals for the QCQP problem."""
-            rng = np.random.default_rng()
-
-            S = rng.normal(
-                loc=0, scale=np.sqrt(signal_var), size=(nb_sources, nb_samples)
-            )
-            A = rng.uniform(low=-offset, high=offset, size=(nb_sensors, nb_sources))
-            noise = rng.normal(
-                loc=0, scale=np.sqrt(noise_var), size=(nb_sensors, nb_samples)
-            )
-
-            Y = A @ S + noise
-
-            return Y
-
-        rng = np.random.default_rng()
-
-        nb_samples = self.problem_parameters.nb_samples
-        nb_sensors = self.problem_parameters.network_graph.nb_sensors_total
-
-        Y = create_signal(nb_sensors, nb_samples)
-        Ryy = Y @ Y.T / nb_samples
-        Ryy = (Ryy + Ryy.T) / 2
-        B = rng.standard_normal(size=(nb_sensors, self.nb_filters))
-        c = rng.standard_normal(size=(nb_sensors, 1))
-        d = rng.standard_normal(size=(self.nb_filters, 1))
-        w = (B.T @ np.linalg.inv(Ryy).T @ c - d) / (c.T @ np.linalg.inv(Ryy) @ c)
-        X = np.linalg.inv(Ryy) @ (B - c @ w.T)
-
-        toss = rng.integers(0, 1, endpoint=True)
-        if toss == 0:
-            alpha = rng.standard_normal()
-            alpha = alpha**2
-        else:
-            alpha = rng.standard_normal()
-            alpha = alpha**2
-            alpha = np.sqrt(np.linalg.norm(X, ord="fro") ** 2 + alpha**2)
-
-        while alpha**2 < np.linalg.norm(d) ** 2 / np.linalg.norm(c) ** 2:
-            c = rng.standard_normal(size=(nb_sensors, 1))
-            d = rng.standard_normal(size=(self.nb_filters, 1))
-            w = (B.T @ np.linalg.inv(Ryy).T @ c - d) / (c.T @ np.linalg.inv(Ryy) @ c)
-            X = np.linalg.inv(Ryy) @ (B - c @ w.T)
-            toss = rng.integers(0, 1, endpoint=True)
-            if toss == 0:
-                alpha = rng.standard_normal()
-                alpha = alpha**2
-            else:
-                alpha = rng.standard_normal()
-                alpha = alpha**2
-                alpha = np.sqrt(np.linalg.norm(X, ord="fro") ** 2 + alpha**2)
-
-        qcqp_inputs = ProblemInputs(
-            fused_signals=[Y],
-            fused_constants=[B, c],
-            fused_quadratics=[np.eye(nb_sensors)],
-            global_parameters=[alpha, d],
-        )
-
-        return qcqp_inputs
-
-
-class SCQPProblem(OptimizationProblem):
-    def __init__(self) -> None:
-        super().__init__()
-
-    def solve(self, problem_inputs: ProblemInputs) -> np.ndarray:
-        """Solve the SCQP problem min 0.5 * E[||X.T @ y(t)||**2] + trace(X.T @ B) s.t. trace(X.T @ Gamma @ X)=1."""
-        Y = problem_inputs.fused_signals[0]
-        B = problem_inputs.fused_constants[0]
-        Gamma = problem_inputs.fused_quadratics[0]
-
-        manifold = Sphere(np.size(B, 0), np.size(B, 1))
-
-        Ryy = autocorrelation_matrix(Y)
-
-        Gamma = make_symmetric(Gamma)
-
-        L = np.linalg.cholesky(Gamma)
-        Ryy_t = np.linalg.inv(L) @ Ryy @ np.linalg.inv(L).T
-        Ryy_t = make_symmetric(Ryy_t)
-        B_t = np.linalg.inv(L) @ B
-
-        @pymanopt.function.autograd(manifold)
-        def cost(X):
-            return 0.5 * autograd.numpy.trace(X.T @ Ryy_t @ X) + autograd.numpy.trace(
-                X.T @ B_t
-            )
-
-        problem = Problem(manifold=manifold, cost=cost)
-        problem.verbosity = 0
-
-        solver = TrustRegions(verbosity=0)
-        X_star = solver.run(problem).point
-        X_star = np.linalg.inv(L.T) @ X_star
-
-        return X_star
-
-    def evaluate_objective(X: np.ndarray, problem_inputs: ProblemInputs) -> float:
-        """Evaluate the SCQP objective 0.5 * E[||X.T @ y(t)||**2] + trace(X.T @ B)."""
-        Y = problem_inputs.fused_signals[0]
-        B = problem_inputs.fused_constants[0]
-
-        Ryy = autocorrelation_matrix(Y)
-
-        f = 0.5 * np.trace(X.T @ Ryy @ X) + np.trace(X.T @ B)
-
-        return f
-
-    def generate_synthetic_inputs(
-        self,
-        signal_var: float = 0.5,
-        noise_var: float = 0.1,
-        offset: float = 0.5,
-        nb_sources: int | None = None,
-    ) -> ProblemInputs:
-        """Create data for the SCQP problem."""
-        rng = np.random.default_rng()
-
-        nb_samples = self.problem_parameters.nb_samples
-        nb_sensors = self.problem_parameters.network_graph.nb_sensors_total
-
-        if nb_sources is None:
-            nb_sources = self.nb_filters
-
-        S = rng.normal(loc=0, scale=np.sqrt(signal_var), size=(nb_sources, nb_samples))
-        A = rng.uniform(low=-offset, high=offset, size=(nb_sensors, nb_sources))
-        noise = rng.normal(
-            loc=0, scale=np.sqrt(noise_var), size=(nb_sensors, nb_samples)
-        )
-
-        Y = A @ S + noise
-        B = rng.standard_normal(size=(nb_sensors, self.nb_filters))
-
-        scqp_inputs = ProblemInputs(
-            fused_signals=[Y],
-            fused_constants=[B],
-            fused_quadratics=[np.eye(nb_sensors)],
-        )
-
-        return scqp_inputs
-
 
 class RTLSProblem(OptimizationProblem):
     def __init__(
         self,
-        convergence_parameters: ConvergenceParameters | None,
+        nb_filters: int,
+        convergence_parameters: ConvergenceParameters,
         initial_estimate: np.ndarray | None = None,
     ) -> None:
         super().__init__(
+            nb_filters=nb_filters,
             convergence_parameters=convergence_parameters,
             initial_estimate=initial_estimate,
         )
 
-    def solve(self, problem_inputs: ProblemInputs) -> np.ndarray:
+    def solve(
+        self,
+        problem_inputs: ProblemInputs,
+        save_solution: bool = False,
+        convergence_parameters=None,
+        initial_estimate=None,
+    ) -> np.ndarray:
         """Solve the RTLS problem max rho = E[|X.T @ y(t) - d(t)|**2] / (1 + X.T @ X) s.t. ||X.T @ L|| <= delta ** 2."""
         Y = problem_inputs.fused_signals[0]
         L = problem_inputs.fused_constants[0]
@@ -837,16 +691,17 @@ class RTLSProblem(OptimizationProblem):
         d = problem_inputs.global_parameters[0]
         delta = problem_inputs.global_parameters[1]
 
-        rng = np.random.default_rng()
-        if self.initial_estimate is None:
+        if initial_estimate is None:
+            rng = self.rng if self.rng is not None else np.random.default_rng()
             X = rng.normal(
                 size=(
                     np.size(Y, 0),
                     self.nb_filters,
                 )
             )
+            logger.warning("Initializing first estimate randomly")
         else:
-            X = self.initial_estimate
+            X = initial_estimate
         i = 0
 
         f = self.evaluate_objective(X, problem_inputs)
@@ -863,30 +718,51 @@ class RTLSProblem(OptimizationProblem):
         LL = make_symmetric(LL)
         Gamma = make_symmetric(Gamma)
 
+        def objective_function(
+            mult: float,
+            L: np.ndarray,
+            Ryy: np.ndarray,
+            f: float,
+            Gamma: np.ndarray,
+            ryd: np.ndarray,
+            delta: float,
+        ) -> float:
+            return (
+                np.linalg.norm(
+                    L.T @ np.linalg.inv(Ryy - f * Gamma + mult * (L @ L.T)) @ ryd
+                )
+                ** 2
+                - delta**2
+            )
+
         while i < convergence_parameters.max_iterations:
             X_old = X
             X_f = np.linalg.inv(Ryy - f * Gamma) @ ryd
             if X_f.T @ LL @ X_f < delta**2:
                 X = X_f
             else:
-                obj = (
-                    lambda l: np.linalg.norm(
-                        L.T @ np.linalg.inv(Ryy - f * Gamma + l * LL) @ ryd
-                    )
-                    ** 2
-                    - delta**2
-                )
-                opt_sol = opt.root_scalar(obj, bracket=[0, 1000], method="bisect", x0=0)
-                l_star = opt_sol.root
+                bracket = [0, 1000]
+                initial_guess = 0
 
-                X = np.linalg.inv(Ryy - f * Gamma + l_star * LL) @ ryd
+                opt_sol = opt.root_scalar(
+                    objective_function,
+                    args=(L, Ryy, f, Gamma, ryd, delta),
+                    bracket=bracket,
+                    method="bisect",
+                    x0=initial_guess,
+                )
+                mult_star = opt_sol.root
+
+                X = np.linalg.inv(Ryy - f * Gamma + mult_star * LL) @ ryd
 
             f_old = f
             f = self.evaluate_objective(X, problem_inputs)
 
-            if (
+            if (convergence_parameters.objective_tolerance is not None) and (
                 np.absolute(f - f_old) <= convergence_parameters.objective_tolerance
-            ) or (
+            ):
+                break
+            if (convergence_parameters.argument_tolerance is not None) and (
                 np.linalg.norm(X - X_old, "fro")
                 <= convergence_parameters.argument_tolerance
             ):
@@ -894,11 +770,14 @@ class RTLSProblem(OptimizationProblem):
 
             i += 1
 
-            X_star = np.expand_dims(X, axis=1)
+        X_star = np.expand_dims(X, axis=1)
+
+        if save_solution:
+            self._X_star = X_star
 
         return X_star
 
-    def evaluate_objective(X: np.ndarray, problem_inputs: ProblemInputs) -> float:
+    def evaluate_objective(self, X: np.ndarray, problem_inputs: ProblemInputs) -> float:
         """Evaluate the RTLS objective E[|X.T @ y(t) - d(t)|**2] / (1 + X.T @ Gamma @ X)."""
         Y = problem_inputs.fused_signals[0]
         Gamma = problem_inputs.fused_quadratics[0]
@@ -911,50 +790,3 @@ class RTLSProblem(OptimizationProblem):
         f = (X.T @ Ryy @ X - 2 * X.T @ ryd + rdd) / (X.T @ Gamma @ X + 1)
 
         return f
-
-    def generate_synthetic_inputs(
-        self,
-        signal_var: float = 0.5,
-        noise_var: float = 0.2,
-        mixture_var: float = 0.3,
-        nb_sources: int | None = None,
-    ) -> ProblemInputs:
-        """Generate synthetic inputs for the RTLS problem."""
-        rng = np.random.default_rng()
-
-        nb_samples = self.problem_parameters.nb_samples
-        nb_sensors = self.problem_parameters.network_graph.nb_sensors_total
-
-        if nb_sources is None:
-            nb_sources = self.nb_filters
-
-        s = rng.normal(loc=0, scale=np.sqrt(signal_var), size=(nb_sources, nb_samples))
-        s = s - s.mean(axis=1, keepdims=True)
-        s = s * np.sqrt(
-            signal_var * np.ones((nb_sources, 1)) / s.var(axis=1, keepdims=True)
-        )
-        Pi_s = rng.normal(
-            loc=0, scale=np.sqrt(mixture_var), size=(nb_sensors, nb_sources)
-        )
-        noise = rng.normal(
-            loc=0, scale=np.sqrt(noise_var), size=(nb_sensors, nb_samples)
-        )
-        noise = noise - noise.mean(axis=1, keepdims=True)
-        noise = noise * np.sqrt(
-            noise_var * np.ones((nb_sensors, 1)) / noise.var(axis=1, keepdims=True)
-        )
-
-        Y = Pi_s @ s + noise
-
-        d_noisevar = 0.02
-        d_noise = rng.normal(
-            loc=0, scale=np.sqrt(d_noisevar), size=(nb_sources, nb_samples)
-        )
-        d_noise = d_noise - d_noise.mean(axis=1, keepdims=True)
-        d_noise = d_noise * np.sqrt(
-            d_noisevar * np.ones((nb_sources, 1)) / d_noise.var(axis=1, keepdims=True)
-        )
-
-        d = s + d_noise
-
-        return Y, d
