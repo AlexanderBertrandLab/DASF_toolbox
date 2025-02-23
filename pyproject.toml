@@ -18,6 +18,10 @@ dependencies = [
 [tool.setuptools]
 packages = ["dasf_tbx"]
 
+[tool.setuptools_scm]
+version_scheme = "post-release"
+local_scheme = "node-and-date"
+
 [project.urls]
 Homepage = "https://github.com/CemMusluoglu/DASF_toolbox"
 Documentation = "https://github.com/CemMusluoglu/DASF_toolbox"
