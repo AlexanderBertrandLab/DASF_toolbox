@@ -4,3 +4,7 @@ __pycache__/
 .idea/
 .vscode/
 run_scqp_dasf.py
+
+*.egg
+*.egg-info
+dist
