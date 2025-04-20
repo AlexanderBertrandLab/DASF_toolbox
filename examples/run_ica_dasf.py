@@ -11,11 +11,9 @@ from dasftoolbox.problem_settings import (
     NetworkGraph,
     ConvergenceParameters,
 )
-from dasftoolbox.optimization_problems import ICAProblem
-from dasftoolbox.data_retriever import (
-    ICADataRetriever,
-    get_stationary_setting,
-)
+from dasftoolbox.optimization_problems.ica_problem import ICAProblem
+from dasftoolbox.data_retrievers.ica_data_retriever import ICADataRetriever
+from dasftoolbox.data_retrievers.data_retriever import get_stationary_setting
 from dasftoolbox.dasf import DASF, DynamicPlotParameters
 
 random_seed = 2025

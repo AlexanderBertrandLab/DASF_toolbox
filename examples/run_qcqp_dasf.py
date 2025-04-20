@@ -11,11 +11,9 @@ from dasftoolbox.problem_settings import (
     NetworkGraph,
     ConvergenceParameters,
 )
-from dasftoolbox.optimization_problems import QCQPProblem
-from dasftoolbox.data_retriever import (
-    QCQPDataRetriever,
-    DataWindowParameters,
-)
+from dasftoolbox.optimization_problems.qcqp_problem import QCQPProblem
+from dasftoolbox.data_retrievers.qcqp_data_retriever import QCQPDataRetriever
+from dasftoolbox.data_retrievers.data_retriever import DataWindowParameters
 from dasftoolbox.dasf import DASF, DynamicPlotParameters
 
 random_seed = 2025

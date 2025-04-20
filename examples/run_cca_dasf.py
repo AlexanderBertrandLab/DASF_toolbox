@@ -8,8 +8,9 @@ mpl.use("macosx")
 # mpl.use('TkAgg')
 # mpl.use("Agg")
 from dasftoolbox.problem_settings import NetworkGraph, ConvergenceParameters
-from dasftoolbox.optimization_problems import CCAProblem
-from dasftoolbox.data_retriever import CCADataRetriever, get_stationary_setting
+from dasftoolbox.optimization_problems.cca_problem import CCAProblem
+from dasftoolbox.data_retrievers.cca_data_retriever import CCADataRetriever
+from dasftoolbox.data_retrievers.data_retriever import get_stationary_setting
 from dasftoolbox.dasf import DASFMultiVar, DynamicPlotParameters
 
 random_seed = 2025

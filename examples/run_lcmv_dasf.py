@@ -8,8 +8,9 @@ mpl.use("macosx")
 # mpl.use('TkAgg')
 # mpl.use("Agg")
 from dasftoolbox.problem_settings import NetworkGraph, ConvergenceParameters
-from dasftoolbox.optimization_problems import LCMVProblem
-from dasftoolbox.data_retriever import LCMVDataRetriever, DataWindowParameters
+from dasftoolbox.optimization_problems.lcmv_problem import LCMVProblem
+from dasftoolbox.data_retrievers.lcmv_data_retriever import LCMVDataRetriever
+from dasftoolbox.data_retrievers.data_retriever import DataWindowParameters
 from dasftoolbox.dasf import DASF
 
 random_seed = 2025

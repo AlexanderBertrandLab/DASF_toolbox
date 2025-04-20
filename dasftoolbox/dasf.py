@@ -5,8 +5,8 @@ from dasftoolbox.problem_settings import (
     ProblemInputs,
     ConvergenceParameters,
 )
-from dasftoolbox.data_retriever import DataRetriever
-from dasftoolbox.optimization_problems import OptimizationProblem
+from dasftoolbox.data_retrievers.data_retriever import DataRetriever
+from dasftoolbox.optimization_problems.optimization_problem import OptimizationProblem
 from typing import Tuple
 import matplotlib.pyplot as plt
 from matplotlib.lines import Line2D

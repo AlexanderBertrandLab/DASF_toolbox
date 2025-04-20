@@ -8,8 +8,9 @@ mpl.use("macosx")
 # mpl.use('TkAgg')
 # mpl.use("Agg")
 from dasftoolbox.problem_settings import NetworkGraph, ConvergenceParameters
-from dasftoolbox.optimization_problems import TROProblem
-from dasftoolbox.data_retriever import TRODataRetriever, get_stationary_setting
+from dasftoolbox.optimization_problems.tro_problem import TROProblem
+from dasftoolbox.data_retrievers.tro_data_retriever import TRODataRetriever
+from dasftoolbox.data_retrievers.data_retriever import get_stationary_setting
 from dasftoolbox.dasf import DASF
 
 random_seed = 2025

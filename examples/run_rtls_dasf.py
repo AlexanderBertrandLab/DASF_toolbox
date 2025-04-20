@@ -11,8 +11,8 @@ from dasftoolbox.problem_settings import (
     NetworkGraph,
     ConvergenceParameters,
 )
-from dasftoolbox.optimization_problems import RTLSProblem
-from dasftoolbox.data_retriever import (
+from dasftoolbox.optimization_problems.rtls_problem import RTLSProblem
+from dasftoolbox.data_retrievers.data_retriever import (
     RTLSDataRetriever,
     DataWindowParameters,
 )

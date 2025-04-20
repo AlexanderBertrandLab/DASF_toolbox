@@ -1,6 +1,6 @@
 from . import dasf
-from . import data_retriever
-from . import optimization_problems
+from .data_retrievers import data_retriever
+from .optimization_problems import optimization_problem
 from . import problem_settings
 from . import utils
 
