@@ -83,7 +83,7 @@ class DASF:
             else:
                 self.solver_convergence_parameters = None
                 logger.info(
-                    "No connvergence parameters provided for the solver, assuming it is not neccessary (e.g., closed form solution)."
+                    "No convergence parameters provided for the solver, assuming it is not neccessary (e.g., closed form solution)."
                 )
         if updating_path is not None:
             self.updating_path = updating_path
