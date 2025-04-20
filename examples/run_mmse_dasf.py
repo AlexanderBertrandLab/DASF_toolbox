@@ -1,5 +1,6 @@
 import numpy as np
 import matplotlib as mpl
+import matplotlib.pyplot as plt
 
 # Choose plot backend.
 mpl.use("macosx")
@@ -70,3 +71,6 @@ dasf_solver = DASF(
     dynamic_plot=True,
 )
 dasf_solver.run()
+
+dasf_solver.plot_error()
+plt.show()

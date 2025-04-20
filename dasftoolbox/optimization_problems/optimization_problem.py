@@ -3,17 +3,8 @@ from dasftoolbox.problem_settings import (
     ProblemInputs,
     ConvergenceParameters,
 )
-from dasftoolbox.utils import (
-    make_symmetric,
-    autocorrelation_matrix,
-    cross_correlation_matrix,
-)
 from abc import ABC, abstractmethod
-import scipy.optimize as opt
-import warnings
 import logging
-import scipy
-from typing import Literal
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)

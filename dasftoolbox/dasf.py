@@ -13,6 +13,7 @@ from matplotlib.lines import Line2D
 from matplotlib.figure import Figure
 import logging
 from dataclasses import dataclass, replace
+import pandas as pd
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -80,7 +81,10 @@ class DASF:
                     "Using same convergence parameters as centralized solver"
                 )
             else:
-                self.solver_convergence_parameters = ConvergenceParameters()
+                self.solver_convergence_parameters = None
+                logger.info(
+                    "No connvergence parameters provided for the solver, assuming it is not neccessary (e.g., closed form solution)."
+                )
         if updating_path is not None:
             self.updating_path = updating_path
         else:
@@ -176,7 +180,7 @@ class DASF:
 
     @property
     def absolute_objective_error_over_iterations(self):
-        """Returns the sequence |f(X^{i+1})-f(X^i)|"""
+        """Returns the sequence |f(X^{i})-f(X^*)|"""
         if hasattr(self.problem, "evaluate_objective"):
             if len(self.X_over_iterations) == 0:
                 logger.warning(
@@ -187,7 +191,7 @@ class DASF:
                 return [
                     np.abs(f - f_star)
                     for f, f_star in zip(
-                        self.f_over_iterations[1:], self.f_star_over_iterations[1:]
+                        self.f_over_iterations, self.f_star_over_iterations
                     )
                 ]
         else:
@@ -767,6 +771,8 @@ class DASF:
             )
 
     def plot_error(self) -> Figure:
+        if len(self.X_over_iterations) == 0:
+            logger.warning("No iterates have been computed, use the run method first.")
         fig = plt.figure()
         ax = fig.add_subplot(1, 1, 1)
         ax.loglog(
@@ -780,9 +786,11 @@ class DASF:
         return fig
 
     def plot_error_over_batches(self) -> Figure:
+        if len(self.X_over_iterations) == 0:
+            logger.warning("No iterates have been computed, use the run method first.")
         fig = plt.figure()
         ax = fig.add_subplot(1, 1, 1)
-        ax.loglog(
+        ax.semilogy(
             range(
                 1,
                 int(
@@ -796,16 +804,18 @@ class DASF:
             ],
             color="b",
         )
-        ax.set_xlabel(r"Iterations $i$")
+        ax.set_xlabel(r"Batch $i$")
         ax.set_ylabel(r"$\varepsilon(i)=\frac{\|X^i-X^*\|_F^2}{\|X^*\|_F^2}$")
         ax.grid(True, which="both")
         return fig
 
     def plot_iterate_difference(self) -> Figure:
+        if len(self.X_over_iterations) == 0:
+            logger.warning("No iterates have been computed, use the run method first.")
         fig = plt.figure()
         ax = fig.add_subplot(1, 1, 1)
         ax.loglog(
-            range(1, self.total_iterations),
+            range(1, self.total_iterations + 1),
             self.normed_difference_over_iterations,
             color="b",
         )
@@ -815,6 +825,8 @@ class DASF:
         return fig
 
     def plot_objective_error(self) -> Figure:
+        if len(self.X_over_iterations) == 0:
+            logger.warning("No iterates have been computed, use the run method first.")
         fig = plt.figure()
         ax = fig.add_subplot(1, 1, 1)
         ax.loglog(
@@ -826,6 +838,39 @@ class DASF:
         ax.set_ylabel(r"$|f(X^i)-f(X^*)|$")
         ax.grid(True, which="both")
         return fig
+
+    def get_summary_df(self) -> pd.DataFrame | None:
+        if len(self.X_over_iterations) == 0:
+            logger.warning("No iterates have been computed, use the run method first.")
+            return None
+
+        df_summary = pd.DataFrame(
+            {
+                "iterations": range(1, self.total_iterations + 1),
+                "iterate_difference": self.normed_difference_over_iterations,
+                "error": self.normed_error_over_iterations[1:],
+                "objective_error": self.absolute_objective_error_over_iterations[1:],
+                "updating_node": np.tile(
+                    self.updating_path,
+                    (self.total_iterations // len(self.updating_path)) + 1,
+                )[: self.total_iterations],
+            }
+        )
+        nb_neighbors = np.sum(
+            self.network_graph.adjacency_matrix[df_summary["updating_node"]], axis=1
+        )
+        df_summary["number_of_neighbors"] = nb_neighbors
+        batch_list = []
+        batch_index = 1
+        while len(batch_list) < self.total_iterations:
+            batch_list.extend(
+                [batch_index] * self.data_retriever.data_window_params.nb_window_reuse
+            )
+            batch_index += 1
+        batch_list = batch_list[: self.total_iterations]
+        df_summary["batch"] = batch_list
+
+        return df_summary
 
 
 class DASFMultiVar(DASF):
