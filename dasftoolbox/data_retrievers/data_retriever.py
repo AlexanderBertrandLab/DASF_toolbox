@@ -15,6 +15,7 @@ class DataWindowParameters:
 
 
 def get_stationary_setting(window_length: int, iterations: int) -> DataWindowParameters:
+    """Get the parameters to simulate a stationary setting by setting the sliding window offset to 0."""
     return DataWindowParameters(
         window_length=window_length, nb_window_reuse=iterations, sliding_window_offset=0
     )
@@ -27,5 +28,6 @@ class DataRetriever:
         return None
 
     @abstractmethod
-    def get_current_window(self, window_id: int) -> ProblemInputs | list[ProblemInputs]:
+    def get_data_window(self, window_id: int) -> ProblemInputs | list[ProblemInputs]:
+        """Get the window of data for the specified window ID."""
         pass

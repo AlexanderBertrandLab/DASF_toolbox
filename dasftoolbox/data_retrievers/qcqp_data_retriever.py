@@ -94,7 +94,7 @@ class QCQPDataRetriever(DataRetriever):
 
         self.weights = self.weight_function(nb_windows)
 
-    def get_current_window(self, window_id: int) -> ProblemInputs:
+    def get_data_window(self, window_id: int) -> ProblemInputs:
         Y_window = (
             self.A_0 + self.Delta * self.weights[window_id]
         ) @ self.D + self.noise

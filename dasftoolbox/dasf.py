@@ -76,7 +76,7 @@ class DASF:
         self.solver_convergence_parameters = solver_convergence_parameters
         if solver_convergence_parameters is None:
             if problem.convergence_parameters is not None:
-                self.solver_convergence_parameters = solver_convergence_parameters
+                self.solver_convergence_parameters = problem.convergence_parameters
                 logger.warning(
                     "Using same convergence parameters as centralized solver"
                 )
@@ -210,7 +210,7 @@ class DASF:
         self.X_star_over_iterations.clear()
         self.f_star_over_iterations.clear()
 
-        problem_inputs = self.data_retriever.get_current_window(window_id=0)
+        problem_inputs = self.data_retriever.get_data_window(window_id=0)
 
         X = self.initial_estimate
         self.X_over_iterations.append(X)
@@ -241,17 +241,19 @@ class DASF:
 
             # Prune the network
             # Find shortest path
-            neighbors, path = self._find_path(updating_node)
+            neighbors, path = self._find_path(updating_node=updating_node)
 
             # Neighborhood clusters
-            clusters = self._find_clusters(neighbors, path)
+            clusters = self._find_clusters(neighbors=neighbors, path=path)
 
             # Global - local transition matrix
-            Cq = self._build_Cq(X, updating_node, neighbors, clusters)
+            Cq = self._build_Cq(
+                X=X, updating_node=updating_node, neighbors=neighbors, clusters=clusters
+            )
 
             # Get current data window
             if i % self.data_retriever.data_window_params.nb_window_reuse == 0:
-                problem_inputs = self.data_retriever.get_current_window(
+                problem_inputs = self.data_retriever.get_data_window(
                     window_id=window_id
                 )
                 X_star_current_window = self.centralized_solution_for_input(
@@ -260,11 +262,11 @@ class DASF:
                 window_id += 1
 
             # Compute the compressed data
-            compressed_inputs = self._compress(problem_inputs, Cq)
+            compressed_inputs = self._compress(problem_inputs=problem_inputs, Cq=Cq)
 
             # Compute the local variable
             # Solve the local problem with the algorithm for the global problem using the compressed data
-            Xq = self._get_block_q(X, updating_node)
+            Xq = self._get_block_q(X=X, updating_node=updating_node)
             X_tilde = np.concatenate(
                 (
                     Xq,
@@ -454,7 +456,11 @@ class DASF:
         return clusters
 
     def _build_Cq(
-        self, X: np.ndarray, updating_node: int, neighbors: list, clusters: list
+        self,
+        X: np.ndarray,
+        updating_node: int,
+        neighbors: list[int],
+        clusters: list[list[int]],
     ) -> np.ndarray:
         """
         Constructs the transition matrix that maps the local data and variables to the global ones.
@@ -734,8 +740,9 @@ class DASF:
         plt.draw()
         plt.pause(0.05)
 
-    def _validate_problem(self):
-        problem_inputs = self.data_retriever.get_current_window(window_id=0)
+    def _validate_problem(self) -> None:
+        """Validates the problem and its inputs."""
+        problem_inputs = self.data_retriever.get_data_window(window_id=0)
         nb_sensor = self.network_graph.nb_sensors_total
         for index, signal in enumerate(problem_inputs.fused_signals):
             if np.size(signal, 0) != nb_sensor:
@@ -771,6 +778,7 @@ class DASF:
             )
 
     def plot_error(self) -> Figure:
+        "Plots the sequence ||X^i-X^*||_F^2/||X^*||_F^2"
         if len(self.X_over_iterations) == 0:
             logger.warning("No iterates have been computed, use the run method first.")
         fig = plt.figure()
@@ -786,6 +794,7 @@ class DASF:
         return fig
 
     def plot_error_over_batches(self) -> Figure:
+        """Plots the sequence ||X^i-X^*||_F^2/||X^*||_F^2 at the end of each batch of data"""
         if len(self.X_over_iterations) == 0:
             logger.warning("No iterates have been computed, use the run method first.")
         fig = plt.figure()
@@ -810,6 +819,7 @@ class DASF:
         return fig
 
     def plot_iterate_difference(self) -> Figure:
+        """Plots the sequence ||X{i+1}-X^i||_F^2/X.size"""
         if len(self.X_over_iterations) == 0:
             logger.warning("No iterates have been computed, use the run method first.")
         fig = plt.figure()
@@ -825,6 +835,7 @@ class DASF:
         return fig
 
     def plot_objective_error(self) -> Figure:
+        """PLots the sequence |f(X^{i})-f(X^*)|"""
         if len(self.X_over_iterations) == 0:
             logger.warning("No iterates have been computed, use the run method first.")
         fig = plt.figure()
@@ -840,6 +851,7 @@ class DASF:
         return fig
 
     def get_summary_df(self) -> pd.DataFrame | None:
+        """Returns a pandas DataFrame summarizing the simulation results."""
         if len(self.X_over_iterations) == 0:
             logger.warning("No iterates have been computed, use the run method first.")
             return None
@@ -951,7 +963,7 @@ class DASFMultiVar(DASF):
         self.X_star_over_iterations.clear()
         self.f_star_over_iterations.clear()
 
-        problem_inputs = self.data_retriever.get_current_window(window_id=0)
+        problem_inputs = self.data_retriever.get_data_window(window_id=0)
 
         X = self.initial_estimate
         self.X_over_iterations.append(X)
@@ -991,14 +1003,14 @@ class DASFMultiVar(DASF):
 
             # Prune the network
             # Find shortest path
-            neighbors, path = self._find_path(updating_node)
+            neighbors, path = self._find_path(updating_node=updating_node)
 
             # Neighborhood clusters
-            clusters = self._find_clusters(neighbors, path)
+            clusters = self._find_clusters(neighbors=neighbors, path=path)
 
             # Get current data window
             if i % self.data_retriever.data_window_params.nb_window_reuse == 0:
-                problem_inputs = self.data_retriever.get_current_window(
+                problem_inputs = self.data_retriever.get_data_window(
                     window_id=window_id
                 )
                 X_star_current_window = self.centralized_solution_for_input(
@@ -1012,14 +1024,21 @@ class DASFMultiVar(DASF):
             compressed_inputs = []
             X_tilde = []
             for k in range(self.nb_variables):
-                Cq_k = self._build_Cq(X[k], updating_node, neighbors, clusters)
+                Cq_k = self._build_Cq(
+                    X=X[k],
+                    updating_node=updating_node,
+                    neighbors=neighbors,
+                    clusters=clusters,
+                )
                 Cq.append(Cq_k)
                 # Compute the compressed data for each input
-                compressed_inputs_k = self._compress(problem_inputs[k], Cq[k])
+                compressed_inputs_k = self._compress(
+                    problem_inputs=problem_inputs[k], Cq=Cq[k]
+                )
                 compressed_inputs.append(compressed_inputs_k)
 
                 # Compute each local variable
-                Xq_k = self._get_block_q(X[k], updating_node)
+                Xq_k = self._get_block_q(X=X[k], updating_node=updating_node)
                 X_tilde_k = np.concatenate(
                     (
                         Xq_k,
@@ -1118,7 +1137,7 @@ class DASFMultiVar(DASF):
         return None
 
     def _validate_problem(self):
-        problem_inputs = self.data_retriever.get_current_window(window_id=0)
+        problem_inputs = self.data_retriever.get_data_window(window_id=0)
         if self.nb_variables != len(problem_inputs):
             raise ValueError(
                 f"The number of variables {self.nb_variables} does not match the number of problem inputs {len(problem_inputs)}"

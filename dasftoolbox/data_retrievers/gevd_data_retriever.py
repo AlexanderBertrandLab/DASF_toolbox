@@ -60,7 +60,7 @@ class GEVDDataRetriever(DataRetriever):
 
         self.weights = self.weight_function(nb_windows)
 
-    def get_current_window(self, window_id: int) -> ProblemInputs:
+    def get_data_window(self, window_id: int) -> ProblemInputs:
         V_window = self.B_0 @ self.D1 + self.noise
         V_window = normalize(V_window)
         Y_window = (
