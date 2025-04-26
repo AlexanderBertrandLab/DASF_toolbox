@@ -654,7 +654,7 @@ class DASF:
             ax1.set_xlabel("Sensors")
             ax1.set_ylabel("Weight values")
             ax1.set_title(
-                f"Weights per sensor for filter {self.dynamic_plot_params.X_col + 1}"
+                rf"$X$: Weights per sensor for filter {self.dynamic_plot_params.X_col + 1}"
             )
             ax1.grid()
 
@@ -694,7 +694,7 @@ class DASF:
             ax2.set_xlabel("Samples")
             ax2.set_ylabel("Filtered signal values")
             ax2.set_title(
-                f"Filtered signal {self.dynamic_plot_params.Y_id + 1} for filter {self.dynamic_plot_params.XTY_col + 1}, shown every {self.dynamic_plot_params.tau} sample"
+                rf"$X^Ty(t)$: Filtered signal {self.dynamic_plot_params.Y_id + 1} for filter {self.dynamic_plot_params.XTY_col + 1}, shown every {self.dynamic_plot_params.tau} sample"
             )
             ax2.grid()
 
