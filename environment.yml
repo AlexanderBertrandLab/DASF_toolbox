@@ -194,15 +194,19 @@ dependencies:
   - zstandard=0.19.0
   - zstd=1.5.5
   - pip:
+      - alabaster==1.0.0
       - autograd==1.6.2
+      - babel==2.17.0
       - backports-tarfile==1.2.0
       - build==1.2.2.post1
       - dasf-tbx==0.0.0
+      - dasftoolbox==0.0.post91+g32c78c7
       - docutils==0.21.2
       - filelock==3.13.1
       - fsspec==2024.2.0
       - future==0.18.3
       - id==1.5.0
+      - imagesize==1.4.1
       - jaraco-classes==3.4.0
       - jaraco-context==6.0.1
       - jaraco-functools==4.1.0
@@ -223,9 +227,20 @@ dependencies:
       - requests-toolbelt==1.0.0
       - rfc3986==2.0.0
       - rich==13.9.4
+      - roman-numerals-py==3.1.0
       - scikit-learn==1.4.2
       - scipy==1.9.3
       - setuptools-scm==8.2.0
+      - snowballstemmer==2.2.0
+      - sphinx==8.2.3
+      - sphinx-rtd-theme==3.0.2
+      - sphinxcontrib-applehelp==2.0.0
+      - sphinxcontrib-devhelp==2.0.0
+      - sphinxcontrib-htmlhelp==2.1.0
+      - sphinxcontrib-jquery==4.1
+      - sphinxcontrib-jsmath==1.0.1
+      - sphinxcontrib-qthelp==2.0.0
+      - sphinxcontrib-serializinghtml==2.0.0
       - sympy==1.12
       - threadpoolctl==3.5.0
 prefix: /Users/musluoglucem/miniconda3/envs/DASF_env
