@@ -8,7 +8,6 @@ DASF toolbox documentation
 
 
 .. toctree::
-   :hidden:
 
    Documentation/index
 

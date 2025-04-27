@@ -48,21 +48,21 @@
 <li class="toctree-l2"><a class="reference internal" href="dasf.html">DASF</a></li>
 <li class="toctree-l2"><a class="reference internal" href="optimization_problems.html">Optimization Problems</a></li>
 <li class="toctree-l2 current"><a class="current reference internal" href="#">Data Retrievers</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#dasftoolbox.data_retrievers.data_retriever.DataWindowParameters"><code class="docutils literal notranslate"><span class="pre">DataWindowParameters</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#dasftoolbox.data_retrievers.data_retriever.DataWindowParameters.window_length"><code class="docutils literal notranslate"><span class="pre">DataWindowParameters.window_length</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#dasftoolbox.data_retrievers.data_retriever.DataWindowParameters.nb_window_reuse"><code class="docutils literal notranslate"><span class="pre">DataWindowParameters.nb_window_reuse</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#dasftoolbox.data_retrievers.data_retriever.DataWindowParameters.sliding_window_offset"><code class="docutils literal notranslate"><span class="pre">DataWindowParameters.sliding_window_offset</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id0"><code class="docutils literal notranslate"><span class="pre">DataWindowParameters.window_length</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id1"><code class="docutils literal notranslate"><span class="pre">DataWindowParameters.nb_window_reuse</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id2"><code class="docutils literal notranslate"><span class="pre">DataWindowParameters.sliding_window_offset</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#dasftoolbox.data_retrievers.data_retriever.get_stationary_setting"><code class="docutils literal notranslate"><span class="pre">get_stationary_setting()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#dasftoolbox.data_retrievers.data_retriever.DataRetriever"><code class="docutils literal notranslate"><span class="pre">DataRetriever</span></code></a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#dasftoolbox.data_retrievers.data_retriever.DataRetriever.data_window_params"><code class="docutils literal notranslate"><span class="pre">DataRetriever.data_window_params</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#dasftoolbox.data_retrievers.data_retriever.DataRetriever.get_data_window"><code class="docutils literal notranslate"><span class="pre">DataRetriever.get_data_window()</span></code></a></li>
 </ul>
 </li>
-<li class="toctree-l3"><a class="reference internal" href="#dasftoolbox.data_retrievers.data_retriever.DataWindowParameters"><code class="docutils literal notranslate"><span class="pre">DataWindowParameters</span></code></a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#dasftoolbox.data_retrievers.data_retriever.DataWindowParameters.window_length"><code class="docutils literal notranslate"><span class="pre">DataWindowParameters.window_length</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#dasftoolbox.data_retrievers.data_retriever.DataWindowParameters.nb_window_reuse"><code class="docutils literal notranslate"><span class="pre">DataWindowParameters.nb_window_reuse</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#dasftoolbox.data_retrievers.data_retriever.DataWindowParameters.sliding_window_offset"><code class="docutils literal notranslate"><span class="pre">DataWindowParameters.sliding_window_offset</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#id0"><code class="docutils literal notranslate"><span class="pre">DataWindowParameters.nb_window_reuse</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#id1"><code class="docutils literal notranslate"><span class="pre">DataWindowParameters.sliding_window_offset</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#id2"><code class="docutils literal notranslate"><span class="pre">DataWindowParameters.window_length</span></code></a></li>
-</ul>
-</li>
-<li class="toctree-l3"><a class="reference internal" href="#dasftoolbox.data_retrievers.data_retriever.get_stationary_setting"><code class="docutils literal notranslate"><span class="pre">get_stationary_setting()</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="problem_settings.html">Problem Settings</a></li>
@@ -98,41 +98,6 @@
              
   <section id="module-dasftoolbox.data_retrievers.data_retriever">
 <span id="data-retrievers"></span><h1>Data Retrievers<a class="headerlink" href="#module-dasftoolbox.data_retrievers.data_retriever" title="Link to this heading"></a></h1>
-<dl class="py class">
-<dt class="sig sig-object py" id="dasftoolbox.data_retrievers.data_retriever.DataRetriever">
-<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">dasftoolbox.data_retrievers.data_retriever.</span></span><span class="sig-name descname"><span class="pre">DataRetriever</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data_window_params</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#dasftoolbox.data_retrievers.data_retriever.DataWindowParameters" title="dasftoolbox.data_retrievers.data_retriever.DataWindowParameters"><span class="pre">DataWindowParameters</span></a></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/dasftoolbox/data_retrievers/data_retriever.html#DataRetriever"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dasftoolbox.data_retrievers.data_retriever.DataRetriever" title="Link to this definition"></a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
-<p>Base class for data retrievers in the DASF format.</p>
-<dl class="py attribute">
-<dt class="sig sig-object py" id="dasftoolbox.data_retrievers.data_retriever.DataRetriever.data_window_params">
-<span class="sig-name descname"><span class="pre">data_window_params</span></span><a class="headerlink" href="#dasftoolbox.data_retrievers.data_retriever.DataRetriever.data_window_params" title="Link to this definition"></a></dt>
-<dd><p>Parameters defining the window of data.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference internal" href="#dasftoolbox.data_retrievers.data_retriever.DataWindowParameters" title="dasftoolbox.data_retrievers.data_retriever.DataWindowParameters">DataWindowParameters</a></p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="dasftoolbox.data_retrievers.data_retriever.DataRetriever.get_data_window">
-<em class="property"><span class="k"><span class="pre">abstractmethod</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_data_window</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">window_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="problem_settings.html#dasftoolbox.problem_settings.ProblemInputs" title="dasftoolbox.problem_settings.ProblemInputs"><span class="pre">ProblemInputs</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="problem_settings.html#dasftoolbox.problem_settings.ProblemInputs" title="dasftoolbox.problem_settings.ProblemInputs"><span class="pre">ProblemInputs</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/dasftoolbox/data_retrievers/data_retriever.html#DataRetriever.get_data_window"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dasftoolbox.data_retrievers.data_retriever.DataRetriever.get_data_window" title="Link to this definition"></a></dt>
-<dd><p>Get the window of data for the specified window ID.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>window_id</strong> (<em>int</em>) – ID of the window of data to retrieve.</p>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>Window of data for the specified window ID.</p>
-</dd>
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference internal" href="problem_settings.html#dasftoolbox.problem_settings.ProblemInputs" title="dasftoolbox.problem_settings.ProblemInputs">ProblemInputs</a> | list[<a class="reference internal" href="problem_settings.html#dasftoolbox.problem_settings.ProblemInputs" title="dasftoolbox.problem_settings.ProblemInputs">ProblemInputs</a>]</p>
-</dd>
-</dl>
-</dd></dl>
-
-</dd></dl>
-
 <dl class="py class">
 <dt class="sig sig-object py" id="dasftoolbox.data_retrievers.data_retriever.DataWindowParameters">
 <em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">dasftoolbox.data_retrievers.data_retriever.</span></span><span class="sig-name descname"><span class="pre">DataWindowParameters</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">window_length</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nb_window_reuse</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sliding_window_offset</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/dasftoolbox/data_retrievers/data_retriever.html#DataWindowParameters"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dasftoolbox.data_retrievers.data_retriever.DataWindowParameters" title="Link to this definition"></a></dt>
@@ -173,17 +138,17 @@
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="id0">
-<span class="sig-name descname"><span class="pre">nb_window_reuse</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">1</span></em><a class="headerlink" href="#id0" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">window_length</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#id0" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="id1">
-<span class="sig-name descname"><span class="pre">sliding_window_offset</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#id1" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">nb_window_reuse</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">1</span></em><a class="headerlink" href="#id1" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="id2">
-<span class="sig-name descname"><span class="pre">window_length</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#id2" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">sliding_window_offset</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#id2" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 </dd></dl>
@@ -206,6 +171,41 @@
 <dd class="field-odd"><p><a class="reference internal" href="#dasftoolbox.data_retrievers.data_retriever.DataWindowParameters" title="dasftoolbox.data_retrievers.data_retriever.DataWindowParameters">DataWindowParameters</a></p>
 </dd>
 </dl>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="dasftoolbox.data_retrievers.data_retriever.DataRetriever">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">dasftoolbox.data_retrievers.data_retriever.</span></span><span class="sig-name descname"><span class="pre">DataRetriever</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data_window_params</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#dasftoolbox.data_retrievers.data_retriever.DataWindowParameters" title="dasftoolbox.data_retrievers.data_retriever.DataWindowParameters"><span class="pre">DataWindowParameters</span></a></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/dasftoolbox/data_retrievers/data_retriever.html#DataRetriever"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dasftoolbox.data_retrievers.data_retriever.DataRetriever" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Base class for data retrievers in the DASF format.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="dasftoolbox.data_retrievers.data_retriever.DataRetriever.data_window_params">
+<span class="sig-name descname"><span class="pre">data_window_params</span></span><a class="headerlink" href="#dasftoolbox.data_retrievers.data_retriever.DataRetriever.data_window_params" title="Link to this definition"></a></dt>
+<dd><p>Parameters defining the window of data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#dasftoolbox.data_retrievers.data_retriever.DataWindowParameters" title="dasftoolbox.data_retrievers.data_retriever.DataWindowParameters">DataWindowParameters</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="dasftoolbox.data_retrievers.data_retriever.DataRetriever.get_data_window">
+<em class="property"><span class="k"><span class="pre">abstractmethod</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_data_window</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">window_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="problem_settings.html#dasftoolbox.problem_settings.ProblemInputs" title="dasftoolbox.problem_settings.ProblemInputs"><span class="pre">ProblemInputs</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="problem_settings.html#dasftoolbox.problem_settings.ProblemInputs" title="dasftoolbox.problem_settings.ProblemInputs"><span class="pre">ProblemInputs</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/dasftoolbox/data_retrievers/data_retriever.html#DataRetriever.get_data_window"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dasftoolbox.data_retrievers.data_retriever.DataRetriever.get_data_window" title="Link to this definition"></a></dt>
+<dd><p>Get the window of data for the specified window ID.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>window_id</strong> (<em>int</em>) – ID of the window of data to retrieve.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Window of data for the specified window ID.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="problem_settings.html#dasftoolbox.problem_settings.ProblemInputs" title="dasftoolbox.problem_settings.ProblemInputs">ProblemInputs</a> | list[<a class="reference internal" href="problem_settings.html#dasftoolbox.problem_settings.ProblemInputs" title="dasftoolbox.problem_settings.ProblemInputs">ProblemInputs</a>]</p>
+</dd>
+</dl>
+</dd></dl>
+
 </dd></dl>
 
 </section>

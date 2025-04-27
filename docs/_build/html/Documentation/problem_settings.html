@@ -49,13 +49,11 @@
 <li class="toctree-l2"><a class="reference internal" href="optimization_problems.html">Optimization Problems</a></li>
 <li class="toctree-l2"><a class="reference internal" href="data_retrievers.html">Data Retrievers</a></li>
 <li class="toctree-l2 current"><a class="current reference internal" href="#">Problem Settings</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#dasftoolbox.problem_settings.ConvergenceParameters"><code class="docutils literal notranslate"><span class="pre">ConvergenceParameters</span></code></a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#dasftoolbox.problem_settings.ConvergenceParameters.max_iterations"><code class="docutils literal notranslate"><span class="pre">ConvergenceParameters.max_iterations</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#dasftoolbox.problem_settings.ConvergenceParameters.objective_tolerance"><code class="docutils literal notranslate"><span class="pre">ConvergenceParameters.objective_tolerance</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#dasftoolbox.problem_settings.ConvergenceParameters.argument_tolerance"><code class="docutils literal notranslate"><span class="pre">ConvergenceParameters.argument_tolerance</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#id0"><code class="docutils literal notranslate"><span class="pre">ConvergenceParameters.argument_tolerance</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#id1"><code class="docutils literal notranslate"><span class="pre">ConvergenceParameters.max_iterations</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#id2"><code class="docutils literal notranslate"><span class="pre">ConvergenceParameters.objective_tolerance</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#dasftoolbox.problem_settings.ProblemInputs"><code class="docutils literal notranslate"><span class="pre">ProblemInputs</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#dasftoolbox.problem_settings.ProblemInputs.fused_signals"><code class="docutils literal notranslate"><span class="pre">ProblemInputs.fused_signals</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#dasftoolbox.problem_settings.ProblemInputs.fused_constants"><code class="docutils literal notranslate"><span class="pre">ProblemInputs.fused_constants</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#dasftoolbox.problem_settings.ProblemInputs.fused_quadratics"><code class="docutils literal notranslate"><span class="pre">ProblemInputs.fused_quadratics</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#dasftoolbox.problem_settings.ProblemInputs.global_parameters"><code class="docutils literal notranslate"><span class="pre">ProblemInputs.global_parameters</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="#dasftoolbox.problem_settings.NetworkGraph"><code class="docutils literal notranslate"><span class="pre">NetworkGraph</span></code></a><ul>
@@ -66,11 +64,13 @@
 <li class="toctree-l4"><a class="reference internal" href="#dasftoolbox.problem_settings.NetworkGraph.plot_graph"><code class="docutils literal notranslate"><span class="pre">NetworkGraph.plot_graph()</span></code></a></li>
 </ul>
 </li>
-<li class="toctree-l3"><a class="reference internal" href="#dasftoolbox.problem_settings.ProblemInputs"><code class="docutils literal notranslate"><span class="pre">ProblemInputs</span></code></a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#dasftoolbox.problem_settings.ProblemInputs.fused_signals"><code class="docutils literal notranslate"><span class="pre">ProblemInputs.fused_signals</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#dasftoolbox.problem_settings.ProblemInputs.fused_constants"><code class="docutils literal notranslate"><span class="pre">ProblemInputs.fused_constants</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#dasftoolbox.problem_settings.ProblemInputs.fused_quadratics"><code class="docutils literal notranslate"><span class="pre">ProblemInputs.fused_quadratics</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#dasftoolbox.problem_settings.ProblemInputs.global_parameters"><code class="docutils literal notranslate"><span class="pre">ProblemInputs.global_parameters</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#dasftoolbox.problem_settings.ConvergenceParameters"><code class="docutils literal notranslate"><span class="pre">ConvergenceParameters</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#dasftoolbox.problem_settings.ConvergenceParameters.max_iterations"><code class="docutils literal notranslate"><span class="pre">ConvergenceParameters.max_iterations</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#dasftoolbox.problem_settings.ConvergenceParameters.objective_tolerance"><code class="docutils literal notranslate"><span class="pre">ConvergenceParameters.objective_tolerance</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#dasftoolbox.problem_settings.ConvergenceParameters.argument_tolerance"><code class="docutils literal notranslate"><span class="pre">ConvergenceParameters.argument_tolerance</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id0"><code class="docutils literal notranslate"><span class="pre">ConvergenceParameters.max_iterations</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id1"><code class="docutils literal notranslate"><span class="pre">ConvergenceParameters.objective_tolerance</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id2"><code class="docutils literal notranslate"><span class="pre">ConvergenceParameters.argument_tolerance</span></code></a></li>
 </ul>
 </li>
 </ul>
@@ -108,56 +108,52 @@
   <section id="module-dasftoolbox.problem_settings">
 <span id="problem-settings"></span><h1>Problem Settings<a class="headerlink" href="#module-dasftoolbox.problem_settings" title="Link to this heading"></a></h1>
 <dl class="py class">
-<dt class="sig sig-object py" id="dasftoolbox.problem_settings.ConvergenceParameters">
-<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">dasftoolbox.problem_settings.</span></span><span class="sig-name descname"><span class="pre">ConvergenceParameters</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">max_iterations</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">objective_tolerance</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">argument_tolerance</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/dasftoolbox/problem_settings.html#ConvergenceParameters"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dasftoolbox.problem_settings.ConvergenceParameters" title="Link to this definition"></a></dt>
-<dd><p>Class storing the convergence parameters of an optimization problem. This class is used both by the centralized solver and the DASF solver.</p>
+<dt class="sig sig-object py" id="dasftoolbox.problem_settings.ProblemInputs">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">dasftoolbox.problem_settings.</span></span><span class="sig-name descname"><span class="pre">ProblemInputs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fused_signals</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">ndarray</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fused_constants</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">ndarray</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fused_quadratics</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">ndarray</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">global_parameters</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">ndarray</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/dasftoolbox/problem_settings.html#ProblemInputs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dasftoolbox.problem_settings.ProblemInputs" title="Link to this definition"></a></dt>
+<dd><p>Class storing the inputs, i.e., the data, of the problem.</p>
 <dl class="py attribute">
-<dt class="sig sig-object py" id="dasftoolbox.problem_settings.ConvergenceParameters.max_iterations">
-<span class="sig-name descname"><span class="pre">max_iterations</span></span><a class="headerlink" href="#dasftoolbox.problem_settings.ConvergenceParameters.max_iterations" title="Link to this definition"></a></dt>
-<dd><p>Maximum number of iterations the solver applies.</p>
+<dt class="sig sig-object py" id="dasftoolbox.problem_settings.ProblemInputs.fused_signals">
+<span class="sig-name descname"><span class="pre">fused_signals</span></span><a class="headerlink" href="#dasftoolbox.problem_settings.ProblemInputs.fused_signals" title="Link to this definition"></a></dt>
+<dd><p>List of signals to be fused by the variable.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>int | None</p>
+<dd class="field-odd"><p>list[np.ndarray]</p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="dasftoolbox.problem_settings.ConvergenceParameters.objective_tolerance">
-<span class="sig-name descname"><span class="pre">objective_tolerance</span></span><a class="headerlink" href="#dasftoolbox.problem_settings.ConvergenceParameters.objective_tolerance" title="Link to this definition"></a></dt>
-<dd><p>Threshold for two consecutive objective function values. If the absolute difference is below this value, the solver stops.</p>
+<dt class="sig sig-object py" id="dasftoolbox.problem_settings.ProblemInputs.fused_constants">
+<span class="sig-name descname"><span class="pre">fused_constants</span></span><a class="headerlink" href="#dasftoolbox.problem_settings.ProblemInputs.fused_constants" title="Link to this definition"></a></dt>
+<dd><p>List of constant arrays to be fused by the variable. Similar to the signals, but do not change in time.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>float | None</p>
+<dd class="field-odd"><p>list[np.ndarray] | None = None</p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="dasftoolbox.problem_settings.ConvergenceParameters.argument_tolerance">
-<span class="sig-name descname"><span class="pre">argument_tolerance</span></span><a class="headerlink" href="#dasftoolbox.problem_settings.ConvergenceParameters.argument_tolerance" title="Link to this definition"></a></dt>
-<dd><p>Threshold for two consecutive iterates. If the norm of the difference is below this value, the solver stops.</p>
+<dt class="sig sig-object py" id="dasftoolbox.problem_settings.ProblemInputs.fused_quadratics">
+<span class="sig-name descname"><span class="pre">fused_quadratics</span></span><a class="headerlink" href="#dasftoolbox.problem_settings.ProblemInputs.fused_quadratics" title="Link to this definition"></a></dt>
+<dd><p>List of block-diagonal arrays to be fused by the variable from both sides, e.g., X.T &#64; M &#64; X.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>float | None</p>
+<dd class="field-odd"><p>list[np.ndarray] | None = None</p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="id0">
-<span class="sig-name descname"><span class="pre">argument_tolerance</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#id0" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="id1">
-<span class="sig-name descname"><span class="pre">max_iterations</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#id1" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="id2">
-<span class="sig-name descname"><span class="pre">objective_tolerance</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#id2" title="Link to this definition"></a></dt>
-<dd></dd></dl>
+<dt class="sig sig-object py" id="dasftoolbox.problem_settings.ProblemInputs.global_parameters">
+<span class="sig-name descname"><span class="pre">global_parameters</span></span><a class="headerlink" href="#dasftoolbox.problem_settings.ProblemInputs.global_parameters" title="Link to this definition"></a></dt>
+<dd><p>List of arrays that are not fused by the variable, but are needed to solve the optimization problem.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list[np.ndarray] | None = None</p>
+</dd>
+</dl>
+</dd></dl>
 
 </dd></dl>
 
@@ -218,52 +214,56 @@
 </dd></dl>
 
 <dl class="py class">
-<dt class="sig sig-object py" id="dasftoolbox.problem_settings.ProblemInputs">
-<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">dasftoolbox.problem_settings.</span></span><span class="sig-name descname"><span class="pre">ProblemInputs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fused_signals</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">ndarray</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fused_constants</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">ndarray</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fused_quadratics</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">ndarray</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">global_parameters</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">ndarray</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/dasftoolbox/problem_settings.html#ProblemInputs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dasftoolbox.problem_settings.ProblemInputs" title="Link to this definition"></a></dt>
-<dd><p>Class storing the inputs, i.e., the data, of the problem.</p>
+<dt class="sig sig-object py" id="dasftoolbox.problem_settings.ConvergenceParameters">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">dasftoolbox.problem_settings.</span></span><span class="sig-name descname"><span class="pre">ConvergenceParameters</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">max_iterations</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">objective_tolerance</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">argument_tolerance</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/dasftoolbox/problem_settings.html#ConvergenceParameters"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dasftoolbox.problem_settings.ConvergenceParameters" title="Link to this definition"></a></dt>
+<dd><p>Class storing the convergence parameters of an optimization problem. This class is used both by the centralized solver and the DASF solver.</p>
 <dl class="py attribute">
-<dt class="sig sig-object py" id="dasftoolbox.problem_settings.ProblemInputs.fused_signals">
-<span class="sig-name descname"><span class="pre">fused_signals</span></span><a class="headerlink" href="#dasftoolbox.problem_settings.ProblemInputs.fused_signals" title="Link to this definition"></a></dt>
-<dd><p>List of signals to be fused by the variable.</p>
+<dt class="sig sig-object py" id="dasftoolbox.problem_settings.ConvergenceParameters.max_iterations">
+<span class="sig-name descname"><span class="pre">max_iterations</span></span><a class="headerlink" href="#dasftoolbox.problem_settings.ConvergenceParameters.max_iterations" title="Link to this definition"></a></dt>
+<dd><p>Maximum number of iterations the solver applies.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>list[np.ndarray]</p>
+<dd class="field-odd"><p>int | None</p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="dasftoolbox.problem_settings.ProblemInputs.fused_constants">
-<span class="sig-name descname"><span class="pre">fused_constants</span></span><a class="headerlink" href="#dasftoolbox.problem_settings.ProblemInputs.fused_constants" title="Link to this definition"></a></dt>
-<dd><p>List of constant arrays to be fused by the variable. Similar to the signals, but do not change in time.</p>
+<dt class="sig sig-object py" id="dasftoolbox.problem_settings.ConvergenceParameters.objective_tolerance">
+<span class="sig-name descname"><span class="pre">objective_tolerance</span></span><a class="headerlink" href="#dasftoolbox.problem_settings.ConvergenceParameters.objective_tolerance" title="Link to this definition"></a></dt>
+<dd><p>Threshold for two consecutive objective function values. If the absolute difference is below this value, the solver stops.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>list[np.ndarray] | None = None</p>
+<dd class="field-odd"><p>float | None</p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="dasftoolbox.problem_settings.ProblemInputs.fused_quadratics">
-<span class="sig-name descname"><span class="pre">fused_quadratics</span></span><a class="headerlink" href="#dasftoolbox.problem_settings.ProblemInputs.fused_quadratics" title="Link to this definition"></a></dt>
-<dd><p>List of block-diagonal arrays to be fused by the variable from both sides, e.g., X.T &#64; M &#64; X.</p>
+<dt class="sig sig-object py" id="dasftoolbox.problem_settings.ConvergenceParameters.argument_tolerance">
+<span class="sig-name descname"><span class="pre">argument_tolerance</span></span><a class="headerlink" href="#dasftoolbox.problem_settings.ConvergenceParameters.argument_tolerance" title="Link to this definition"></a></dt>
+<dd><p>Threshold for two consecutive iterates. If the norm of the difference is below this value, the solver stops.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>list[np.ndarray] | None = None</p>
+<dd class="field-odd"><p>float | None</p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="dasftoolbox.problem_settings.ProblemInputs.global_parameters">
-<span class="sig-name descname"><span class="pre">global_parameters</span></span><a class="headerlink" href="#dasftoolbox.problem_settings.ProblemInputs.global_parameters" title="Link to this definition"></a></dt>
-<dd><p>List of arrays that are not fused by the variable, but are needed to solve the optimization problem.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>list[np.ndarray] | None = None</p>
-</dd>
-</dl>
-</dd></dl>
+<dt class="sig sig-object py" id="id0">
+<span class="sig-name descname"><span class="pre">max_iterations</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#id0" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="id1">
+<span class="sig-name descname"><span class="pre">objective_tolerance</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#id1" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="id2">
+<span class="sig-name descname"><span class="pre">argument_tolerance</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#id2" title="Link to this definition"></a></dt>
+<dd></dd></dl>
 
 </dd></dl>
 

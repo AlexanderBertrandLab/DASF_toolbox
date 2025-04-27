@@ -46,6 +46,21 @@
               <ul class="current">
 <li class="toctree-l1 current"><a class="reference internal" href="index.html">Documentation</a><ul class="current">
 <li class="toctree-l2 current"><a class="current reference internal" href="#">DASF</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#dasftoolbox.dasf.DynamicPlotParameters"><code class="docutils literal notranslate"><span class="pre">DynamicPlotParameters</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#dasftoolbox.dasf.DynamicPlotParameters.tau"><code class="docutils literal notranslate"><span class="pre">DynamicPlotParameters.tau</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#dasftoolbox.dasf.DynamicPlotParameters.show_x"><code class="docutils literal notranslate"><span class="pre">DynamicPlotParameters.show_x</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#dasftoolbox.dasf.DynamicPlotParameters.show_xTY"><code class="docutils literal notranslate"><span class="pre">DynamicPlotParameters.show_xTY</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#dasftoolbox.dasf.DynamicPlotParameters.X_col"><code class="docutils literal notranslate"><span class="pre">DynamicPlotParameters.X_col</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#dasftoolbox.dasf.DynamicPlotParameters.XTY_col"><code class="docutils literal notranslate"><span class="pre">DynamicPlotParameters.XTY_col</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id0"><code class="docutils literal notranslate"><span class="pre">DynamicPlotParameters.tau</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id1"><code class="docutils literal notranslate"><span class="pre">DynamicPlotParameters.show_x</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id2"><code class="docutils literal notranslate"><span class="pre">DynamicPlotParameters.show_xTY</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id3"><code class="docutils literal notranslate"><span class="pre">DynamicPlotParameters.X_col</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id4"><code class="docutils literal notranslate"><span class="pre">DynamicPlotParameters.XTY_col</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#dasftoolbox.dasf.DynamicPlotParameters.Y_id"><code class="docutils literal notranslate"><span class="pre">DynamicPlotParameters.Y_id</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#dasftoolbox.dasf.DynamicPlotParameters.apply_correction"><code class="docutils literal notranslate"><span class="pre">DynamicPlotParameters.apply_correction()</span></code></a></li>
+</ul>
+</li>
 <li class="toctree-l3"><a class="reference internal" href="#dasftoolbox.dasf.DASF"><code class="docutils literal notranslate"><span class="pre">DASF</span></code></a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#dasftoolbox.dasf.DASF.problem"><code class="docutils literal notranslate"><span class="pre">DASF.problem</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#dasftoolbox.dasf.DASF.data_retriever"><code class="docutils literal notranslate"><span class="pre">DASF.data_retriever</span></code></a></li>
@@ -58,17 +73,17 @@
 <li class="toctree-l4"><a class="reference internal" href="#dasftoolbox.dasf.DASF.dynamic_plot"><code class="docutils literal notranslate"><span class="pre">DASF.dynamic_plot</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#dasftoolbox.dasf.DASF.dynamic_plot_params"><code class="docutils literal notranslate"><span class="pre">DASF.dynamic_plot_params</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#dasftoolbox.dasf.DASF.centralized_solution_for_input"><code class="docutils literal notranslate"><span class="pre">DASF.centralized_solution_for_input()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#dasftoolbox.dasf.DASF.get_summary_df"><code class="docutils literal notranslate"><span class="pre">DASF.get_summary_df()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#dasftoolbox.dasf.DASF.X_estimate"><code class="docutils literal notranslate"><span class="pre">DASF.X_estimate</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#dasftoolbox.dasf.DASF.normed_difference_over_iterations"><code class="docutils literal notranslate"><span class="pre">DASF.normed_difference_over_iterations</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#dasftoolbox.dasf.DASF.normed_error_over_iterations"><code class="docutils literal notranslate"><span class="pre">DASF.normed_error_over_iterations</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#dasftoolbox.dasf.DASF.absolute_objective_error_over_iterations"><code class="docutils literal notranslate"><span class="pre">DASF.absolute_objective_error_over_iterations</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#dasftoolbox.dasf.DASF.total_iterations"><code class="docutils literal notranslate"><span class="pre">DASF.total_iterations</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#dasftoolbox.dasf.DASF.run"><code class="docutils literal notranslate"><span class="pre">DASF.run()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#dasftoolbox.dasf.DASF.plot_error"><code class="docutils literal notranslate"><span class="pre">DASF.plot_error()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#dasftoolbox.dasf.DASF.plot_error_over_batches"><code class="docutils literal notranslate"><span class="pre">DASF.plot_error_over_batches()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#dasftoolbox.dasf.DASF.plot_iterate_difference"><code class="docutils literal notranslate"><span class="pre">DASF.plot_iterate_difference()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#dasftoolbox.dasf.DASF.plot_objective_error"><code class="docutils literal notranslate"><span class="pre">DASF.plot_objective_error()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#dasftoolbox.dasf.DASF.run"><code class="docutils literal notranslate"><span class="pre">DASF.run()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#dasftoolbox.dasf.DASF.X_estimate"><code class="docutils literal notranslate"><span class="pre">DASF.X_estimate</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#dasftoolbox.dasf.DASF.absolute_objective_error_over_iterations"><code class="docutils literal notranslate"><span class="pre">DASF.absolute_objective_error_over_iterations</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#dasftoolbox.dasf.DASF.normed_difference_over_iterations"><code class="docutils literal notranslate"><span class="pre">DASF.normed_difference_over_iterations</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#dasftoolbox.dasf.DASF.normed_error_over_iterations"><code class="docutils literal notranslate"><span class="pre">DASF.normed_error_over_iterations</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#dasftoolbox.dasf.DASF.total_iterations"><code class="docutils literal notranslate"><span class="pre">DASF.total_iterations</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#dasftoolbox.dasf.DASF.get_summary_df"><code class="docutils literal notranslate"><span class="pre">DASF.get_summary_df()</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="#dasftoolbox.dasf.DASFMultiVar"><code class="docutils literal notranslate"><span class="pre">DASFMultiVar</span></code></a><ul>
@@ -82,24 +97,9 @@
 <li class="toctree-l4"><a class="reference internal" href="#dasftoolbox.dasf.DASFMultiVar.solver_convergence_parameters"><code class="docutils literal notranslate"><span class="pre">DASFMultiVar.solver_convergence_parameters</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#dasftoolbox.dasf.DASFMultiVar.dynamic_plot"><code class="docutils literal notranslate"><span class="pre">DASFMultiVar.dynamic_plot</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#dasftoolbox.dasf.DASFMultiVar.dynamic_plot_params"><code class="docutils literal notranslate"><span class="pre">DASFMultiVar.dynamic_plot_params</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#dasftoolbox.dasf.DASFMultiVar.run"><code class="docutils literal notranslate"><span class="pre">DASFMultiVar.run()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#dasftoolbox.dasf.DASFMultiVar.normed_difference_over_iterations"><code class="docutils literal notranslate"><span class="pre">DASFMultiVar.normed_difference_over_iterations</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#dasftoolbox.dasf.DASFMultiVar.normed_error_over_iterations"><code class="docutils literal notranslate"><span class="pre">DASFMultiVar.normed_error_over_iterations</span></code></a></li>
-</ul>
-</li>
-<li class="toctree-l3"><a class="reference internal" href="#dasftoolbox.dasf.DynamicPlotParameters"><code class="docutils literal notranslate"><span class="pre">DynamicPlotParameters</span></code></a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#dasftoolbox.dasf.DynamicPlotParameters.tau"><code class="docutils literal notranslate"><span class="pre">DynamicPlotParameters.tau</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#dasftoolbox.dasf.DynamicPlotParameters.show_x"><code class="docutils literal notranslate"><span class="pre">DynamicPlotParameters.show_x</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#dasftoolbox.dasf.DynamicPlotParameters.show_xTY"><code class="docutils literal notranslate"><span class="pre">DynamicPlotParameters.show_xTY</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#dasftoolbox.dasf.DynamicPlotParameters.X_col"><code class="docutils literal notranslate"><span class="pre">DynamicPlotParameters.X_col</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#dasftoolbox.dasf.DynamicPlotParameters.XTY_col"><code class="docutils literal notranslate"><span class="pre">DynamicPlotParameters.XTY_col</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#dasftoolbox.dasf.DynamicPlotParameters.apply_correction"><code class="docutils literal notranslate"><span class="pre">DynamicPlotParameters.apply_correction()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#id0"><code class="docutils literal notranslate"><span class="pre">DynamicPlotParameters.XTY_col</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#id1"><code class="docutils literal notranslate"><span class="pre">DynamicPlotParameters.X_col</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#dasftoolbox.dasf.DynamicPlotParameters.Y_id"><code class="docutils literal notranslate"><span class="pre">DynamicPlotParameters.Y_id</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#id2"><code class="docutils literal notranslate"><span class="pre">DynamicPlotParameters.show_x</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#id3"><code class="docutils literal notranslate"><span class="pre">DynamicPlotParameters.show_xTY</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#id4"><code class="docutils literal notranslate"><span class="pre">DynamicPlotParameters.tau</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#dasftoolbox.dasf.DASFMultiVar.run"><code class="docutils literal notranslate"><span class="pre">DASFMultiVar.run()</span></code></a></li>
 </ul>
 </li>
 </ul>
@@ -139,6 +139,103 @@
              
   <section id="module-dasftoolbox.dasf">
 <span id="dasf"></span><h1>DASF<a class="headerlink" href="#module-dasftoolbox.dasf" title="Link to this heading"></a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="dasftoolbox.dasf.DynamicPlotParameters">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">dasftoolbox.dasf.</span></span><span class="sig-name descname"><span class="pre">DynamicPlotParameters</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tau</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">10</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">show_x</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">show_xTY</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">X_col</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">XTY_col</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Y_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/dasftoolbox/dasf.html#DynamicPlotParameters"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dasftoolbox.dasf.DynamicPlotParameters" title="Link to this definition"></a></dt>
+<dd><p>Parameters for dynamic plots.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="dasftoolbox.dasf.DynamicPlotParameters.tau">
+<span class="sig-name descname"><span class="pre">tau</span></span><a class="headerlink" href="#dasftoolbox.dasf.DynamicPlotParameters.tau" title="Link to this definition"></a></dt>
+<dd><p>Sampling period for the dynamic plot.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="dasftoolbox.dasf.DynamicPlotParameters.show_x">
+<span class="sig-name descname"><span class="pre">show_x</span></span><a class="headerlink" href="#dasftoolbox.dasf.DynamicPlotParameters.show_x" title="Link to this definition"></a></dt>
+<dd><p>Flag to show the current estimate of X, i.e., the filter weights.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="dasftoolbox.dasf.DynamicPlotParameters.show_xTY">
+<span class="sig-name descname"><span class="pre">show_xTY</span></span><a class="headerlink" href="#dasftoolbox.dasf.DynamicPlotParameters.show_xTY" title="Link to this definition"></a></dt>
+<dd><p>Flag to show the current estimate of X.T &#64; Y, i.e., the filtered signal, per sample.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="dasftoolbox.dasf.DynamicPlotParameters.X_col">
+<span class="sig-name descname"><span class="pre">X_col</span></span><a class="headerlink" href="#dasftoolbox.dasf.DynamicPlotParameters.X_col" title="Link to this definition"></a></dt>
+<dd><p>Index of the column of X (i.e., the filter) to be plotted.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="dasftoolbox.dasf.DynamicPlotParameters.XTY_col">
+<span class="sig-name descname"><span class="pre">XTY_col</span></span><a class="headerlink" href="#dasftoolbox.dasf.DynamicPlotParameters.XTY_col" title="Link to this definition"></a></dt>
+<dd><p>Index of the column of X.T&#64;Y (i.e., the filtered signal) to be plotted for the filtered signal.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="id0">
+<span class="sig-name descname"><span class="pre">tau</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">10</span></em><a class="headerlink" href="#id0" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="id1">
+<span class="sig-name descname"><span class="pre">show_x</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">True</span></em><a class="headerlink" href="#id1" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="id2">
+<span class="sig-name descname"><span class="pre">show_xTY</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">True</span></em><a class="headerlink" href="#id2" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="id3">
+<span class="sig-name descname"><span class="pre">X_col</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">0</span></em><a class="headerlink" href="#id3" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="id4">
+<span class="sig-name descname"><span class="pre">XTY_col</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">0</span></em><a class="headerlink" href="#id4" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="dasftoolbox.dasf.DynamicPlotParameters.Y_id">
+<span class="sig-name descname"><span class="pre">Y_id</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">0</span></em><a class="headerlink" href="#dasftoolbox.dasf.DynamicPlotParameters.Y_id" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="dasftoolbox.dasf.DynamicPlotParameters.apply_correction">
+<span class="sig-name descname"><span class="pre">apply_correction</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">nb_filters</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nb_samples</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#dasftoolbox.dasf.DynamicPlotParameters" title="dasftoolbox.dasf.DynamicPlotParameters"><span class="pre">DynamicPlotParameters</span></a></span></span><a class="reference internal" href="../_modules/dasftoolbox/dasf.html#DynamicPlotParameters.apply_correction"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dasftoolbox.dasf.DynamicPlotParameters.apply_correction" title="Link to this definition"></a></dt>
+<dd><p>Function ensuring that parameters are set correctly, and making modifications if necessary.</p>
+</dd></dl>
+
+</dd></dl>
+
 <dl class="py class">
 <dt class="sig sig-object py" id="dasftoolbox.dasf.DASF">
 <em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">dasftoolbox.dasf.</span></span><span class="sig-name descname"><span class="pre">DASF</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">problem</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="optimization_problems.html#dasftoolbox.optimization_problems.optimization_problem.OptimizationProblem" title="dasftoolbox.optimization_problems.optimization_problem.OptimizationProblem"><span class="pre">OptimizationProblem</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">data_retriever</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="data_retrievers.html#dasftoolbox.data_retrievers.data_retriever.DataRetriever" title="dasftoolbox.data_retrievers.data_retriever.DataRetriever"><span class="pre">DataRetriever</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">network_graph</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="problem_settings.html#dasftoolbox.problem_settings.NetworkGraph" title="dasftoolbox.problem_settings.NetworkGraph"><span class="pre">NetworkGraph</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">dasf_convergence_params</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="problem_settings.html#dasftoolbox.problem_settings.ConvergenceParameters" title="dasftoolbox.problem_settings.ConvergenceParameters"><span class="pre">ConvergenceParameters</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">updating_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">initial_estimate</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rng</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Generator</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">solver_convergence_parameters</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="problem_settings.html#dasftoolbox.problem_settings.ConvergenceParameters" title="dasftoolbox.problem_settings.ConvergenceParameters"><span class="pre">ConvergenceParameters</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dynamic_plot</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dynamic_plot_params</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#dasftoolbox.dasf.DynamicPlotParameters" title="dasftoolbox.dasf.DynamicPlotParameters"><span class="pre">DynamicPlotParameters</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/dasftoolbox/dasf.html#DASF"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dasftoolbox.dasf.DASF" title="Link to this definition"></a></dt>
@@ -273,10 +370,57 @@
 </dl>
 </dd></dl>
 
+<dl class="py property">
+<dt class="sig sig-object py" id="dasftoolbox.dasf.DASF.X_estimate">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">X_estimate</span></span><a class="headerlink" href="#dasftoolbox.dasf.DASF.X_estimate" title="Link to this definition"></a></dt>
+<dd><p>Final estimate of te optimal solution using DASF.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The final estimate of the optimal solution using DASF.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>np.ndarray | None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="dasftoolbox.dasf.DASF.normed_difference_over_iterations">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">normed_difference_over_iterations</span></span><a class="headerlink" href="#dasftoolbox.dasf.DASF.normed_difference_over_iterations" title="Link to this definition"></a></dt>
+<dd><p><a href="#id5"><span class="problematic" id="id6">`</span></a>||X^{i+1}-X^i||_F^2/MQ</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Returns the sequence</p>
+</dd>
+<dt class="field-even">Type<span class="colon">:</span></dt>
+<dd class="field-even"><p>math</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="dasftoolbox.dasf.DASF.normed_error_over_iterations">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">normed_error_over_iterations</span></span><a class="headerlink" href="#dasftoolbox.dasf.DASF.normed_error_over_iterations" title="Link to this definition"></a></dt>
+<dd><p>Returns the sequence ||X^i-X^*||_F^2/||X^*||_F^2</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="dasftoolbox.dasf.DASF.absolute_objective_error_over_iterations">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">absolute_objective_error_over_iterations</span></span><a class="headerlink" href="#dasftoolbox.dasf.DASF.absolute_objective_error_over_iterations" title="Link to this definition"></a></dt>
+<dd><p>Returns the sequence <a href="#id9"><span class="problematic" id="id10">|f(X^{i})-f(X^*)|</span></a></p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="dasftoolbox.dasf.DASF.total_iterations">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">total_iterations</span></span><a class="headerlink" href="#dasftoolbox.dasf.DASF.total_iterations" title="Link to this definition"></a></dt>
+<dd><p>Returns the number of iterations performed during the run.</p>
+</dd></dl>
+
 <dl class="py method">
-<dt class="sig sig-object py" id="dasftoolbox.dasf.DASF.get_summary_df">
-<span class="sig-name descname"><span class="pre">get_summary_df</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">DataFrame</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span></span><a class="reference internal" href="../_modules/dasftoolbox/dasf.html#DASF.get_summary_df"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dasftoolbox.dasf.DASF.get_summary_df" title="Link to this definition"></a></dt>
-<dd><p>Returns a pandas DataFrame summarizing the simulation results.</p>
+<dt class="sig sig-object py" id="dasftoolbox.dasf.DASF.run">
+<span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../_modules/dasftoolbox/dasf.html#DASF.run"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dasftoolbox.dasf.DASF.run" title="Link to this definition"></a></dt>
+<dd><p>Main method to run the DASF algorithm.
+Values summarizing the result are stored in various attributes of the class.</p>
 </dd></dl>
 
 <dl class="py method">
@@ -300,52 +444,13 @@
 <dl class="py method">
 <dt class="sig sig-object py" id="dasftoolbox.dasf.DASF.plot_objective_error">
 <span class="sig-name descname"><span class="pre">plot_objective_error</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Figure</span></span></span><a class="reference internal" href="../_modules/dasftoolbox/dasf.html#DASF.plot_objective_error"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dasftoolbox.dasf.DASF.plot_objective_error" title="Link to this definition"></a></dt>
-<dd><p>PLots the sequence <a href="#id5"><span class="problematic" id="id6">|f(X^{i})-f(X^*)|</span></a></p>
+<dd><p>PLots the sequence <a href="#id11"><span class="problematic" id="id12">|f(X^{i})-f(X^*)|</span></a></p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="dasftoolbox.dasf.DASF.run">
-<span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../_modules/dasftoolbox/dasf.html#DASF.run"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dasftoolbox.dasf.DASF.run" title="Link to this definition"></a></dt>
-<dd><p>Main method to run the DASF algorithm.
-Values summarizing the result are stored in various attributes of the class.</p>
-</dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py" id="dasftoolbox.dasf.DASF.X_estimate">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">X_estimate</span></span><a class="headerlink" href="#dasftoolbox.dasf.DASF.X_estimate" title="Link to this definition"></a></dt>
-<dd><p>Final estimate of te optimal solution using DASF.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>The final estimate of the optimal solution using DASF.</p>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>np.ndarray | None</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py" id="dasftoolbox.dasf.DASF.absolute_objective_error_over_iterations">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">absolute_objective_error_over_iterations</span></span><a class="headerlink" href="#dasftoolbox.dasf.DASF.absolute_objective_error_over_iterations" title="Link to this definition"></a></dt>
-<dd><p>Returns the sequence <a href="#id7"><span class="problematic" id="id8">|f(X^{i})-f(X^*)|</span></a></p>
-</dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py" id="dasftoolbox.dasf.DASF.normed_difference_over_iterations">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">normed_difference_over_iterations</span></span><a class="headerlink" href="#dasftoolbox.dasf.DASF.normed_difference_over_iterations" title="Link to this definition"></a></dt>
-<dd><p>Returns the sequence ||X{i+1}-X^i||_F^2/X.size</p>
-</dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py" id="dasftoolbox.dasf.DASF.normed_error_over_iterations">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">normed_error_over_iterations</span></span><a class="headerlink" href="#dasftoolbox.dasf.DASF.normed_error_over_iterations" title="Link to this definition"></a></dt>
-<dd><p>Returns the sequence ||X^i-X^*||_F^2/||X^*||_F^2</p>
-</dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py" id="dasftoolbox.dasf.DASF.total_iterations">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">total_iterations</span></span><a class="headerlink" href="#dasftoolbox.dasf.DASF.total_iterations" title="Link to this definition"></a></dt>
-<dd><p>Returns the number of iterations performed during the run.</p>
+<dt class="sig sig-object py" id="dasftoolbox.dasf.DASF.get_summary_df">
+<span class="sig-name descname"><span class="pre">get_summary_df</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">DataFrame</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span></span><a class="reference internal" href="../_modules/dasftoolbox/dasf.html#DASF.get_summary_df"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dasftoolbox.dasf.DASF.get_summary_df" title="Link to this definition"></a></dt>
+<dd><p>Returns a pandas DataFrame summarizing the simulation results.</p>
 </dd></dl>
 
 </dd></dl>
@@ -464,16 +569,18 @@ Values summarizing the result are stored in various attributes of the class.</p>
 </dl>
 </dd></dl>
 
-<dl class="py method">
-<dt class="sig sig-object py" id="dasftoolbox.dasf.DASFMultiVar.run">
-<span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../_modules/dasftoolbox/dasf.html#DASFMultiVar.run"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dasftoolbox.dasf.DASFMultiVar.run" title="Link to this definition"></a></dt>
-<dd><p>Main method to run the DASF algorithm in a setting with multiple variables.</p>
-</dd></dl>
-
 <dl class="py property">
 <dt class="sig sig-object py" id="dasftoolbox.dasf.DASFMultiVar.normed_difference_over_iterations">
 <em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">normed_difference_over_iterations</span></span><a class="headerlink" href="#dasftoolbox.dasf.DASFMultiVar.normed_difference_over_iterations" title="Link to this definition"></a></dt>
-<dd><p>Returns the sequence ||X{i+1}-X^i||_F^2/X.size</p>
+<dd><p><a href="#id7"><span class="problematic" id="id8">`</span></a>||X^{i+1}-X^i||_F^2/MQ</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Returns the sequence</p>
+</dd>
+<dt class="field-even">Type<span class="colon">:</span></dt>
+<dd class="field-even"><p>math</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py property">
@@ -482,102 +589,11 @@ Values summarizing the result are stored in various attributes of the class.</p>
 <dd><p>Returns the sequence ||X^i-X^*||_F^2/||X^*||_F^2</p>
 </dd></dl>
 
-</dd></dl>
-
-<dl class="py class">
-<dt class="sig sig-object py" id="dasftoolbox.dasf.DynamicPlotParameters">
-<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">dasftoolbox.dasf.</span></span><span class="sig-name descname"><span class="pre">DynamicPlotParameters</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tau</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">10</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">show_x</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">show_xTY</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">X_col</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">XTY_col</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Y_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/dasftoolbox/dasf.html#DynamicPlotParameters"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dasftoolbox.dasf.DynamicPlotParameters" title="Link to this definition"></a></dt>
-<dd><p>Parameters for dynamic plots.</p>
-<dl class="py attribute">
-<dt class="sig sig-object py" id="dasftoolbox.dasf.DynamicPlotParameters.tau">
-<span class="sig-name descname"><span class="pre">tau</span></span><a class="headerlink" href="#dasftoolbox.dasf.DynamicPlotParameters.tau" title="Link to this definition"></a></dt>
-<dd><p>Sampling period for the dynamic plot.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>int</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="dasftoolbox.dasf.DynamicPlotParameters.show_x">
-<span class="sig-name descname"><span class="pre">show_x</span></span><a class="headerlink" href="#dasftoolbox.dasf.DynamicPlotParameters.show_x" title="Link to this definition"></a></dt>
-<dd><p>Flag to show the current estimate of X, i.e., the filter weights.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>bool</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="dasftoolbox.dasf.DynamicPlotParameters.show_xTY">
-<span class="sig-name descname"><span class="pre">show_xTY</span></span><a class="headerlink" href="#dasftoolbox.dasf.DynamicPlotParameters.show_xTY" title="Link to this definition"></a></dt>
-<dd><p>Flag to show the current estimate of X.T &#64; Y, i.e., the filtered signal, per sample.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>bool</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="dasftoolbox.dasf.DynamicPlotParameters.X_col">
-<span class="sig-name descname"><span class="pre">X_col</span></span><a class="headerlink" href="#dasftoolbox.dasf.DynamicPlotParameters.X_col" title="Link to this definition"></a></dt>
-<dd><p>Index of the column of X (i.e., the filter) to be plotted.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>int</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="dasftoolbox.dasf.DynamicPlotParameters.XTY_col">
-<span class="sig-name descname"><span class="pre">XTY_col</span></span><a class="headerlink" href="#dasftoolbox.dasf.DynamicPlotParameters.XTY_col" title="Link to this definition"></a></dt>
-<dd><p>Index of the column of X.T&#64;Y (i.e., the filtered signal) to be plotted for the filtered signal.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>int</p>
-</dd>
-</dl>
-</dd></dl>
-
 <dl class="py method">
-<dt class="sig sig-object py" id="dasftoolbox.dasf.DynamicPlotParameters.apply_correction">
-<span class="sig-name descname"><span class="pre">apply_correction</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">nb_filters</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nb_samples</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#dasftoolbox.dasf.DynamicPlotParameters" title="dasftoolbox.dasf.DynamicPlotParameters"><span class="pre">DynamicPlotParameters</span></a></span></span><a class="reference internal" href="../_modules/dasftoolbox/dasf.html#DynamicPlotParameters.apply_correction"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dasftoolbox.dasf.DynamicPlotParameters.apply_correction" title="Link to this definition"></a></dt>
-<dd><p>Function ensuring that parameters are set correctly, and making modifications if necessary.</p>
+<dt class="sig sig-object py" id="dasftoolbox.dasf.DASFMultiVar.run">
+<span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../_modules/dasftoolbox/dasf.html#DASFMultiVar.run"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dasftoolbox.dasf.DASFMultiVar.run" title="Link to this definition"></a></dt>
+<dd><p>Main method to run the DASF algorithm in a setting with multiple variables.</p>
 </dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="id0">
-<span class="sig-name descname"><span class="pre">XTY_col</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">0</span></em><a class="headerlink" href="#id0" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="id1">
-<span class="sig-name descname"><span class="pre">X_col</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">0</span></em><a class="headerlink" href="#id1" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="dasftoolbox.dasf.DynamicPlotParameters.Y_id">
-<span class="sig-name descname"><span class="pre">Y_id</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">0</span></em><a class="headerlink" href="#dasftoolbox.dasf.DynamicPlotParameters.Y_id" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="id2">
-<span class="sig-name descname"><span class="pre">show_x</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">True</span></em><a class="headerlink" href="#id2" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="id3">
-<span class="sig-name descname"><span class="pre">show_xTY</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">True</span></em><a class="headerlink" href="#id3" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="id4">
-<span class="sig-name descname"><span class="pre">tau</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">10</span></em><a class="headerlink" href="#id4" title="Link to this definition"></a></dt>
-<dd></dd></dl>
 
 </dd></dl>
 
