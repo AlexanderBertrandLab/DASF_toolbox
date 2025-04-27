@@ -5,7 +5,7 @@
 - The DASF toolbox has been featured in the [AI toolbox list](https://www.flandersairesearch.be/en/research/list-of-toolboxes/dasf) of the Flanders AI Research Program! 
 - v2 is here! The DASF toolbox gets a brand new look with a much more practical and flexible design! With this version, Python is the main supported language, while the previous version can be accessed from the archive, where the MATLAB implementation can also be found.
 
-[![Documentation Status](https://dasf-toolbox.readthedocs.io/en/latest/)](https://dasf-toolbox.readthedocs.io/en/latest/)
+[![Documentation Status](https://readthedocs.org/projects/dasf-toolbox/badge/?version=latest)](https://dasf-toolbox.readthedocs.io/en/latest/)
 
 ![](https://github.com/CemMusluoglu/DASF_toolbox/blob/main/assets/dasf_gif.gif)
 
