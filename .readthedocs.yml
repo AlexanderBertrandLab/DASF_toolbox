@@ -7,9 +7,9 @@ build:
   os: ubuntu-20.04  # Or another version that matches your project
   tools:
     python: "mambaforge-22.9"  # Or whichever Python version you need
-  install:
-    - method: conda
-      path: environment.yml  # This is where you specify your environment file
+
+conda:
+  environment: environment.yml
 
 # Build documentation in the "docs/" directory with Sphinx
 sphinx:
