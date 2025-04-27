@@ -1,6 +1,7 @@
 import os
 import sys
-sys.path.insert(0, os.path.abspath('../..')) 
+
+sys.path.insert(0, os.path.abspath("../.."))
 
 extensions = [
     "sphinx.ext.viewcode",
@@ -13,9 +14,11 @@ extensions.append("sphinx.ext.autodoc")
 autodoc_default_options = {
     "members": True,
     "undoc-members": True,
-    "member-order": "groupwise",  # alphabetical, groupwise, bysource
+    "member-order": "bysource",  # alphabetical, groupwise, bysource
+    "private_members": True,
 }
 extensions.append("sphinx.ext.napoleon")
+napoleon_numpy_docstring = True
 
 # Configuration file for the Sphinx documentation builder.
 #
