@@ -8,6 +8,11 @@ build:
   tools:
     python: "mambaforge-22.9"  # Or whichever Python version you need
 
+python:
+  install:
+    - method: pip
+      path: .
+
 conda:
   environment: docs/docs_env.yml
 
