@@ -1,11 +1,14 @@
-=============
 Documentation
 =============
 
 .. automodule:: dasftoolbox
+    :members:
+    :undoc-members:
+    :show-inheritance:
 
 .. toctree::
-    :hidden:
+    :maxdepth: 2
+    
 
     dasf
     optimization_problems

@@ -27,15 +27,15 @@ class DynamicPlotParameters:
     Attributes
     ----------
     tau : int
-        Sampling period for the dynamic plot.
+        Sampling period for the dynamic plot for :math:`X^T\\mathbf{y}(t)`. One sample every `tau` will be shown.
     show_x : bool
-        Flag to show the current estimate of X, i.e., the filter weights.
+        Flag to show the current estimate of :math:`X`, i.e., the filter weights.
     show_xTY : bool
-        Flag to show the current estimate of X.T @ Y, i.e., the filtered signal, per sample.
+        Flag to show the current estimate of :math:`X^T\\mathbf{y}(t)`, i.e., the filtered signal, per sample.
     X_col : int
-        Index of the column of X (i.e., the filter) to be plotted.
+        Index of the column of :math:`X` (i.e., the filter) to be plotted.
     XTY_col : int
-        Index of the column of X.T@Y (i.e., the filtered signal) to be plotted for the filtered signal.
+        Index of the column of :math:`X^T\\mathbf{y}(t)` (i.e., the filtered signal) to be plotted for the filtered signal.
 
     """
 
@@ -221,7 +221,8 @@ class DASF:
     @property
     def normed_difference_over_iterations(self):
         """
-        Returns the sequence :math:`\|\|X^{i+1}-X^i\|\|_F^2/MQ`
+        Returns the sequence :math:`\\frac{1}{MQ}\\|X^{i+1}-X^i\\|_F^2`, where :math:`\\{X^i\\}_i\\subset \\mathbb{R}^{M\\times Q}`.
+        If there are multiple variables, the variables are first stacked vertically.
         """
         if len(self.X_over_iterations) == 0:
             logger.warning("No iterates have been computed, use the run method first.")
@@ -236,7 +237,10 @@ class DASF:
 
     @property
     def normed_error_over_iterations(self):
-        """Returns the sequence ||X^i-X^*||_F^2/||X^*||_F^2"""
+        """
+        Returns the sequence :math:`\\frac{\\|X^i-X^*\\|_F^2}{\\|X^*\\|_F^2}`.
+        If there are multiple variables, the variables are first stacked vertically.
+        """
         if len(self.X_over_iterations) == 0:
             logger.warning("No iterates have been computed, use the run method first.")
             return None
@@ -251,7 +255,10 @@ class DASF:
 
     @property
     def absolute_objective_error_over_iterations(self):
-        """Returns the sequence |f(X^{i})-f(X^*)|"""
+        """
+        Returns the sequence :math:`|f(X^{i})-f(X^*)|`.
+        If there are multiple variables, the variables are first stacked vertically.
+        """
         if hasattr(self.problem, "evaluate_objective"):
             if len(self.X_over_iterations) == 0:
                 logger.warning(
@@ -626,7 +633,7 @@ class DASF:
 
     def _compress(self, problem_inputs: ProblemInputs, Cq: np.ndarray) -> ProblemInputs:
         """
-        Compresses the data using the transition matrix `Cq`.
+        Compresses the data using the transition matrix :math:`C_q`.
 
         Parameters
         ----------
@@ -695,14 +702,14 @@ class DASF:
         ----------
         X : np.ndarray
             A matrix of shape (nb_sensors, nb_filters) representing the global variable,
-            structured as [X1; ...; Xq; ...; XK].
+            structured as :math:`\\begin{bmatrix}X_1^T, ..., X_q^T, ..., X_K^T\\end{bmatrix}^T`.
         updating_node : int
-            The node for which the corresponding block of `X` is extracted.
+            The node for which the corresponding block of :math:`X` is extracted.
 
         Returns
         -------
         np.ndarray
-            A matrix `Xq` of shape (nb_sensors_per_node[updating_node], nb_filters), containing the block of `X`
+            A matrix :math:`X_q` of shape (nb_sensors_per_node[updating_node], nb_filters), containing the block of :math:`X`
             corresponding to `updating_node`.
         """
         Mq = self.network_graph.nb_sensors_per_node[updating_node]
@@ -726,7 +733,7 @@ class DASF:
         X_star : np.ndarray
             Optimal solution matrix.
         Y : np.ndarray
-            Signal fused using X.
+            Signal fused using :math:`X`.
         """
         plt.ion()
         if self.dynamic_plot_params.show_x & self.dynamic_plot_params.show_xTY:
@@ -834,15 +841,15 @@ class DASF:
         X_star : np.ndarray
             Optimal solution matrix.
         Y : np.ndarray
-            Signal fused using X.
+            Signal fused using :math:`X`.
         line_x : object
-            Line object for X.
+            Line object for :math:`X`.
         line_xs : object
-            Line object for X_star.
+            Line object for :math:`X^*`.
         line_xTY : object
-            Line object for X.T @ Y.
+            Line object for :math:`X^T\\mathbf{y}(t)`.
         line_xsTY : object
-            Line object for X_star.T @ Y.
+            Line object for :math:`X^{*T}\\mathbf{y}(t)`.
         """
 
         if self.dynamic_plot_params.show_x:
@@ -898,7 +905,10 @@ class DASF:
             )
 
     def plot_error(self) -> Figure:
-        "Plots the sequence ||X^i-X^*||_F^2/||X^*||_F^2"
+        """
+        Plots the sequence :math:`\\frac{\\|X^i-X^*\\|_F^2}{\\|X^*\\|_F^2}`.
+        If there are multiple variables, the variables are first stacked vertically.
+        """
         if len(self.X_over_iterations) == 0:
             logger.warning("No iterates have been computed, use the run method first.")
         fig = plt.figure()
@@ -914,7 +924,10 @@ class DASF:
         return fig
 
     def plot_error_over_batches(self) -> Figure:
-        """Plots the sequence ||X^i-X^*||_F^2/||X^*||_F^2 at the end of each batch of data"""
+        """
+        Plots the sequence :math:`\\frac{\\|X^i-X^*\\|_F^2}{\\|X^*\\|_F^2}` at the end of each batch of data.
+        If there are multiple variables, the variables are first stacked vertically.
+        """
         if len(self.X_over_iterations) == 0:
             logger.warning("No iterates have been computed, use the run method first.")
         fig = plt.figure()
@@ -939,7 +952,10 @@ class DASF:
         return fig
 
     def plot_iterate_difference(self) -> Figure:
-        """Plots the sequence ||X{i+1}-X^i||_F^2/X.size"""
+        """
+        Plots the sequence :math:`\\frac{1}{MQ}\\|X^{i+1}-X^i\\|_F^2`, where :math:`\\{X^i\\}_i\\subset \\mathbb{R}^{M\\times Q}`.`
+        If there are multiple variables, the variables are first stacked vertically.
+        """
         if len(self.X_over_iterations) == 0:
             logger.warning("No iterates have been computed, use the run method first.")
         fig = plt.figure()
@@ -955,7 +971,10 @@ class DASF:
         return fig
 
     def plot_objective_error(self) -> Figure:
-        """PLots the sequence |f(X^{i})-f(X^*)|"""
+        """
+        Plots the sequence :math:`|f(X^{i})-f(X^*)|`.
+        If there are multiple variables, the variables are first stacked vertically.
+        """
         if len(self.X_over_iterations) == 0:
             logger.warning("No iterates have been computed, use the run method first.")
         fig = plt.figure()

@@ -100,15 +100,15 @@
 <span class="sd">    Attributes</span>
 <span class="sd">    ----------</span>
 <span class="sd">    tau : int</span>
-<span class="sd">        Sampling period for the dynamic plot.</span>
+<span class="sd">        Sampling period for the dynamic plot for :math:`X^T\\mathbf{y}(t)`. One sample every `tau` will be shown.</span>
 <span class="sd">    show_x : bool</span>
-<span class="sd">        Flag to show the current estimate of X, i.e., the filter weights.</span>
+<span class="sd">        Flag to show the current estimate of :math:`X`, i.e., the filter weights.</span>
 <span class="sd">    show_xTY : bool</span>
-<span class="sd">        Flag to show the current estimate of X.T @ Y, i.e., the filtered signal, per sample.</span>
+<span class="sd">        Flag to show the current estimate of :math:`X^T\\mathbf{y}(t)`, i.e., the filtered signal, per sample.</span>
 <span class="sd">    X_col : int</span>
-<span class="sd">        Index of the column of X (i.e., the filter) to be plotted.</span>
+<span class="sd">        Index of the column of :math:`X` (i.e., the filter) to be plotted.</span>
 <span class="sd">    XTY_col : int</span>
-<span class="sd">        Index of the column of X.T@Y (i.e., the filtered signal) to be plotted for the filtered signal.</span>
+<span class="sd">        Index of the column of :math:`X^T\\mathbf{y}(t)` (i.e., the filtered signal) to be plotted for the filtered signal.</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
 
@@ -303,7 +303,8 @@
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">normed_difference_over_iterations</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Returns the sequence :math:`\|\|X^{i+1}-X^i\|\|_F^2/MQ`</span>
+<span class="sd">        Returns the sequence :math:`\\frac{1}{MQ}\\|X^{i+1}-X^i\\|_F^2`, where :math:`\\{X^i\\}_i\\subset \\mathbb{R}^{M\\times Q}`.</span>
+<span class="sd">        If there are multiple variables, the variables are first stacked vertically.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">X_over_iterations</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;No iterates have been computed, use the run method first.&quot;</span><span class="p">)</span>
@@ -318,7 +319,10 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">normed_error_over_iterations</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Returns the sequence ||X^i-X^*||_F^2/||X^*||_F^2&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns the sequence :math:`\\frac{\\|X^i-X^*\\|_F^2}{\\|X^*\\|_F^2}`.</span>
+<span class="sd">        If there are multiple variables, the variables are first stacked vertically.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">X_over_iterations</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;No iterates have been computed, use the run method first.&quot;</span><span class="p">)</span>
             <span class="k">return</span> <span class="kc">None</span>
@@ -333,7 +337,10 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">absolute_objective_error_over_iterations</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Returns the sequence |f(X^{i})-f(X^*)|&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns the sequence :math:`|f(X^{i})-f(X^*)|`.</span>
+<span class="sd">        If there are multiple variables, the variables are first stacked vertically.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">problem</span><span class="p">,</span> <span class="s2">&quot;evaluate_objective&quot;</span><span class="p">):</span>
             <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">X_over_iterations</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
                 <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
@@ -513,6 +520,8 @@
         <span class="k">return</span> <span class="kc">None</span></div>
 
 
+<div class="viewcode-block" id="DASF._find_path">
+<a class="viewcode-back" href="../../Documentation/dasf.html#dasftoolbox.dasf.DASF._find_path">[docs]</a>
     <span class="k">def</span> <span class="nf">_find_path</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">updating_node</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span> <span class="nb">list</span><span class="p">[</span><span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">]]]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Finds the neighbors of a given node and determines the shortest path to every other node in the network.</span>
@@ -535,8 +544,11 @@
         <span class="n">neighbors</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">path</span><span class="p">))</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">path</span><span class="p">[</span><span class="n">x</span><span class="p">])</span> <span class="o">==</span> <span class="mi">2</span><span class="p">]</span>
         <span class="n">neighbors</span><span class="o">.</span><span class="n">sort</span><span class="p">()</span>
 
-        <span class="k">return</span> <span class="n">neighbors</span><span class="p">,</span> <span class="n">path</span>
+        <span class="k">return</span> <span class="n">neighbors</span><span class="p">,</span> <span class="n">path</span></div>
 
+
+<div class="viewcode-block" id="DASF._shortest_path">
+<a class="viewcode-back" href="../../Documentation/dasf.html#dasftoolbox.dasf.DASF._shortest_path">[docs]</a>
     <span class="k">def</span> <span class="nf">_shortest_path</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">updating_node</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="nb">list</span><span class="p">[</span><span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">]]]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Computes the shortest path distances from a given source node to all other nodes</span>
@@ -602,8 +614,11 @@
 
             <span class="n">path</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">path_k</span><span class="p">)</span>
 
-        <span class="k">return</span> <span class="n">dist</span><span class="p">,</span> <span class="n">path</span>
+        <span class="k">return</span> <span class="n">dist</span><span class="p">,</span> <span class="n">path</span></div>
 
+
+<div class="viewcode-block" id="DASF._find_clusters">
+<a class="viewcode-back" href="../../Documentation/dasf.html#dasftoolbox.dasf.DASF._find_clusters">[docs]</a>
     <span class="k">def</span> <span class="nf">_find_clusters</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">neighbors</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span> <span class="n">path</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">]]</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">]]:</span>
@@ -627,8 +642,11 @@
         <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">neighbors</span><span class="p">:</span>
             <span class="n">clusters</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">path</span><span class="p">))</span> <span class="k">if</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">path</span><span class="p">[</span><span class="n">x</span><span class="p">]])</span>
 
-        <span class="k">return</span> <span class="n">clusters</span>
+        <span class="k">return</span> <span class="n">clusters</span></div>
 
+
+<div class="viewcode-block" id="DASF._build_Cq">
+<a class="viewcode-back" href="../../Documentation/dasf.html#dasftoolbox.dasf.DASF._build_Cq">[docs]</a>
     <span class="k">def</span> <span class="nf">_build_Cq</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">X</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
@@ -707,11 +725,14 @@
                     <span class="o">+</span> <span class="n">nb_filters</span><span class="p">,</span>
                 <span class="p">]</span> <span class="o">=</span> <span class="n">X_curr</span>
 
-        <span class="k">return</span> <span class="n">Cq</span>
+        <span class="k">return</span> <span class="n">Cq</span></div>
 
+
+<div class="viewcode-block" id="DASF._compress">
+<a class="viewcode-back" href="../../Documentation/dasf.html#dasftoolbox.dasf.DASF._compress">[docs]</a>
     <span class="k">def</span> <span class="nf">_compress</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">problem_inputs</span><span class="p">:</span> <span class="n">ProblemInputs</span><span class="p">,</span> <span class="n">Cq</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ProblemInputs</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Compresses the data using the transition matrix `Cq`.</span>
+<span class="sd">        Compresses the data using the transition matrix :math:`C_q`.</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
@@ -770,8 +791,11 @@
             <span class="n">global_parameters</span><span class="o">=</span><span class="n">global_constants</span><span class="p">,</span>
         <span class="p">)</span>
 
-        <span class="k">return</span> <span class="n">compressed_inputs</span>
+        <span class="k">return</span> <span class="n">compressed_inputs</span></div>
 
+
+<div class="viewcode-block" id="DASF._get_block_q">
+<a class="viewcode-back" href="../../Documentation/dasf.html#dasftoolbox.dasf.DASF._get_block_q">[docs]</a>
     <span class="k">def</span> <span class="nf">_get_block_q</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">updating_node</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Extracts the block of `X` corresponding to the specified updating node.</span>
@@ -780,14 +804,14 @@
 <span class="sd">        ----------</span>
 <span class="sd">        X : np.ndarray</span>
 <span class="sd">            A matrix of shape (nb_sensors, nb_filters) representing the global variable,</span>
-<span class="sd">            structured as [X1; ...; Xq; ...; XK].</span>
+<span class="sd">            structured as :math:`\\begin{bmatrix}X_1^T, ..., X_q^T, ..., X_K^T\\end{bmatrix}^T`.</span>
 <span class="sd">        updating_node : int</span>
-<span class="sd">            The node for which the corresponding block of `X` is extracted.</span>
+<span class="sd">            The node for which the corresponding block of :math:`X` is extracted.</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
 <span class="sd">        np.ndarray</span>
-<span class="sd">            A matrix `Xq` of shape (nb_sensors_per_node[updating_node], nb_filters), containing the block of `X`</span>
+<span class="sd">            A matrix :math:`X_q` of shape (nb_sensors_per_node[updating_node], nb_filters), containing the block of :math:`X`</span>
 <span class="sd">            corresponding to `updating_node`.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">Mq</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">network_graph</span><span class="o">.</span><span class="n">nb_sensors_per_node</span><span class="p">[</span><span class="n">updating_node</span><span class="p">]</span>
@@ -796,8 +820,11 @@
         <span class="n">row_blk_q</span> <span class="o">=</span> <span class="n">row_blk</span><span class="p">[</span><span class="n">updating_node</span><span class="p">]</span>
         <span class="n">Xq</span> <span class="o">=</span> <span class="n">X</span><span class="p">[</span><span class="n">row_blk_q</span> <span class="p">:</span> <span class="n">row_blk_q</span> <span class="o">+</span> <span class="n">Mq</span><span class="p">,</span> <span class="p">:]</span>
 
-        <span class="k">return</span> <span class="n">Xq</span>
+        <span class="k">return</span> <span class="n">Xq</span></div>
 
+
+<div class="viewcode-block" id="DASF._init_dynamic_plot">
+<a class="viewcode-back" href="../../Documentation/dasf.html#dasftoolbox.dasf.DASF._init_dynamic_plot">[docs]</a>
     <span class="k">def</span> <span class="nf">_init_dynamic_plot</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">X_star</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">Y</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">Line2D</span><span class="p">]:</span>
@@ -811,7 +838,7 @@
 <span class="sd">        X_star : np.ndarray</span>
 <span class="sd">            Optimal solution matrix.</span>
 <span class="sd">        Y : np.ndarray</span>
-<span class="sd">            Signal fused using X.</span>
+<span class="sd">            Signal fused using :math:`X`.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">plt</span><span class="o">.</span><span class="n">ion</span><span class="p">()</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">dynamic_plot_params</span><span class="o">.</span><span class="n">show_x</span> <span class="o">&amp;</span> <span class="bp">self</span><span class="o">.</span><span class="n">dynamic_plot_params</span><span class="o">.</span><span class="n">show_xTY</span><span class="p">:</span>
@@ -897,8 +924,11 @@
 
         <span class="n">plt</span><span class="o">.</span><span class="n">subplots_adjust</span><span class="p">(</span><span class="n">hspace</span><span class="o">=</span><span class="mf">0.4</span><span class="p">)</span>
         <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
-        <span class="k">return</span> <span class="n">line_x</span><span class="p">,</span> <span class="n">line_xs</span><span class="p">,</span> <span class="n">line_xTY</span><span class="p">,</span> <span class="n">line_xsTY</span>
+        <span class="k">return</span> <span class="n">line_x</span><span class="p">,</span> <span class="n">line_xs</span><span class="p">,</span> <span class="n">line_xTY</span><span class="p">,</span> <span class="n">line_xsTY</span></div>
 
+
+<div class="viewcode-block" id="DASF._update_dynamic_plot">
+<a class="viewcode-back" href="../../Documentation/dasf.html#dasftoolbox.dasf.DASF._update_dynamic_plot">[docs]</a>
     <span class="k">def</span> <span class="nf">_update_dynamic_plot</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">X</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
@@ -919,15 +949,15 @@
 <span class="sd">        X_star : np.ndarray</span>
 <span class="sd">            Optimal solution matrix.</span>
 <span class="sd">        Y : np.ndarray</span>
-<span class="sd">            Signal fused using X.</span>
+<span class="sd">            Signal fused using :math:`X`.</span>
 <span class="sd">        line_x : object</span>
-<span class="sd">            Line object for X.</span>
+<span class="sd">            Line object for :math:`X`.</span>
 <span class="sd">        line_xs : object</span>
-<span class="sd">            Line object for X_star.</span>
+<span class="sd">            Line object for :math:`X^*`.</span>
 <span class="sd">        line_xTY : object</span>
-<span class="sd">            Line object for X.T @ Y.</span>
+<span class="sd">            Line object for :math:`X^T\\mathbf{y}(t)`.</span>
 <span class="sd">        line_xsTY : object</span>
-<span class="sd">            Line object for X_star.T @ Y.</span>
+<span class="sd">            Line object for :math:`X^{*T}\\mathbf{y}(t)`.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">dynamic_plot_params</span><span class="o">.</span><span class="n">show_x</span><span class="p">:</span>
@@ -943,8 +973,11 @@
             <span class="n">line_xsTY</span><span class="o">.</span><span class="n">set_ydata</span><span class="p">(</span><span class="n">xsTY</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="n">sampled_indices</span><span class="p">])</span>
 
         <span class="n">plt</span><span class="o">.</span><span class="n">draw</span><span class="p">()</span>
-        <span class="n">plt</span><span class="o">.</span><span class="n">pause</span><span class="p">(</span><span class="mf">0.05</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">pause</span><span class="p">(</span><span class="mf">0.05</span><span class="p">)</span></div>
 
+
+<div class="viewcode-block" id="DASF._validate_problem">
+<a class="viewcode-back" href="../../Documentation/dasf.html#dasftoolbox.dasf.DASF._validate_problem">[docs]</a>
     <span class="k">def</span> <span class="nf">_validate_problem</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Validates the problem and its inputs.&quot;&quot;&quot;</span>
         <span class="n">problem_inputs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data_retriever</span><span class="o">.</span><span class="n">get_data_window</span><span class="p">(</span><span class="n">window_id</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
@@ -980,12 +1013,16 @@
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">problem</span><span class="p">,</span> <span class="s2">&quot;evaluate_objective&quot;</span><span class="p">):</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
                 <span class="s2">&quot;The problem does not have an evaluate_objective method. The objective will not be evaluated.&quot;</span>
-            <span class="p">)</span>
+            <span class="p">)</span></div>
+
 
 <div class="viewcode-block" id="DASF.plot_error">
 <a class="viewcode-back" href="../../Documentation/dasf.html#dasftoolbox.dasf.DASF.plot_error">[docs]</a>
     <span class="k">def</span> <span class="nf">plot_error</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Figure</span><span class="p">:</span>
-        <span class="s2">&quot;Plots the sequence ||X^i-X^*||_F^2/||X^*||_F^2&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Plots the sequence :math:`\\frac{\\|X^i-X^*\\|_F^2}{\\|X^*\\|_F^2}`.</span>
+<span class="sd">        If there are multiple variables, the variables are first stacked vertically.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">X_over_iterations</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;No iterates have been computed, use the run method first.&quot;</span><span class="p">)</span>
         <span class="n">fig</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
@@ -1004,7 +1041,10 @@
 <div class="viewcode-block" id="DASF.plot_error_over_batches">
 <a class="viewcode-back" href="../../Documentation/dasf.html#dasftoolbox.dasf.DASF.plot_error_over_batches">[docs]</a>
     <span class="k">def</span> <span class="nf">plot_error_over_batches</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Figure</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Plots the sequence ||X^i-X^*||_F^2/||X^*||_F^2 at the end of each batch of data&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Plots the sequence :math:`\\frac{\\|X^i-X^*\\|_F^2}{\\|X^*\\|_F^2}` at the end of each batch of data.</span>
+<span class="sd">        If there are multiple variables, the variables are first stacked vertically.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">X_over_iterations</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;No iterates have been computed, use the run method first.&quot;</span><span class="p">)</span>
         <span class="n">fig</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
@@ -1032,7 +1072,10 @@
 <div class="viewcode-block" id="DASF.plot_iterate_difference">
 <a class="viewcode-back" href="../../Documentation/dasf.html#dasftoolbox.dasf.DASF.plot_iterate_difference">[docs]</a>
     <span class="k">def</span> <span class="nf">plot_iterate_difference</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Figure</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Plots the sequence ||X{i+1}-X^i||_F^2/X.size&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Plots the sequence :math:`\\frac{1}{MQ}\\|X^{i+1}-X^i\\|_F^2`, where :math:`\\{X^i\\}_i\\subset \\mathbb{R}^{M\\times Q}`.`</span>
+<span class="sd">        If there are multiple variables, the variables are first stacked vertically.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">X_over_iterations</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;No iterates have been computed, use the run method first.&quot;</span><span class="p">)</span>
         <span class="n">fig</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
@@ -1051,7 +1094,10 @@
 <div class="viewcode-block" id="DASF.plot_objective_error">
 <a class="viewcode-back" href="../../Documentation/dasf.html#dasftoolbox.dasf.DASF.plot_objective_error">[docs]</a>
     <span class="k">def</span> <span class="nf">plot_objective_error</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Figure</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;PLots the sequence |f(X^{i})-f(X^*)|&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Plots the sequence :math:`|f(X^{i})-f(X^*)|`.</span>
+<span class="sd">        If there are multiple variables, the variables are first stacked vertically.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">X_over_iterations</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;No iterates have been computed, use the run method first.&quot;</span><span class="p">)</span>
         <span class="n">fig</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
@@ -1392,6 +1438,8 @@
         <span class="k">return</span> <span class="kc">None</span></div>
 
 
+<div class="viewcode-block" id="DASFMultiVar._validate_problem">
+<a class="viewcode-back" href="../../Documentation/dasf.html#dasftoolbox.dasf.DASFMultiVar._validate_problem">[docs]</a>
     <span class="k">def</span> <span class="nf">_validate_problem</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Validates the problem and its inputs.&quot;&quot;&quot;</span>
         <span class="n">problem_inputs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data_retriever</span><span class="o">.</span><span class="n">get_data_window</span><span class="p">(</span><span class="n">window_id</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
@@ -1437,6 +1485,7 @@
             <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
                 <span class="s2">&quot;The problem does not have an evaluate_objective method. The objective will not be evaluated.&quot;</span>
             <span class="p">)</span></div>
+</div>
 
 </pre></div>
 
