@@ -8,8 +8,6 @@ build:
   tools:
     python: "3.11"  # Or whichever Python version you need
   install:
-    - method: pip
-      path: .  # Ensure your package is installed from the local directory
     - method: conda
       path: environment.yml  # This is where you specify your environment file
 
