@@ -220,7 +220,7 @@ class DASF:
 
     @property
     def normed_difference_over_iterations(self):
-        """Returns the sequence ||X{i+1}-X^i||_F^2/X.size"""
+        """Returns the sequence :math:`\|\|X^{i+1}-X^i\|\|_F^2/MQ"""
         if len(self.X_over_iterations) == 0:
             logger.warning("No iterates have been computed, use the run method first.")
             return None
