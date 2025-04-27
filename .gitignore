@@ -8,3 +8,5 @@ run_scqp_dasf.py
 *.egg
 *.egg-info
 dist
+
+/docs/_build/
