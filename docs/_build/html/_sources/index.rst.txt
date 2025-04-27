@@ -8,10 +8,9 @@ DASF toolbox documentation
 
 
 .. toctree::
-   :maxdepth: 2
-   :caption: Contents:
+   :hidden:
 
-   dasftoolbox
+   Documentation/index
 
 Indices and tables
 ==================

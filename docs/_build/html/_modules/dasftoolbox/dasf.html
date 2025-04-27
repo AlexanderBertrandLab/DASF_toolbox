@@ -1,0 +1,1468 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>dasftoolbox.dasf &mdash; DASF toolbox  documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css?v=4ae1632d" />
+
+  
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            DASF toolbox
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../Documentation/index.html">Documentation</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">DASF toolbox</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">dasftoolbox.dasf</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for dasftoolbox.dasf</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">annotations</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">dasftoolbox.problem_settings</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">NetworkGraph</span><span class="p">,</span>
+    <span class="n">ProblemInputs</span><span class="p">,</span>
+    <span class="n">ConvergenceParameters</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="kn">from</span> <span class="nn">dasftoolbox.data_retrievers.data_retriever</span> <span class="kn">import</span> <span class="n">DataRetriever</span>
+<span class="kn">from</span> <span class="nn">dasftoolbox.optimization_problems.optimization_problem</span> <span class="kn">import</span> <span class="n">OptimizationProblem</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Tuple</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="kn">from</span> <span class="nn">matplotlib.lines</span> <span class="kn">import</span> <span class="n">Line2D</span>
+<span class="kn">from</span> <span class="nn">matplotlib.figure</span> <span class="kn">import</span> <span class="n">Figure</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">from</span> <span class="nn">dataclasses</span> <span class="kn">import</span> <span class="n">dataclass</span><span class="p">,</span> <span class="n">replace</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+
+<span class="n">logging</span><span class="o">.</span><span class="n">basicConfig</span><span class="p">(</span><span class="n">level</span><span class="o">=</span><span class="n">logging</span><span class="o">.</span><span class="n">INFO</span><span class="p">)</span>
+<span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="DynamicPlotParameters">
+<a class="viewcode-back" href="../../Documentation/dasf.html#dasftoolbox.dasf.DynamicPlotParameters">[docs]</a>
+<span class="nd">@dataclass</span>
+<span class="k">class</span> <span class="nc">DynamicPlotParameters</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Parameters for dynamic plots.</span>
+
+<span class="sd">    Attributes</span>
+<span class="sd">    ----------</span>
+<span class="sd">    tau : int</span>
+<span class="sd">        Sampling period for the dynamic plot.</span>
+<span class="sd">    show_x : bool</span>
+<span class="sd">        Flag to show the current estimate of X, i.e., the filter weights.</span>
+<span class="sd">    show_xTY : bool</span>
+<span class="sd">        Flag to show the current estimate of X.T @ Y, i.e., the filtered signal, per sample.</span>
+<span class="sd">    X_col : int</span>
+<span class="sd">        Index of the column of X (i.e., the filter) to be plotted.</span>
+<span class="sd">    XTY_col : int</span>
+<span class="sd">        Index of the column of X.T@Y (i.e., the filtered signal) to be plotted for the filtered signal.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">tau</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">10</span>
+    <span class="n">show_x</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="n">show_xTY</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="n">X_col</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">XTY_col</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">Y_id</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span>
+
+<div class="viewcode-block" id="DynamicPlotParameters.apply_correction">
+<a class="viewcode-back" href="../../Documentation/dasf.html#dasftoolbox.dasf.DynamicPlotParameters.apply_correction">[docs]</a>
+    <span class="k">def</span> <span class="nf">apply_correction</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">nb_filters</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">nb_samples</span><span class="p">:</span> <span class="nb">int</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">DynamicPlotParameters</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Function ensuring that parameters are set correctly, and making modifications if necessary.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">new_values</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">tau</span> <span class="o">&gt;</span> <span class="n">nb_samples</span> <span class="o">/</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="n">new_values</span><span class="p">[</span><span class="s2">&quot;tau&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">10</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+                <span class="s2">&quot;Subsample value exceeds the total number of samples, setting it to 10&quot;</span>
+            <span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">X_col</span> <span class="o">&gt;=</span> <span class="n">nb_filters</span><span class="p">:</span>
+            <span class="n">new_values</span><span class="p">[</span><span class="s2">&quot;X_col&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">nb_filters</span> <span class="o">-</span> <span class="mi">1</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;Column to show for X exceeds total number of columns, setting it to </span><span class="si">{</span><span class="n">nb_filters</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mi">1</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">XTY_col</span> <span class="o">&gt;=</span> <span class="n">nb_filters</span><span class="p">:</span>
+            <span class="n">new_values</span><span class="p">[</span><span class="s2">&quot;XTY_col&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">nb_filters</span> <span class="o">-</span> <span class="mi">1</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;Filtered signal index exceeds total number of filtered signals, setting it to </span><span class="si">{</span><span class="n">nb_filters</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mi">1</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">show_x</span> <span class="ow">is</span> <span class="kc">False</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">show_xTY</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
+            <span class="n">new_values</span><span class="p">[</span><span class="s2">&quot;show_x&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;Both dynamic plots were set to false, Showing only X.&quot;</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">replace</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">new_values</span><span class="p">)</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="DASF">
+<a class="viewcode-back" href="../../Documentation/dasf.html#dasftoolbox.dasf.DASF">[docs]</a>
+<span class="k">class</span> <span class="nc">DASF</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Base class for the DASF algorithm.</span>
+
+<span class="sd">    Attributes</span>
+<span class="sd">    ----------</span>
+
+<span class="sd">    problem : OptimizationProblem</span>
+<span class="sd">        The optimization problem to be solved.</span>
+<span class="sd">    data_retriever : DataRetriever</span>
+<span class="sd">        The data retriever object retrieving data for the optimization problem.</span>
+<span class="sd">    network_graph : NetworkGraph</span>
+<span class="sd">        The network graph representing the sensor network.</span>
+<span class="sd">    dasf_convergence_params : ConvergenceParameters</span>
+<span class="sd">        The convergence parameters for the DASF algorithm.</span>
+<span class="sd">    updating_path : np.ndarray | None</span>
+<span class="sd">        The path followed to select updating nodes.</span>
+<span class="sd">    initial_estimate : np.ndarray | None</span>
+<span class="sd">        The initial estimate for the optimization problem.</span>
+<span class="sd">    rng : np.random.Generator | None</span>
+<span class="sd">        Random number generator for reproducibility.</span>
+<span class="sd">    solver_convergence_parameters : ConvergenceParameters | None</span>
+<span class="sd">        The convergence parameters of the provided optimization problem. Adds an additional degree of freedom to select different parameters than the ones used by the centralized solver.</span>
+<span class="sd">    dynamic_plot : bool</span>
+<span class="sd">        Flag to enable dynamic plotting during the algorithm run.</span>
+<span class="sd">    dynamic_plot_params : DynamicPlotParameters | None</span>
+<span class="sd">        Parameters for dynamic plotting.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">problem</span><span class="p">:</span> <span class="n">OptimizationProblem</span><span class="p">,</span>
+        <span class="n">data_retriever</span><span class="p">:</span> <span class="n">DataRetriever</span><span class="p">,</span>
+        <span class="n">network_graph</span><span class="p">:</span> <span class="n">NetworkGraph</span><span class="p">,</span>
+        <span class="n">dasf_convergence_params</span><span class="p">:</span> <span class="n">ConvergenceParameters</span><span class="p">,</span>
+        <span class="n">updating_path</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">initial_estimate</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">rng</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">Generator</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">solver_convergence_parameters</span><span class="p">:</span> <span class="n">ConvergenceParameters</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">dynamic_plot</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">dynamic_plot_params</span><span class="p">:</span> <span class="n">DynamicPlotParameters</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">problem</span> <span class="o">=</span> <span class="n">problem</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">data_retriever</span> <span class="o">=</span> <span class="n">data_retriever</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">network_graph</span> <span class="o">=</span> <span class="n">network_graph</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dasf_convergence_params</span> <span class="o">=</span> <span class="n">dasf_convergence_params</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">solver_convergence_parameters</span> <span class="o">=</span> <span class="n">solver_convergence_parameters</span>
+        <span class="k">if</span> <span class="n">solver_convergence_parameters</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">problem</span><span class="o">.</span><span class="n">convergence_parameters</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">solver_convergence_parameters</span> <span class="o">=</span> <span class="n">problem</span><span class="o">.</span><span class="n">convergence_parameters</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+                    <span class="s2">&quot;Using same convergence parameters as centralized solver&quot;</span>
+                <span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">solver_convergence_parameters</span> <span class="o">=</span> <span class="kc">None</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+                    <span class="s2">&quot;No convergence parameters provided for the solver, assuming it is not neccessary (e.g., closed form solution).&quot;</span>
+                <span class="p">)</span>
+        <span class="k">if</span> <span class="n">updating_path</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">updating_path</span> <span class="o">=</span> <span class="n">updating_path</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">updating_path</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="n">rng</span><span class="o">.</span><span class="n">permutation</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">network_graph</span><span class="o">.</span><span class="n">nb_nodes</span><span class="p">))</span>
+                <span class="k">if</span> <span class="n">rng</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+                <span class="k">else</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">network_graph</span><span class="o">.</span><span class="n">nb_nodes</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+            <span class="p">)</span>
+        <span class="k">if</span> <span class="n">initial_estimate</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">initial_estimate</span> <span class="o">=</span> <span class="n">initial_estimate</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">initial_estimate</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="n">rng</span><span class="o">.</span><span class="n">standard_normal</span><span class="p">(</span>
+                    <span class="p">(</span><span class="n">network_graph</span><span class="o">.</span><span class="n">nb_sensors_total</span><span class="p">,</span> <span class="n">problem</span><span class="o">.</span><span class="n">nb_filters</span><span class="p">)</span>
+                <span class="p">)</span>
+                <span class="k">if</span> <span class="n">rng</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+                <span class="k">else</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">standard_normal</span><span class="p">(</span>
+                    <span class="p">(</span><span class="n">network_graph</span><span class="o">.</span><span class="n">nb_sensors_total</span><span class="p">,</span> <span class="n">problem</span><span class="o">.</span><span class="n">nb_filters</span><span class="p">)</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">nb_variables</span> <span class="o">=</span> <span class="n">problem</span><span class="o">.</span><span class="n">nb_variables</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dynamic_plot</span> <span class="o">=</span> <span class="n">dynamic_plot</span>
+        <span class="k">if</span> <span class="n">dynamic_plot</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">dynamic_plot_params</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">dynamic_plot_params</span> <span class="o">=</span> <span class="n">dynamic_plot_params</span><span class="o">.</span><span class="n">apply_correction</span><span class="p">(</span>
+                    <span class="n">nb_filters</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">problem</span><span class="o">.</span><span class="n">nb_filters</span><span class="p">,</span>
+                    <span class="n">nb_samples</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">data_retriever</span><span class="o">.</span><span class="n">data_window_params</span><span class="o">.</span><span class="n">window_length</span><span class="p">,</span>
+                <span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">dynamic_plot_params</span> <span class="o">=</span> <span class="n">DynamicPlotParameters</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">X_over_iterations</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">f_over_iterations</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">X_star_over_iterations</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">f_star_over_iterations</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_validate_problem</span><span class="p">()</span>
+
+<div class="viewcode-block" id="DASF.centralized_solution_for_input">
+<a class="viewcode-back" href="../../Documentation/dasf.html#dasftoolbox.dasf.DASF.centralized_solution_for_input">[docs]</a>
+    <span class="k">def</span> <span class="nf">centralized_solution_for_input</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">problem_inputs</span><span class="p">:</span> <span class="n">ProblemInputs</span> <span class="o">|</span> <span class="nb">list</span><span class="p">[</span><span class="n">ProblemInputs</span><span class="p">],</span>
+        <span class="n">initial_estimate</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">|</span> <span class="nb">list</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">|</span> <span class="nb">list</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Solves the centralized problem, used for comparison.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        problem_inputs : ProblemInputs | list[ProblemInputs]</span>
+<span class="sd">            The inputs of the problem.</span>
+<span class="sd">        initial_estimate : np.ndarray | list[np.ndarray] | None</span>
+<span class="sd">            The initial estimate for the problem.</span>
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        np.ndarray | list[np.ndarray]</span>
+<span class="sd">            The solution to the centralized problem.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">problem</span><span class="o">.</span><span class="n">solve</span><span class="p">(</span>
+            <span class="n">problem_inputs</span><span class="o">=</span><span class="n">problem_inputs</span><span class="p">,</span>
+            <span class="n">save_solution</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+            <span class="n">convergence_parameters</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">problem</span><span class="o">.</span><span class="n">convergence_parameters</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">problem</span><span class="o">.</span><span class="n">convergence_parameters</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+            <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">initial_estimate</span><span class="o">=</span><span class="n">initial_estimate</span><span class="p">,</span>
+        <span class="p">)</span></div>
+
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">X_estimate</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Final estimate of te optimal solution using DASF.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        np.ndarray | None</span>
+<span class="sd">            The final estimate of the optimal solution using DASF.&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">X_over_iterations</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;No iterates have been computed, use the run method first.&quot;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="kc">None</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">X_estimate</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">problem</span><span class="o">.</span><span class="n">resolve_ambiguity</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">X_over_iterations</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">X_star_over_iterations</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+            <span class="p">)</span>
+            <span class="k">return</span> <span class="n">X_estimate</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">normed_difference_over_iterations</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Returns the sequence ||X{i+1}-X^i||_F^2/X.size&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">X_over_iterations</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;No iterates have been computed, use the run method first.&quot;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="kc">None</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="p">[</span>
+                <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">X_new</span> <span class="o">-</span> <span class="n">X</span><span class="p">,</span> <span class="s2">&quot;fro&quot;</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">/</span> <span class="n">X</span><span class="o">.</span><span class="n">size</span>
+                <span class="k">for</span> <span class="n">X</span><span class="p">,</span> <span class="n">X_new</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">X_over_iterations</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">X_over_iterations</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>
+                <span class="p">)</span>
+            <span class="p">]</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">normed_error_over_iterations</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Returns the sequence ||X^i-X^*||_F^2/||X^*||_F^2&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">X_over_iterations</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;No iterates have been computed, use the run method first.&quot;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="kc">None</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="p">[</span>
+                <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">X</span> <span class="o">-</span> <span class="n">X_star</span><span class="p">,</span> <span class="s2">&quot;fro&quot;</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span>
+                <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">X_star</span><span class="p">,</span> <span class="s2">&quot;fro&quot;</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span>
+                <span class="k">for</span> <span class="n">X</span><span class="p">,</span> <span class="n">X_star</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">X_over_iterations</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">X_star_over_iterations</span>
+                <span class="p">)</span>
+            <span class="p">]</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">absolute_objective_error_over_iterations</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Returns the sequence |f(X^{i})-f(X^*)|&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">problem</span><span class="p">,</span> <span class="s2">&quot;evaluate_objective&quot;</span><span class="p">):</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">X_over_iterations</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+                    <span class="s2">&quot;No iterates have been computed, use the run method first.&quot;</span>
+                <span class="p">)</span>
+                <span class="k">return</span> <span class="kc">None</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">return</span> <span class="p">[</span>
+                    <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">f</span> <span class="o">-</span> <span class="n">f_star</span><span class="p">)</span>
+                    <span class="k">for</span> <span class="n">f</span><span class="p">,</span> <span class="n">f_star</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">f_over_iterations</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">f_star_over_iterations</span>
+                    <span class="p">)</span>
+                <span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+                <span class="s2">&quot;The problem does not have an evaluate_objective method. The objective has not been evaluated.&quot;</span>
+            <span class="p">)</span>
+            <span class="k">return</span> <span class="kc">None</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">total_iterations</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Returns the number of iterations performed during the run.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">X_over_iterations</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span>
+
+<div class="viewcode-block" id="DASF.run">
+<a class="viewcode-back" href="../../Documentation/dasf.html#dasftoolbox.dasf.DASF.run">[docs]</a>
+    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Main method to run the DASF algorithm.</span>
+<span class="sd">        Values summarizing the result are stored in various attributes of the class.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">X_over_iterations</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">f_over_iterations</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">X_star_over_iterations</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">f_star_over_iterations</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
+
+        <span class="n">problem_inputs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data_retriever</span><span class="o">.</span><span class="n">get_data_window</span><span class="p">(</span><span class="n">window_id</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+        <span class="n">X</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">initial_estimate</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">X_over_iterations</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
+        <span class="n">X_star_current_window</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">centralized_solution_for_input</span><span class="p">(</span>
+            <span class="n">problem_inputs</span><span class="o">=</span><span class="n">problem_inputs</span><span class="p">,</span> <span class="n">initial_estimate</span><span class="o">=</span><span class="n">X</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">X_star_over_iterations</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">X_star_current_window</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">problem</span><span class="p">,</span> <span class="s2">&quot;evaluate_objective&quot;</span><span class="p">):</span>
+            <span class="n">f</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">problem</span><span class="o">.</span><span class="n">evaluate_objective</span><span class="p">(</span><span class="n">X</span><span class="o">=</span><span class="n">X</span><span class="p">,</span> <span class="n">problem_inputs</span><span class="o">=</span><span class="n">problem_inputs</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">f_over_iterations</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">f_star_over_iterations</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">problem</span><span class="o">.</span><span class="n">evaluate_objective</span><span class="p">(</span>
+                    <span class="n">X</span><span class="o">=</span><span class="n">X_star_current_window</span><span class="p">,</span> <span class="n">problem_inputs</span><span class="o">=</span><span class="n">problem_inputs</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">dynamic_plot</span><span class="p">:</span>
+            <span class="n">Y</span> <span class="o">=</span> <span class="n">problem_inputs</span><span class="o">.</span><span class="n">fused_signals</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">dynamic_plot_params</span><span class="o">.</span><span class="n">Y_id</span><span class="p">]</span>
+            <span class="n">line_x</span><span class="p">,</span> <span class="n">line_xs</span><span class="p">,</span> <span class="n">line_xTY</span><span class="p">,</span> <span class="n">line_xsTY</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_init_dynamic_plot</span><span class="p">(</span>
+                <span class="n">X</span><span class="o">=</span><span class="n">X</span><span class="p">,</span> <span class="n">X_star</span><span class="o">=</span><span class="n">X_star_current_window</span><span class="p">,</span> <span class="n">Y</span><span class="o">=</span><span class="n">Y</span>
+            <span class="p">)</span>
+
+        <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">window_id</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">while</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">dasf_convergence_params</span><span class="o">.</span><span class="n">max_iterations</span><span class="p">:</span>
+            <span class="c1"># Select updating node</span>
+            <span class="n">updating_node</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">updating_path</span><span class="p">[</span><span class="n">i</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">network_graph</span><span class="o">.</span><span class="n">nb_nodes</span><span class="p">]</span>
+
+            <span class="c1"># Prune the network</span>
+            <span class="c1"># Find shortest path</span>
+            <span class="n">neighbors</span><span class="p">,</span> <span class="n">path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_find_path</span><span class="p">(</span><span class="n">updating_node</span><span class="o">=</span><span class="n">updating_node</span><span class="p">)</span>
+
+            <span class="c1"># Neighborhood clusters</span>
+            <span class="n">clusters</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_find_clusters</span><span class="p">(</span><span class="n">neighbors</span><span class="o">=</span><span class="n">neighbors</span><span class="p">,</span> <span class="n">path</span><span class="o">=</span><span class="n">path</span><span class="p">)</span>
+
+            <span class="c1"># Global - local transition matrix</span>
+            <span class="n">Cq</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_build_Cq</span><span class="p">(</span>
+                <span class="n">X</span><span class="o">=</span><span class="n">X</span><span class="p">,</span> <span class="n">updating_node</span><span class="o">=</span><span class="n">updating_node</span><span class="p">,</span> <span class="n">neighbors</span><span class="o">=</span><span class="n">neighbors</span><span class="p">,</span> <span class="n">clusters</span><span class="o">=</span><span class="n">clusters</span>
+            <span class="p">)</span>
+
+            <span class="c1"># Get current data window</span>
+            <span class="k">if</span> <span class="n">i</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">data_retriever</span><span class="o">.</span><span class="n">data_window_params</span><span class="o">.</span><span class="n">nb_window_reuse</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">problem_inputs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data_retriever</span><span class="o">.</span><span class="n">get_data_window</span><span class="p">(</span>
+                    <span class="n">window_id</span><span class="o">=</span><span class="n">window_id</span>
+                <span class="p">)</span>
+                <span class="n">X_star_current_window</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">centralized_solution_for_input</span><span class="p">(</span>
+                    <span class="n">problem_inputs</span><span class="o">=</span><span class="n">problem_inputs</span><span class="p">,</span> <span class="n">initial_estimate</span><span class="o">=</span><span class="n">X</span>
+                <span class="p">)</span>
+                <span class="n">window_id</span> <span class="o">+=</span> <span class="mi">1</span>
+
+            <span class="c1"># Compute the compressed data</span>
+            <span class="n">compressed_inputs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_compress</span><span class="p">(</span><span class="n">problem_inputs</span><span class="o">=</span><span class="n">problem_inputs</span><span class="p">,</span> <span class="n">Cq</span><span class="o">=</span><span class="n">Cq</span><span class="p">)</span>
+
+            <span class="c1"># Compute the local variable</span>
+            <span class="c1"># Solve the local problem with the algorithm for the global problem using the compressed data</span>
+            <span class="n">Xq</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_block_q</span><span class="p">(</span><span class="n">X</span><span class="o">=</span><span class="n">X</span><span class="p">,</span> <span class="n">updating_node</span><span class="o">=</span><span class="n">updating_node</span><span class="p">)</span>
+            <span class="n">X_tilde</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">(</span>
+                <span class="p">(</span>
+                    <span class="n">Xq</span><span class="p">,</span>
+                    <span class="n">np</span><span class="o">.</span><span class="n">tile</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">eye</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">problem</span><span class="o">.</span><span class="n">nb_filters</span><span class="p">),</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">neighbors</span><span class="p">),</span> <span class="mi">1</span><span class="p">)),</span>
+                <span class="p">),</span>
+                <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="n">X_tilde_new</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">problem</span><span class="o">.</span><span class="n">solve</span><span class="p">(</span>
+                <span class="n">problem_inputs</span><span class="o">=</span><span class="n">compressed_inputs</span><span class="p">,</span>
+                <span class="n">convergence_parameters</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">solver_convergence_parameters</span><span class="p">,</span>
+                <span class="n">initial_estimate</span><span class="o">=</span><span class="n">X_tilde</span><span class="p">,</span>
+            <span class="p">)</span>
+
+            <span class="c1"># Select a solution among potential ones if the problem has multiple solutions</span>
+            <span class="n">X_tilde_new</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">problem</span><span class="o">.</span><span class="n">resolve_ambiguity</span><span class="p">(</span>
+                <span class="n">X_reference</span><span class="o">=</span><span class="n">X_tilde</span><span class="p">,</span> <span class="n">X_current</span><span class="o">=</span><span class="n">X_tilde_new</span><span class="p">,</span> <span class="n">updating_node</span><span class="o">=</span><span class="n">updating_node</span>
+            <span class="p">)</span>
+
+            <span class="c1"># Global variable</span>
+            <span class="n">X_new</span> <span class="o">=</span> <span class="n">Cq</span> <span class="o">@</span> <span class="n">X_tilde_new</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">X_over_iterations</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">X_new</span><span class="p">)</span>
+            <span class="n">X_star_current_window</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">problem</span><span class="o">.</span><span class="n">resolve_ambiguity</span><span class="p">(</span>
+                <span class="n">X_reference</span><span class="o">=</span><span class="n">X_new</span><span class="p">,</span>
+                <span class="n">X_current</span><span class="o">=</span><span class="n">X_star_current_window</span><span class="p">,</span>
+                <span class="n">updating_node</span><span class="o">=</span><span class="n">updating_node</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">X_star_over_iterations</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">X_star_current_window</span><span class="p">)</span>
+            <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">problem</span><span class="p">,</span> <span class="s2">&quot;evaluate_objective&quot;</span><span class="p">):</span>
+                <span class="n">f_new</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">problem</span><span class="o">.</span><span class="n">evaluate_objective</span><span class="p">(</span>
+                    <span class="n">X</span><span class="o">=</span><span class="n">X_tilde_new</span><span class="p">,</span> <span class="n">problem_inputs</span><span class="o">=</span><span class="n">compressed_inputs</span>
+                <span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">f_over_iterations</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">f_new</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">f_star_over_iterations</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">problem</span><span class="o">.</span><span class="n">evaluate_objective</span><span class="p">(</span>
+                        <span class="n">X</span><span class="o">=</span><span class="n">X_star_current_window</span><span class="p">,</span> <span class="n">problem_inputs</span><span class="o">=</span><span class="n">problem_inputs</span>
+                    <span class="p">)</span>
+                <span class="p">)</span>
+
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">dynamic_plot</span><span class="p">:</span>
+                <span class="n">Y</span> <span class="o">=</span> <span class="n">problem_inputs</span><span class="o">.</span><span class="n">fused_signals</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">dynamic_plot_params</span><span class="o">.</span><span class="n">Y_id</span><span class="p">]</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_update_dynamic_plot</span><span class="p">(</span>
+                    <span class="n">X</span><span class="o">=</span><span class="n">X_new</span><span class="p">,</span>
+                    <span class="n">X_star</span><span class="o">=</span><span class="n">X_star_current_window</span><span class="p">,</span>
+                    <span class="n">Y</span><span class="o">=</span><span class="n">Y</span><span class="p">,</span>
+                    <span class="n">line_x</span><span class="o">=</span><span class="n">line_x</span><span class="p">,</span>
+                    <span class="n">line_xs</span><span class="o">=</span><span class="n">line_xs</span><span class="p">,</span>
+                    <span class="n">line_xTY</span><span class="o">=</span><span class="n">line_xTY</span><span class="p">,</span>
+                    <span class="n">line_xsTY</span><span class="o">=</span><span class="n">line_xsTY</span><span class="p">,</span>
+                <span class="p">)</span>
+
+            <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
+
+            <span class="k">if</span> <span class="p">(</span>
+                <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">problem</span><span class="p">,</span> <span class="s2">&quot;evaluate_objective&quot;</span><span class="p">)</span>
+                <span class="ow">and</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dasf_convergence_params</span><span class="o">.</span><span class="n">objective_tolerance</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">)</span>
+                <span class="ow">and</span> <span class="p">(</span>
+                    <span class="n">np</span><span class="o">.</span><span class="n">absolute</span><span class="p">(</span><span class="n">f_new</span> <span class="o">-</span> <span class="n">f</span><span class="p">)</span>
+                    <span class="o">&lt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dasf_convergence_params</span><span class="o">.</span><span class="n">objective_tolerance</span>
+                <span class="p">)</span>
+            <span class="p">):</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">&quot;Stopped after </span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2"> iterations due to reaching the threshold in difference in objectives&quot;</span>
+                <span class="p">)</span>
+                <span class="k">break</span>
+
+            <span class="k">if</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dasf_convergence_params</span><span class="o">.</span><span class="n">argument_tolerance</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span>
+                <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">X_new</span> <span class="o">-</span> <span class="n">X</span><span class="p">,</span> <span class="s2">&quot;fro&quot;</span><span class="p">)</span>
+                <span class="o">&lt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dasf_convergence_params</span><span class="o">.</span><span class="n">argument_tolerance</span>
+            <span class="p">):</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">&quot;Stopped after </span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2"> iterations due to reaching the threshold in difference in arguments&quot;</span>
+                <span class="p">)</span>
+                <span class="k">break</span>
+
+            <span class="n">X</span> <span class="o">=</span> <span class="n">X_new</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+            <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">problem</span><span class="p">,</span> <span class="s2">&quot;evaluate_objective&quot;</span><span class="p">):</span>
+                <span class="n">f</span> <span class="o">=</span> <span class="n">f_new</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">dynamic_plot</span><span class="p">:</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">ioff</span><span class="p">()</span>
+            <span class="c1"># plt.show(block=False)</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+
+        <span class="k">return</span> <span class="kc">None</span></div>
+
+
+    <span class="k">def</span> <span class="nf">_find_path</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">updating_node</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span> <span class="nb">list</span><span class="p">[</span><span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">]]]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Finds the neighbors of a given node and determines the shortest path to every other node in the network.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        updating_node : int</span>
+<span class="sd">            The source node for which neighbors and shortest paths are computed.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        tuple</span>
+<span class="sd">            A tuple containing:</span>
+<span class="sd">            - neighbors : list of int</span>
+<span class="sd">                A sorted list of nodes that are direct neighbors of `updating_node`.</span>
+<span class="sd">            - path : list of list of int</span>
+<span class="sd">                A list where the element at index `k` contains the shortest path from `updating_node` to node `k`.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">dist</span><span class="p">,</span> <span class="n">path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_shortest_path</span><span class="p">(</span><span class="n">updating_node</span><span class="p">)</span>
+        <span class="n">neighbors</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">path</span><span class="p">))</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">path</span><span class="p">[</span><span class="n">x</span><span class="p">])</span> <span class="o">==</span> <span class="mi">2</span><span class="p">]</span>
+        <span class="n">neighbors</span><span class="o">.</span><span class="n">sort</span><span class="p">()</span>
+
+        <span class="k">return</span> <span class="n">neighbors</span><span class="p">,</span> <span class="n">path</span>
+
+    <span class="k">def</span> <span class="nf">_shortest_path</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">updating_node</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="nb">list</span><span class="p">[</span><span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">]]]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Computes the shortest path distances from a given source node to all other nodes</span>
+<span class="sd">        in the network using Dijkstra&#39;s algorithm.</span>
+
+<span class="sd">        Note</span>
+<span class="sd">        ----</span>
+<span class="sd">        - This implementation assumes that all edges have a weight of 1.</span>
+<span class="sd">        - Uses an adjacency matrix representation for the graph.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        updating_node : int</span>
+<span class="sd">            The source node from which shortest paths are calculated.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        tuple</span>
+<span class="sd">            A tuple containing:</span>
+<span class="sd">            - dist : np.ndarray</span>
+<span class="sd">                A 1D array where the value at index `k` represents the shortest distance from `updating_node` to node `k`.</span>
+<span class="sd">            - path : list of list of int</span>
+<span class="sd">                A list where the element at index `k` contains the shortest path from `updating_node` to node `k`.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">nb_nodes</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">network_graph</span><span class="o">.</span><span class="n">nb_nodes</span>
+        <span class="n">dist</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">inf</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">network_graph</span><span class="o">.</span><span class="n">nb_nodes</span><span class="p">)</span>
+        <span class="n">dist</span><span class="p">[</span><span class="n">updating_node</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+
+        <span class="n">visited</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">pred</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">nb_nodes</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
+
+        <span class="k">def</span> <span class="nf">diff</span><span class="p">(</span><span class="n">l1</span><span class="p">,</span> <span class="n">l2</span><span class="p">):</span>
+            <span class="k">return</span> <span class="p">[</span><span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">l1</span> <span class="k">if</span> <span class="n">x</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">l2</span><span class="p">]</span>
+
+        <span class="k">def</span> <span class="nf">intersect</span><span class="p">(</span><span class="n">l1</span><span class="p">,</span> <span class="n">l2</span><span class="p">):</span>
+            <span class="k">return</span> <span class="p">[</span><span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">l1</span> <span class="k">if</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">l2</span><span class="p">]</span>
+
+        <span class="n">unvisited</span> <span class="o">=</span> <span class="n">diff</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">nb_nodes</span><span class="p">)),</span> <span class="n">visited</span><span class="p">)</span>
+        <span class="n">path</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="k">while</span> <span class="nb">len</span><span class="p">(</span><span class="n">visited</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">nb_nodes</span><span class="p">:</span>
+            <span class="n">inds</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argwhere</span><span class="p">(</span><span class="n">dist</span> <span class="o">==</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">dist</span><span class="p">[</span><span class="n">unvisited</span><span class="p">]))</span><span class="o">.</span><span class="n">T</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+            <span class="k">for</span> <span class="n">ind</span> <span class="ow">in</span> <span class="n">inds</span><span class="p">:</span>
+                <span class="n">visited</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ind</span><span class="p">)</span>
+                <span class="n">unvisited</span> <span class="o">=</span> <span class="n">diff</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">nb_nodes</span><span class="p">)),</span> <span class="n">visited</span><span class="p">)</span>
+                <span class="n">neighbors_ind</span> <span class="o">=</span> <span class="p">[</span>
+                    <span class="n">i</span>
+                    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">x</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">network_graph</span><span class="o">.</span><span class="n">adjacency_matrix</span><span class="p">[</span><span class="n">ind</span><span class="p">,</span> <span class="p">:])</span>
+                    <span class="k">if</span> <span class="n">x</span> <span class="o">==</span> <span class="mi">1</span>
+                <span class="p">]</span>
+                <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="n">intersect</span><span class="p">(</span><span class="n">neighbors_ind</span><span class="p">,</span> <span class="n">unvisited</span><span class="p">):</span>
+                    <span class="k">if</span> <span class="n">dist</span><span class="p">[</span><span class="n">ind</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span> <span class="o">&lt;</span> <span class="n">dist</span><span class="p">[</span><span class="n">m</span><span class="p">]:</span>
+                        <span class="n">dist</span><span class="p">[</span><span class="n">m</span><span class="p">]</span> <span class="o">=</span> <span class="n">dist</span><span class="p">[</span><span class="n">ind</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span>
+                        <span class="n">pred</span><span class="p">[</span><span class="n">m</span><span class="p">]</span> <span class="o">=</span> <span class="n">ind</span>
+
+        <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nb_nodes</span><span class="p">):</span>
+            <span class="n">jmp</span> <span class="o">=</span> <span class="n">k</span>
+            <span class="n">path_k</span> <span class="o">=</span> <span class="p">[</span><span class="n">k</span><span class="p">]</span>
+            <span class="k">while</span> <span class="n">jmp</span> <span class="o">!=</span> <span class="n">updating_node</span><span class="p">:</span>
+                <span class="n">jmp</span> <span class="o">=</span> <span class="n">pred</span><span class="p">[</span><span class="n">jmp</span><span class="p">]</span>
+                <span class="n">path_k</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">jmp</span><span class="p">)</span>
+
+            <span class="n">path</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">path_k</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">dist</span><span class="p">,</span> <span class="n">path</span>
+
+    <span class="k">def</span> <span class="nf">_find_clusters</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">neighbors</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span> <span class="n">path</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">]]</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">]]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Obtains clusters of nodes for each neighbor by removing their direct connection to the source node.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        neighbors : list of int</span>
+<span class="sd">            List of neighbors of the source node.</span>
+<span class="sd">        path : list of list of int</span>
+<span class="sd">            A list where the element at index `k` contains the shortest path from the source node to node `k`.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        list of list of int</span>
+<span class="sd">            A list of clusters. Each sublist corresponds to a neighbor and contains the nodes that belong to the subgraph</span>
+<span class="sd">            formed after removing the direct connection between the source node and that neighbor.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">clusters</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">neighbors</span><span class="p">:</span>
+            <span class="n">clusters</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">path</span><span class="p">))</span> <span class="k">if</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">path</span><span class="p">[</span><span class="n">x</span><span class="p">]])</span>
+
+        <span class="k">return</span> <span class="n">clusters</span>
+
+    <span class="k">def</span> <span class="nf">_build_Cq</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">X</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+        <span class="n">updating_node</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+        <span class="n">neighbors</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span>
+        <span class="n">clusters</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">]],</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Constructs the transition matrix that maps the local data and variables to the global ones.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        X : np.ndarray</span>
+<span class="sd">            A matrix of shape (nb_sensors, nb_filters) representing the global variable,</span>
+<span class="sd">            structured as [X1; ...; Xq; ...; XK].</span>
+<span class="sd">        updating_node : int</span>
+<span class="sd">            The current updating node.</span>
+<span class="sd">        neighbors : list of int</span>
+<span class="sd">            A list of neighbors of the updating node.</span>
+<span class="sd">        clusters : list of list of int</span>
+<span class="sd">            A list of clusters, where each sublist corresponds to a neighbor and contains nodes in the subgraph formed by</span>
+<span class="sd">            cutting the link between the updating node and that neighbor.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        np.ndarray</span>
+<span class="sd">            The transition matrix `Cq`, which facilitates the transition between local and global data representations.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">nb_sensors_per_node</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">network_graph</span><span class="o">.</span><span class="n">nb_sensors_per_node</span>
+        <span class="n">nb_filters</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">problem</span><span class="o">.</span><span class="n">nb_filters</span>
+        <span class="n">nb_neighbors</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">neighbors</span><span class="p">)</span>
+
+        <span class="n">ind</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">network_graph</span><span class="o">.</span><span class="n">nb_nodes</span><span class="p">)</span>
+
+        <span class="n">Cq</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span>
+            <span class="p">(</span>
+                <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">nb_sensors_per_node</span><span class="p">),</span>
+                <span class="n">nb_sensors_per_node</span><span class="p">[</span><span class="n">updating_node</span><span class="p">]</span> <span class="o">+</span> <span class="n">nb_neighbors</span> <span class="o">*</span> <span class="n">nb_filters</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="p">)</span>
+        <span class="n">Cq</span><span class="p">[:,</span> <span class="mi">0</span> <span class="p">:</span> <span class="n">nb_sensors_per_node</span><span class="p">[</span><span class="n">updating_node</span><span class="p">]]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">(</span>
+            <span class="p">(</span>
+                <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span>
+                    <span class="p">(</span>
+                        <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">nb_sensors_per_node</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="n">updating_node</span><span class="p">]),</span>
+                        <span class="n">nb_sensors_per_node</span><span class="p">[</span><span class="n">updating_node</span><span class="p">],</span>
+                    <span class="p">)</span>
+                <span class="p">),</span>
+                <span class="n">np</span><span class="o">.</span><span class="n">identity</span><span class="p">(</span><span class="n">nb_sensors_per_node</span><span class="p">[</span><span class="n">updating_node</span><span class="p">]),</span>
+                <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span>
+                    <span class="p">(</span>
+                        <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">nb_sensors_per_node</span><span class="p">[</span><span class="n">updating_node</span> <span class="o">+</span> <span class="mi">1</span> <span class="p">:]),</span>
+                        <span class="n">nb_sensors_per_node</span><span class="p">[</span><span class="n">updating_node</span><span class="p">],</span>
+                    <span class="p">)</span>
+                <span class="p">),</span>
+            <span class="p">)</span>
+        <span class="p">)</span>
+        <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nb_neighbors</span><span class="p">):</span>
+            <span class="n">ind_k</span> <span class="o">=</span> <span class="n">ind</span><span class="p">[</span><span class="n">k</span><span class="p">]</span>
+            <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">clusters</span><span class="p">[</span><span class="n">k</span><span class="p">])):</span>
+                <span class="n">clusters_k</span> <span class="o">=</span> <span class="n">clusters</span><span class="p">[</span><span class="n">k</span><span class="p">]</span>
+                <span class="n">l</span> <span class="o">=</span> <span class="n">clusters_k</span><span class="p">[</span><span class="n">n</span><span class="p">]</span>
+                <span class="n">X_curr</span> <span class="o">=</span> <span class="n">X</span><span class="p">[</span>
+                    <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">nb_sensors_per_node</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="n">l</span><span class="p">])</span> <span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span>
+                        <span class="n">nb_sensors_per_node</span><span class="p">[</span><span class="mi">0</span> <span class="p">:</span> <span class="n">l</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span>
+                    <span class="p">),</span>
+                    <span class="p">:,</span>
+                <span class="p">]</span>
+                <span class="n">Cq</span><span class="p">[</span>
+                    <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">nb_sensors_per_node</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="n">l</span><span class="p">])</span> <span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span>
+                        <span class="n">nb_sensors_per_node</span><span class="p">[</span><span class="mi">0</span> <span class="p">:</span> <span class="n">l</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span>
+                    <span class="p">),</span>
+                    <span class="n">nb_sensors_per_node</span><span class="p">[</span><span class="n">updating_node</span><span class="p">]</span>
+                    <span class="o">+</span> <span class="n">ind_k</span> <span class="o">*</span> <span class="n">nb_filters</span> <span class="p">:</span> <span class="n">nb_sensors_per_node</span><span class="p">[</span><span class="n">updating_node</span><span class="p">]</span>
+                    <span class="o">+</span> <span class="n">ind_k</span> <span class="o">*</span> <span class="n">nb_filters</span>
+                    <span class="o">+</span> <span class="n">nb_filters</span><span class="p">,</span>
+                <span class="p">]</span> <span class="o">=</span> <span class="n">X_curr</span>
+
+        <span class="k">return</span> <span class="n">Cq</span>
+
+    <span class="k">def</span> <span class="nf">_compress</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">problem_inputs</span><span class="p">:</span> <span class="n">ProblemInputs</span><span class="p">,</span> <span class="n">Cq</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ProblemInputs</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Compresses the data using the transition matrix `Cq`.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        problem_inputs : ProblemInputs</span>
+<span class="sd">            An object containing the original problem data, including:</span>
+<span class="sd">            - fused_signals : list</span>
+<span class="sd">                List of signals to be fused.</span>
+<span class="sd">            - fused_constants : list, optional</span>
+<span class="sd">                List of constants to be fused (if present).</span>
+<span class="sd">            - fused_quadratics : list, optional</span>
+<span class="sd">                List of quadratic matrices to be fused (if present).</span>
+<span class="sd">            - global_parameters : object, optional</span>
+<span class="sd">                Additional global parameters (if present).</span>
+<span class="sd">        Cq : np.ndarray</span>
+<span class="sd">            The transition matrix that maps the local data to the global one.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        ProblemInputs</span>
+<span class="sd">            A new instance of `ProblemInputs` containing the compressed versions of:</span>
+<span class="sd">            - fused_signals</span>
+<span class="sd">            - fused_constants</span>
+<span class="sd">            - fused_quadratics</span>
+<span class="sd">            - global_parameters (unchanged)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">fused_data</span> <span class="o">=</span> <span class="n">problem_inputs</span><span class="o">.</span><span class="n">fused_signals</span>
+        <span class="n">fused_constants</span> <span class="o">=</span> <span class="n">problem_inputs</span><span class="o">.</span><span class="n">fused_constants</span>
+        <span class="n">fused_quadratics</span> <span class="o">=</span> <span class="n">problem_inputs</span><span class="o">.</span><span class="n">fused_quadratics</span>
+        <span class="n">global_constants</span> <span class="o">=</span> <span class="n">problem_inputs</span><span class="o">.</span><span class="n">global_parameters</span>
+
+        <span class="n">data_list_compressed</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">nb_data</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">fused_data</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">ind</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nb_data</span><span class="p">):</span>
+            <span class="n">data_list_compressed</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Cq</span><span class="o">.</span><span class="n">T</span> <span class="o">@</span> <span class="n">fused_data</span><span class="p">[</span><span class="n">ind</span><span class="p">])</span>
+
+        <span class="k">if</span> <span class="n">fused_constants</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">constants_list_compressed</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="n">nb_constants</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">fused_constants</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">ind</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nb_constants</span><span class="p">):</span>
+                <span class="n">constants_list_compressed</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Cq</span><span class="o">.</span><span class="n">T</span> <span class="o">@</span> <span class="n">fused_constants</span><span class="p">[</span><span class="n">ind</span><span class="p">])</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">constants_list_compressed</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="k">if</span> <span class="n">fused_quadratics</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">quadratics_list_compressed</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="n">nb_quadratics</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">fused_quadratics</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">ind</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nb_quadratics</span><span class="p">):</span>
+                <span class="n">quadratics_list_compressed</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Cq</span><span class="o">.</span><span class="n">T</span> <span class="o">@</span> <span class="n">fused_quadratics</span><span class="p">[</span><span class="n">ind</span><span class="p">]</span> <span class="o">@</span> <span class="n">Cq</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">quadratics_list_compressed</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="n">compressed_inputs</span> <span class="o">=</span> <span class="n">ProblemInputs</span><span class="p">(</span>
+            <span class="n">fused_signals</span><span class="o">=</span><span class="n">data_list_compressed</span><span class="p">,</span>
+            <span class="n">fused_constants</span><span class="o">=</span><span class="n">constants_list_compressed</span><span class="p">,</span>
+            <span class="n">fused_quadratics</span><span class="o">=</span><span class="n">quadratics_list_compressed</span><span class="p">,</span>
+            <span class="n">global_parameters</span><span class="o">=</span><span class="n">global_constants</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">compressed_inputs</span>
+
+    <span class="k">def</span> <span class="nf">_get_block_q</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">updating_node</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Extracts the block of `X` corresponding to the specified updating node.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        X : np.ndarray</span>
+<span class="sd">            A matrix of shape (nb_sensors, nb_filters) representing the global variable,</span>
+<span class="sd">            structured as [X1; ...; Xq; ...; XK].</span>
+<span class="sd">        updating_node : int</span>
+<span class="sd">            The node for which the corresponding block of `X` is extracted.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        np.ndarray</span>
+<span class="sd">            A matrix `Xq` of shape (nb_sensors_per_node[updating_node], nb_filters), containing the block of `X`</span>
+<span class="sd">            corresponding to `updating_node`.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">Mq</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">network_graph</span><span class="o">.</span><span class="n">nb_sensors_per_node</span><span class="p">[</span><span class="n">updating_node</span><span class="p">]</span>
+        <span class="n">row_blk</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">cumsum</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">network_graph</span><span class="o">.</span><span class="n">nb_sensors_per_node</span><span class="p">)</span>
+        <span class="n">row_blk</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">row_blk</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+        <span class="n">row_blk_q</span> <span class="o">=</span> <span class="n">row_blk</span><span class="p">[</span><span class="n">updating_node</span><span class="p">]</span>
+        <span class="n">Xq</span> <span class="o">=</span> <span class="n">X</span><span class="p">[</span><span class="n">row_blk_q</span> <span class="p">:</span> <span class="n">row_blk_q</span> <span class="o">+</span> <span class="n">Mq</span><span class="p">,</span> <span class="p">:]</span>
+
+        <span class="k">return</span> <span class="n">Xq</span>
+
+    <span class="k">def</span> <span class="nf">_init_dynamic_plot</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">X_star</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">Y</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">Line2D</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Initializes the dynamic plot.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        X : np.ndarray</span>
+<span class="sd">            Current estimate matrix.</span>
+<span class="sd">        X_star : np.ndarray</span>
+<span class="sd">            Optimal solution matrix.</span>
+<span class="sd">        Y : np.ndarray</span>
+<span class="sd">            Signal fused using X.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">ion</span><span class="p">()</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">dynamic_plot_params</span><span class="o">.</span><span class="n">show_x</span> <span class="o">&amp;</span> <span class="bp">self</span><span class="o">.</span><span class="n">dynamic_plot_params</span><span class="o">.</span><span class="n">show_xTY</span><span class="p">:</span>
+            <span class="n">fig</span><span class="p">,</span> <span class="n">axes</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">7</span><span class="p">,</span> <span class="mi">6</span><span class="p">))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">fig</span><span class="p">,</span> <span class="n">axes</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">7</span><span class="p">,</span> <span class="mi">4</span><span class="p">))</span>
+
+        <span class="p">(</span><span class="n">line_x</span><span class="p">,</span> <span class="n">line_xs</span><span class="p">,</span> <span class="n">line_xTY</span><span class="p">,</span> <span class="n">line_xsTY</span><span class="p">)</span> <span class="o">=</span> <span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">dynamic_plot_params</span><span class="o">.</span><span class="n">show_x</span><span class="p">:</span>
+            <span class="n">ax1</span> <span class="o">=</span> <span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">dynamic_plot_params</span><span class="o">.</span><span class="n">show_xTY</span> <span class="k">else</span> <span class="n">axes</span>
+            <span class="p">(</span><span class="n">line_x</span><span class="p">,)</span> <span class="o">=</span> <span class="n">ax1</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span>
+                <span class="n">X</span><span class="p">[:,</span> <span class="bp">self</span><span class="o">.</span><span class="n">dynamic_plot_params</span><span class="o">.</span><span class="n">X_col</span><span class="p">],</span>
+                <span class="n">color</span><span class="o">=</span><span class="s2">&quot;r&quot;</span><span class="p">,</span>
+                <span class="n">marker</span><span class="o">=</span><span class="s2">&quot;x&quot;</span><span class="p">,</span>
+                <span class="n">label</span><span class="o">=</span><span class="s2">&quot;Current estimate&quot;</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="p">(</span><span class="n">line_xs</span><span class="p">,)</span> <span class="o">=</span> <span class="n">ax1</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span>
+                <span class="n">X_star</span><span class="p">[:,</span> <span class="bp">self</span><span class="o">.</span><span class="n">dynamic_plot_params</span><span class="o">.</span><span class="n">X_col</span><span class="p">],</span>
+                <span class="n">color</span><span class="o">=</span><span class="s2">&quot;b&quot;</span><span class="p">,</span>
+                <span class="n">label</span><span class="o">=</span><span class="s2">&quot;Centralized solution&quot;</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">nb_variables</span> <span class="o">&amp;</span> <span class="bp">self</span><span class="o">.</span><span class="n">nb_variables</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">nb_variables</span> <span class="o">-</span> <span class="mi">1</span><span class="p">):</span>
+                    <span class="n">pos</span> <span class="o">=</span> <span class="p">(</span><span class="n">k</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">nb_variables</span><span class="p">)</span>
+                    <span class="n">ax1</span><span class="o">.</span><span class="n">axvline</span><span class="p">(</span>
+                        <span class="n">x</span><span class="o">=</span><span class="n">pos</span><span class="p">,</span>
+                        <span class="n">color</span><span class="o">=</span><span class="s2">&quot;k&quot;</span><span class="p">,</span>
+                        <span class="n">linestyle</span><span class="o">=</span><span class="s2">&quot;--&quot;</span><span class="p">,</span>
+                        <span class="n">label</span><span class="o">=</span><span class="s2">&quot;Delimiter for variables&quot;</span><span class="p">,</span>
+                    <span class="p">)</span>
+            <span class="n">ax1</span><span class="o">.</span><span class="n">set_xlim</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+            <span class="n">ax1</span><span class="o">.</span><span class="n">set_ylim</span><span class="p">(</span>
+                <span class="mi">2</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">X_star</span><span class="p">[:,</span> <span class="bp">self</span><span class="o">.</span><span class="n">dynamic_plot_params</span><span class="o">.</span><span class="n">X_col</span><span class="p">]),</span>
+                <span class="mi">2</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">X_star</span><span class="p">[:,</span> <span class="bp">self</span><span class="o">.</span><span class="n">dynamic_plot_params</span><span class="o">.</span><span class="n">X_col</span><span class="p">]),</span>
+            <span class="p">)</span>
+            <span class="n">ax1</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="s2">&quot;upper right&quot;</span><span class="p">)</span>
+            <span class="n">ax1</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s2">&quot;Sensors&quot;</span><span class="p">)</span>
+            <span class="n">ax1</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s2">&quot;Weight values&quot;</span><span class="p">)</span>
+            <span class="n">ax1</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span>
+                <span class="sa">rf</span><span class="s2">&quot;$X$: Weights per sensor for filter </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">dynamic_plot_params</span><span class="o">.</span><span class="n">X_col</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="p">)</span>
+            <span class="n">ax1</span><span class="o">.</span><span class="n">grid</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">dynamic_plot_params</span><span class="o">.</span><span class="n">show_xTY</span><span class="p">:</span>
+            <span class="n">ax2</span> <span class="o">=</span> <span class="n">axes</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">dynamic_plot_params</span><span class="o">.</span><span class="n">show_x</span> <span class="k">else</span> <span class="n">axes</span>
+            <span class="n">xTY</span> <span class="o">=</span> <span class="n">X</span><span class="p">[:,</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">dynamic_plot_params</span><span class="o">.</span><span class="n">XTY_col</span><span class="p">]]</span><span class="o">.</span><span class="n">T</span> <span class="o">@</span> <span class="n">Y</span>
+            <span class="n">xsTY</span> <span class="o">=</span> <span class="n">X_star</span><span class="p">[:,</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">dynamic_plot_params</span><span class="o">.</span><span class="n">XTY_col</span><span class="p">]]</span><span class="o">.</span><span class="n">T</span> <span class="o">@</span> <span class="n">Y</span>
+            <span class="n">sampled_indices</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">xTY</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">dynamic_plot_params</span><span class="o">.</span><span class="n">tau</span><span class="p">)</span>
+            <span class="p">(</span><span class="n">line_xTY</span><span class="p">,)</span> <span class="o">=</span> <span class="n">ax2</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span>
+                <span class="n">sampled_indices</span><span class="p">,</span>
+                <span class="n">xTY</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="n">sampled_indices</span><span class="p">],</span>
+                <span class="n">color</span><span class="o">=</span><span class="s2">&quot;orange&quot;</span><span class="p">,</span>
+                <span class="n">marker</span><span class="o">=</span><span class="s2">&quot;x&quot;</span><span class="p">,</span>
+                <span class="n">label</span><span class="o">=</span><span class="s2">&quot;Filtered signal estimation&quot;</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="p">(</span><span class="n">line_xsTY</span><span class="p">,)</span> <span class="o">=</span> <span class="n">ax2</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span>
+                <span class="n">sampled_indices</span><span class="p">,</span>
+                <span class="n">xsTY</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="n">sampled_indices</span><span class="p">],</span>
+                <span class="n">color</span><span class="o">=</span><span class="s2">&quot;b&quot;</span><span class="p">,</span>
+                <span class="n">label</span><span class="o">=</span><span class="s2">&quot;Centralized filtered signal&quot;</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">nb_variables</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">nb_variables</span> <span class="o">-</span> <span class="mi">1</span><span class="p">):</span>
+                    <span class="n">pos</span> <span class="o">=</span> <span class="p">(</span><span class="n">k</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">sampled_indices</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">nb_variables</span><span class="p">)</span>
+                    <span class="n">ax2</span><span class="o">.</span><span class="n">axvline</span><span class="p">(</span>
+                        <span class="n">x</span><span class="o">=</span><span class="n">pos</span><span class="p">,</span>
+                        <span class="n">color</span><span class="o">=</span><span class="s2">&quot;k&quot;</span><span class="p">,</span>
+                        <span class="n">linestyle</span><span class="o">=</span><span class="s2">&quot;--&quot;</span><span class="p">,</span>
+                        <span class="n">label</span><span class="o">=</span><span class="s2">&quot;Delimiter for variables&quot;</span><span class="p">,</span>
+                    <span class="p">)</span>
+            <span class="n">ax2</span><span class="o">.</span><span class="n">set_xlim</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">sampled_indices</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+            <span class="n">ax2</span><span class="o">.</span><span class="n">set_ylim</span><span class="p">(</span>
+                <span class="mi">2</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">xsTY</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="p">:]),</span>
+                <span class="mi">2</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">xsTY</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="p">:]),</span>
+            <span class="p">)</span>
+            <span class="n">ax2</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="s2">&quot;upper right&quot;</span><span class="p">)</span>
+            <span class="n">ax2</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s2">&quot;Samples&quot;</span><span class="p">)</span>
+            <span class="n">ax2</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s2">&quot;Filtered signal values&quot;</span><span class="p">)</span>
+            <span class="n">ax2</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span>
+                <span class="sa">rf</span><span class="s2">&quot;$X^Ty(t)$: Filtered signal </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">dynamic_plot_params</span><span class="o">.</span><span class="n">Y_id</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="si">}</span><span class="s2"> for filter </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">dynamic_plot_params</span><span class="o">.</span><span class="n">XTY_col</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="si">}</span><span class="s2">, shown every </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">dynamic_plot_params</span><span class="o">.</span><span class="n">tau</span><span class="si">}</span><span class="s2"> sample&quot;</span>
+            <span class="p">)</span>
+            <span class="n">ax2</span><span class="o">.</span><span class="n">grid</span><span class="p">()</span>
+
+        <span class="n">plt</span><span class="o">.</span><span class="n">subplots_adjust</span><span class="p">(</span><span class="n">hspace</span><span class="o">=</span><span class="mf">0.4</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">line_x</span><span class="p">,</span> <span class="n">line_xs</span><span class="p">,</span> <span class="n">line_xTY</span><span class="p">,</span> <span class="n">line_xsTY</span>
+
+    <span class="k">def</span> <span class="nf">_update_dynamic_plot</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">X</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+        <span class="n">X_star</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+        <span class="n">Y</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+        <span class="n">line_x</span><span class="p">:</span> <span class="n">Line2D</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">line_xs</span><span class="p">:</span> <span class="n">Line2D</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">line_xTY</span><span class="p">:</span> <span class="n">Line2D</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">line_xsTY</span><span class="p">:</span> <span class="n">Line2D</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Updates the dynamic plot.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        X : np.ndarray</span>
+<span class="sd">            Current estimate matrix.</span>
+<span class="sd">        X_star : np.ndarray</span>
+<span class="sd">            Optimal solution matrix.</span>
+<span class="sd">        Y : np.ndarray</span>
+<span class="sd">            Signal fused using X.</span>
+<span class="sd">        line_x : object</span>
+<span class="sd">            Line object for X.</span>
+<span class="sd">        line_xs : object</span>
+<span class="sd">            Line object for X_star.</span>
+<span class="sd">        line_xTY : object</span>
+<span class="sd">            Line object for X.T @ Y.</span>
+<span class="sd">        line_xsTY : object</span>
+<span class="sd">            Line object for X_star.T @ Y.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">dynamic_plot_params</span><span class="o">.</span><span class="n">show_x</span><span class="p">:</span>
+            <span class="n">line_x</span><span class="o">.</span><span class="n">set_ydata</span><span class="p">(</span><span class="n">X</span><span class="p">[:,</span> <span class="bp">self</span><span class="o">.</span><span class="n">dynamic_plot_params</span><span class="o">.</span><span class="n">X_col</span><span class="p">])</span>
+            <span class="n">line_xs</span><span class="o">.</span><span class="n">set_ydata</span><span class="p">(</span><span class="n">X_star</span><span class="p">[:,</span> <span class="bp">self</span><span class="o">.</span><span class="n">dynamic_plot_params</span><span class="o">.</span><span class="n">X_col</span><span class="p">])</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">dynamic_plot_params</span><span class="o">.</span><span class="n">show_xTY</span><span class="p">:</span>
+            <span class="n">xTY</span> <span class="o">=</span> <span class="n">X</span><span class="p">[:,</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">dynamic_plot_params</span><span class="o">.</span><span class="n">XTY_col</span><span class="p">]]</span><span class="o">.</span><span class="n">T</span> <span class="o">@</span> <span class="n">Y</span>
+            <span class="n">xsTY</span> <span class="o">=</span> <span class="n">X_star</span><span class="p">[:,</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">dynamic_plot_params</span><span class="o">.</span><span class="n">XTY_col</span><span class="p">]]</span><span class="o">.</span><span class="n">T</span> <span class="o">@</span> <span class="n">Y</span>
+            <span class="n">sampled_indices</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">xTY</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">dynamic_plot_params</span><span class="o">.</span><span class="n">tau</span><span class="p">)</span>
+            <span class="n">line_xTY</span><span class="o">.</span><span class="n">set_xdata</span><span class="p">(</span><span class="n">sampled_indices</span><span class="p">)</span>
+            <span class="n">line_xTY</span><span class="o">.</span><span class="n">set_ydata</span><span class="p">(</span><span class="n">xTY</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="n">sampled_indices</span><span class="p">])</span>
+            <span class="n">line_xsTY</span><span class="o">.</span><span class="n">set_ydata</span><span class="p">(</span><span class="n">xsTY</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="n">sampled_indices</span><span class="p">])</span>
+
+        <span class="n">plt</span><span class="o">.</span><span class="n">draw</span><span class="p">()</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">pause</span><span class="p">(</span><span class="mf">0.05</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_validate_problem</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Validates the problem and its inputs.&quot;&quot;&quot;</span>
+        <span class="n">problem_inputs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data_retriever</span><span class="o">.</span><span class="n">get_data_window</span><span class="p">(</span><span class="n">window_id</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        <span class="n">nb_sensor</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">network_graph</span><span class="o">.</span><span class="n">nb_sensors_total</span>
+        <span class="k">for</span> <span class="n">index</span><span class="p">,</span> <span class="n">signal</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">problem_inputs</span><span class="o">.</span><span class="n">fused_signals</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="n">signal</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span> <span class="o">!=</span> <span class="n">nb_sensor</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">&quot;The number of rows in data </span><span class="si">{</span><span class="n">index</span><span class="si">}</span><span class="s2"> does not match the number of sensors in the network graph.&quot;</span>
+                <span class="p">)</span>
+        <span class="k">if</span> <span class="n">problem_inputs</span><span class="o">.</span><span class="n">fused_constants</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">index</span><span class="p">,</span> <span class="n">constant</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">problem_inputs</span><span class="o">.</span><span class="n">fused_constants</span><span class="p">):</span>
+                <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="n">constant</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span> <span class="o">!=</span> <span class="n">nb_sensor</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                        <span class="sa">f</span><span class="s2">&quot;The number of rows in the fused constant </span><span class="si">{</span><span class="n">index</span><span class="si">}</span><span class="s2"> does not match the number of sensors in the network graph.&quot;</span>
+                    <span class="p">)</span>
+        <span class="k">if</span> <span class="n">problem_inputs</span><span class="o">.</span><span class="n">fused_quadratics</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">index</span><span class="p">,</span> <span class="n">quadratic</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">problem_inputs</span><span class="o">.</span><span class="n">fused_quadratics</span><span class="p">):</span>
+                <span class="k">if</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="n">quadratic</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span> <span class="o">!=</span> <span class="n">nb_sensor</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span>
+                    <span class="n">np</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="n">quadratic</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span> <span class="o">!=</span> <span class="n">nb_sensor</span>
+                <span class="p">):</span>
+                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                        <span class="sa">f</span><span class="s2">&quot;The number of rows or columns in the fused quadratic </span><span class="si">{</span><span class="n">index</span><span class="si">}</span><span class="s2"> does not match the number of sensors in the network graph.&quot;</span>
+                    <span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">initial_estimate</span><span class="o">.</span><span class="n">shape</span> <span class="o">!=</span> <span class="p">(</span>
+            <span class="n">nb_sensor</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">problem</span><span class="o">.</span><span class="n">nb_filters</span><span class="p">,</span>
+        <span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="s2">&quot;The initial estimate does not have the correct shape for the problem.&quot;</span>
+            <span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">problem</span><span class="p">,</span> <span class="s2">&quot;solve&quot;</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;The problem does not have a solve method.&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">problem</span><span class="p">,</span> <span class="s2">&quot;evaluate_objective&quot;</span><span class="p">):</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+                <span class="s2">&quot;The problem does not have an evaluate_objective method. The objective will not be evaluated.&quot;</span>
+            <span class="p">)</span>
+
+<div class="viewcode-block" id="DASF.plot_error">
+<a class="viewcode-back" href="../../Documentation/dasf.html#dasftoolbox.dasf.DASF.plot_error">[docs]</a>
+    <span class="k">def</span> <span class="nf">plot_error</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Figure</span><span class="p">:</span>
+        <span class="s2">&quot;Plots the sequence ||X^i-X^*||_F^2/||X^*||_F^2&quot;</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">X_over_iterations</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;No iterates have been computed, use the run method first.&quot;</span><span class="p">)</span>
+        <span class="n">fig</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
+        <span class="n">ax</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">loglog</span><span class="p">(</span>
+            <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">total_iterations</span> <span class="o">+</span> <span class="mi">1</span><span class="p">),</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">normed_error_over_iterations</span><span class="p">[</span><span class="mi">1</span><span class="p">:],</span>
+            <span class="n">color</span><span class="o">=</span><span class="s2">&quot;b&quot;</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;Iterations $i$&quot;</span><span class="p">)</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;$\varepsilon(i)=\frac{\|X^i-X^*\|_F^2}{\|X^*\|_F^2}$&quot;</span><span class="p">)</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="kc">True</span><span class="p">,</span> <span class="n">which</span><span class="o">=</span><span class="s2">&quot;both&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">fig</span></div>
+
+
+<div class="viewcode-block" id="DASF.plot_error_over_batches">
+<a class="viewcode-back" href="../../Documentation/dasf.html#dasftoolbox.dasf.DASF.plot_error_over_batches">[docs]</a>
+    <span class="k">def</span> <span class="nf">plot_error_over_batches</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Figure</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Plots the sequence ||X^i-X^*||_F^2/||X^*||_F^2 at the end of each batch of data&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">X_over_iterations</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;No iterates have been computed, use the run method first.&quot;</span><span class="p">)</span>
+        <span class="n">fig</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
+        <span class="n">ax</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">semilogy</span><span class="p">(</span>
+            <span class="nb">range</span><span class="p">(</span>
+                <span class="mi">1</span><span class="p">,</span>
+                <span class="nb">int</span><span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">total_iterations</span>
+                    <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">data_retriever</span><span class="o">.</span><span class="n">data_window_params</span><span class="o">.</span><span class="n">nb_window_reuse</span>
+                <span class="p">)</span>
+                <span class="o">+</span> <span class="mi">1</span><span class="p">,</span>
+            <span class="p">),</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">normed_error_over_iterations</span><span class="p">[</span>
+                <span class="mi">1</span> <span class="p">::</span> <span class="bp">self</span><span class="o">.</span><span class="n">data_retriever</span><span class="o">.</span><span class="n">data_window_params</span><span class="o">.</span><span class="n">nb_window_reuse</span>
+            <span class="p">],</span>
+            <span class="n">color</span><span class="o">=</span><span class="s2">&quot;b&quot;</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;Batch $i$&quot;</span><span class="p">)</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;$\varepsilon(i)=\frac{\|X^i-X^*\|_F^2}{\|X^*\|_F^2}$&quot;</span><span class="p">)</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="kc">True</span><span class="p">,</span> <span class="n">which</span><span class="o">=</span><span class="s2">&quot;both&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">fig</span></div>
+
+
+<div class="viewcode-block" id="DASF.plot_iterate_difference">
+<a class="viewcode-back" href="../../Documentation/dasf.html#dasftoolbox.dasf.DASF.plot_iterate_difference">[docs]</a>
+    <span class="k">def</span> <span class="nf">plot_iterate_difference</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Figure</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Plots the sequence ||X{i+1}-X^i||_F^2/X.size&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">X_over_iterations</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;No iterates have been computed, use the run method first.&quot;</span><span class="p">)</span>
+        <span class="n">fig</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
+        <span class="n">ax</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">loglog</span><span class="p">(</span>
+            <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">total_iterations</span> <span class="o">+</span> <span class="mi">1</span><span class="p">),</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">normed_difference_over_iterations</span><span class="p">,</span>
+            <span class="n">color</span><span class="o">=</span><span class="s2">&quot;b&quot;</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;Iterations $i$&quot;</span><span class="p">)</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;$\frac{\|X^i-X^{i-1}\|_F^2}</span><span class="si">{MQ}</span><span class="s2">$&quot;</span><span class="p">)</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="kc">True</span><span class="p">,</span> <span class="n">which</span><span class="o">=</span><span class="s2">&quot;both&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">fig</span></div>
+
+
+<div class="viewcode-block" id="DASF.plot_objective_error">
+<a class="viewcode-back" href="../../Documentation/dasf.html#dasftoolbox.dasf.DASF.plot_objective_error">[docs]</a>
+    <span class="k">def</span> <span class="nf">plot_objective_error</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Figure</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;PLots the sequence |f(X^{i})-f(X^*)|&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">X_over_iterations</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;No iterates have been computed, use the run method first.&quot;</span><span class="p">)</span>
+        <span class="n">fig</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
+        <span class="n">ax</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">loglog</span><span class="p">(</span>
+            <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">total_iterations</span> <span class="o">+</span> <span class="mi">1</span><span class="p">),</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">absolute_objective_error_over_iterations</span><span class="p">[</span><span class="mi">1</span><span class="p">:],</span>
+            <span class="n">color</span><span class="o">=</span><span class="s2">&quot;b&quot;</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;Iterations $i$&quot;</span><span class="p">)</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;$|f(X^i)-f(X^*)|$&quot;</span><span class="p">)</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="kc">True</span><span class="p">,</span> <span class="n">which</span><span class="o">=</span><span class="s2">&quot;both&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">fig</span></div>
+
+
+<div class="viewcode-block" id="DASF.get_summary_df">
+<a class="viewcode-back" href="../../Documentation/dasf.html#dasftoolbox.dasf.DASF.get_summary_df">[docs]</a>
+    <span class="k">def</span> <span class="nf">get_summary_df</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Returns a pandas DataFrame summarizing the simulation results.&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">X_over_iterations</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;No iterates have been computed, use the run method first.&quot;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="kc">None</span>
+
+        <span class="n">df_summary</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span>
+            <span class="p">{</span>
+                <span class="s2">&quot;iterations&quot;</span><span class="p">:</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">total_iterations</span> <span class="o">+</span> <span class="mi">1</span><span class="p">),</span>
+                <span class="s2">&quot;iterate_difference&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">normed_difference_over_iterations</span><span class="p">,</span>
+                <span class="s2">&quot;error&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">normed_error_over_iterations</span><span class="p">[</span><span class="mi">1</span><span class="p">:],</span>
+                <span class="s2">&quot;objective_error&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">absolute_objective_error_over_iterations</span><span class="p">[</span><span class="mi">1</span><span class="p">:],</span>
+                <span class="s2">&quot;updating_node&quot;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">tile</span><span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">updating_path</span><span class="p">,</span>
+                    <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">total_iterations</span> <span class="o">//</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">updating_path</span><span class="p">))</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span>
+                <span class="p">)[:</span> <span class="bp">self</span><span class="o">.</span><span class="n">total_iterations</span><span class="p">],</span>
+            <span class="p">}</span>
+        <span class="p">)</span>
+        <span class="n">nb_neighbors</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">network_graph</span><span class="o">.</span><span class="n">adjacency_matrix</span><span class="p">[</span><span class="n">df_summary</span><span class="p">[</span><span class="s2">&quot;updating_node&quot;</span><span class="p">]],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span>
+        <span class="p">)</span>
+        <span class="n">df_summary</span><span class="p">[</span><span class="s2">&quot;number_of_neighbors&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">nb_neighbors</span>
+        <span class="n">batch_list</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">batch_index</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="k">while</span> <span class="nb">len</span><span class="p">(</span><span class="n">batch_list</span><span class="p">)</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">total_iterations</span><span class="p">:</span>
+            <span class="n">batch_list</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span>
+                <span class="p">[</span><span class="n">batch_index</span><span class="p">]</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">data_retriever</span><span class="o">.</span><span class="n">data_window_params</span><span class="o">.</span><span class="n">nb_window_reuse</span>
+            <span class="p">)</span>
+            <span class="n">batch_index</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="n">batch_list</span> <span class="o">=</span> <span class="n">batch_list</span><span class="p">[:</span> <span class="bp">self</span><span class="o">.</span><span class="n">total_iterations</span><span class="p">]</span>
+        <span class="n">df_summary</span><span class="p">[</span><span class="s2">&quot;batch&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">batch_list</span>
+
+        <span class="k">return</span> <span class="n">df_summary</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="DASFMultiVar">
+<a class="viewcode-back" href="../../Documentation/dasf.html#dasftoolbox.dasf.DASFMultiVar">[docs]</a>
+<span class="k">class</span> <span class="nc">DASFMultiVar</span><span class="p">(</span><span class="n">DASF</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Class inheriting from the DASF class and implementing the DASF algorithm for a setting with multiple variables.</span>
+
+<span class="sd">    Attributes</span>
+<span class="sd">    ----------</span>
+
+<span class="sd">    problem : OptimizationProblem</span>
+<span class="sd">        The optimization problem to be solved.</span>
+<span class="sd">    data_retriever : DataRetriever</span>
+<span class="sd">        The data retriever object retrieving data for the optimization problem.</span>
+<span class="sd">    network_graph : NetworkGraph</span>
+<span class="sd">        The network graph representing the sensor network.</span>
+<span class="sd">    dasf_convergence_params : ConvergenceParameters</span>
+<span class="sd">        The convergence parameters for the DASF algorithm.</span>
+<span class="sd">    updating_path : np.ndarray | None</span>
+<span class="sd">        The path followed to select updating nodes.</span>
+<span class="sd">    initial_estimate : list[np.ndarray] | None</span>
+<span class="sd">        The list of initial estimates for the optimization problem, one for each variable.</span>
+<span class="sd">    rng : np.random.Generator | None</span>
+<span class="sd">        Random number generator for reproducibility.</span>
+<span class="sd">    solver_convergence_parameters : ConvergenceParameters | None</span>
+<span class="sd">        The convergence parameters of the provided optimization problem. Adds an additional degree of freedom to select different parameters than the ones used by the centralized solver.</span>
+<span class="sd">    dynamic_plot : bool</span>
+<span class="sd">        Flag to enable dynamic plotting during the algorithm run.</span>
+<span class="sd">    dynamic_plot_params : DynamicPlotParameters | None</span>
+<span class="sd">        Parameters for dynamic plotting.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">problem</span><span class="p">:</span> <span class="n">OptimizationProblem</span><span class="p">,</span>
+        <span class="n">data_retriever</span><span class="p">:</span> <span class="n">DataRetriever</span><span class="p">,</span>
+        <span class="n">network_graph</span><span class="p">:</span> <span class="n">NetworkGraph</span><span class="p">,</span>
+        <span class="n">dasf_convergence_params</span><span class="p">:</span> <span class="n">ConvergenceParameters</span><span class="p">,</span>
+        <span class="n">updating_path</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">initial_estimate</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">rng</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">Generator</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">solver_convergence_parameters</span><span class="p">:</span> <span class="n">ConvergenceParameters</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">dynamic_plot</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">dynamic_plot_params</span><span class="p">:</span> <span class="n">DynamicPlotParameters</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_validate_problem</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_validate_problem</span>
+
+        <span class="k">if</span> <span class="n">initial_estimate</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">initial_estimate</span> <span class="o">=</span> <span class="n">initial_estimate</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">initial_estimate</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">problem</span><span class="o">.</span><span class="n">nb_variables</span><span class="p">):</span>
+                <span class="n">initial_estimate</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                    <span class="n">rng</span><span class="o">.</span><span class="n">standard_normal</span><span class="p">(</span>
+                        <span class="p">(</span><span class="n">network_graph</span><span class="o">.</span><span class="n">nb_sensors_total</span><span class="p">,</span> <span class="n">problem</span><span class="o">.</span><span class="n">nb_filters</span><span class="p">)</span>
+                    <span class="p">)</span>
+                    <span class="k">if</span> <span class="n">rng</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+                    <span class="k">else</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">standard_normal</span><span class="p">(</span>
+                        <span class="p">(</span><span class="n">network_graph</span><span class="o">.</span><span class="n">nb_sensors_total</span><span class="p">,</span> <span class="n">problem</span><span class="o">.</span><span class="n">nb_filters</span><span class="p">)</span>
+                    <span class="p">)</span>
+                <span class="p">)</span>
+
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
+            <span class="n">problem</span><span class="o">=</span><span class="n">problem</span><span class="p">,</span>
+            <span class="n">data_retriever</span><span class="o">=</span><span class="n">data_retriever</span><span class="p">,</span>
+            <span class="n">network_graph</span><span class="o">=</span><span class="n">network_graph</span><span class="p">,</span>
+            <span class="n">dasf_convergence_params</span><span class="o">=</span><span class="n">dasf_convergence_params</span><span class="p">,</span>
+            <span class="n">updating_path</span><span class="o">=</span><span class="n">updating_path</span><span class="p">,</span>
+            <span class="n">initial_estimate</span><span class="o">=</span><span class="n">initial_estimate</span><span class="p">,</span>
+            <span class="n">rng</span><span class="o">=</span><span class="n">rng</span><span class="p">,</span>
+            <span class="n">solver_convergence_parameters</span><span class="o">=</span><span class="n">solver_convergence_parameters</span><span class="p">,</span>
+            <span class="n">dynamic_plot</span><span class="o">=</span><span class="n">dynamic_plot</span><span class="p">,</span>
+            <span class="n">dynamic_plot_params</span><span class="o">=</span><span class="n">dynamic_plot_params</span><span class="p">,</span>
+        <span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">normed_difference_over_iterations</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">X_over_iterations</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;No iterates have been computed, use the run method first.&quot;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="kc">None</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="p">[</span>
+                <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">(</span><span class="n">X_new</span><span class="p">)</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">(</span><span class="n">X</span><span class="p">),</span> <span class="s2">&quot;fro&quot;</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span>
+                <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">(</span><span class="n">X</span><span class="p">)</span><span class="o">.</span><span class="n">size</span>
+                <span class="k">for</span> <span class="n">X</span><span class="p">,</span> <span class="n">X_new</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">X_over_iterations</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">X_over_iterations</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>
+                <span class="p">)</span>
+            <span class="p">]</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">normed_error_over_iterations</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">X_over_iterations</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;No iterates have been computed, use the run method first.&quot;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="kc">None</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="p">[</span>
+                <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">(</span><span class="n">X</span><span class="p">)</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">(</span><span class="n">X_star</span><span class="p">),</span> <span class="s2">&quot;fro&quot;</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span>
+                <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">(</span><span class="n">X_star</span><span class="p">),</span> <span class="s2">&quot;fro&quot;</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span>
+                <span class="k">for</span> <span class="n">X</span><span class="p">,</span> <span class="n">X_star</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">X_over_iterations</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">X_star_over_iterations</span>
+                <span class="p">)</span>
+            <span class="p">]</span>
+
+<div class="viewcode-block" id="DASFMultiVar.run">
+<a class="viewcode-back" href="../../Documentation/dasf.html#dasftoolbox.dasf.DASFMultiVar.run">[docs]</a>
+    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Main method to run the DASF algorithm in a setting with multiple variables.&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">X_over_iterations</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">f_over_iterations</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">X_star_over_iterations</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">f_star_over_iterations</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
+
+        <span class="n">problem_inputs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data_retriever</span><span class="o">.</span><span class="n">get_data_window</span><span class="p">(</span><span class="n">window_id</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+        <span class="n">X</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">initial_estimate</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">X_over_iterations</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
+        <span class="n">X_star_current_window</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">centralized_solution_for_input</span><span class="p">(</span>
+            <span class="n">problem_inputs</span><span class="o">=</span><span class="n">problem_inputs</span><span class="p">,</span> <span class="n">initial_estimate</span><span class="o">=</span><span class="n">X</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">X_star_over_iterations</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">X_star_current_window</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">problem</span><span class="p">,</span> <span class="s2">&quot;evaluate_objective&quot;</span><span class="p">):</span>
+            <span class="n">f</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">problem</span><span class="o">.</span><span class="n">evaluate_objective</span><span class="p">(</span><span class="n">X</span><span class="o">=</span><span class="n">X</span><span class="p">,</span> <span class="n">problem_inputs</span><span class="o">=</span><span class="n">problem_inputs</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">f_over_iterations</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">f_star_over_iterations</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">problem</span><span class="o">.</span><span class="n">evaluate_objective</span><span class="p">(</span>
+                    <span class="n">X</span><span class="o">=</span><span class="n">X_star_current_window</span><span class="p">,</span> <span class="n">problem_inputs</span><span class="o">=</span><span class="n">problem_inputs</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">dynamic_plot</span><span class="p">:</span>
+            <span class="n">X_stack</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
+            <span class="n">X_star_stack</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">(</span><span class="n">X_star_current_window</span><span class="p">)</span>
+            <span class="n">Y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">(</span>
+                <span class="p">[</span>
+                    <span class="n">p_i</span><span class="o">.</span><span class="n">fused_signals</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">dynamic_plot_params</span><span class="o">.</span><span class="n">Y_id</span><span class="p">]</span>
+                    <span class="k">for</span> <span class="n">p_i</span> <span class="ow">in</span> <span class="n">problem_inputs</span>
+                <span class="p">]</span>
+            <span class="p">)</span>
+            <span class="n">line_x</span><span class="p">,</span> <span class="n">line_xs</span><span class="p">,</span> <span class="n">line_xTY</span><span class="p">,</span> <span class="n">line_xsTY</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_init_dynamic_plot</span><span class="p">(</span>
+                <span class="n">X</span><span class="o">=</span><span class="n">X_stack</span><span class="p">,</span>
+                <span class="n">X_star</span><span class="o">=</span><span class="n">X_star_stack</span><span class="p">,</span>
+                <span class="n">Y</span><span class="o">=</span><span class="n">Y</span><span class="p">,</span>
+            <span class="p">)</span>
+
+        <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">window_id</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">while</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">dasf_convergence_params</span><span class="o">.</span><span class="n">max_iterations</span><span class="p">:</span>
+            <span class="c1"># Select updating node</span>
+            <span class="n">updating_node</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">updating_path</span><span class="p">[</span><span class="n">i</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">network_graph</span><span class="o">.</span><span class="n">nb_nodes</span><span class="p">]</span>
+
+            <span class="c1"># Prune the network</span>
+            <span class="c1"># Find shortest path</span>
+            <span class="n">neighbors</span><span class="p">,</span> <span class="n">path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_find_path</span><span class="p">(</span><span class="n">updating_node</span><span class="o">=</span><span class="n">updating_node</span><span class="p">)</span>
+
+            <span class="c1"># Neighborhood clusters</span>
+            <span class="n">clusters</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_find_clusters</span><span class="p">(</span><span class="n">neighbors</span><span class="o">=</span><span class="n">neighbors</span><span class="p">,</span> <span class="n">path</span><span class="o">=</span><span class="n">path</span><span class="p">)</span>
+
+            <span class="c1"># Get current data window</span>
+            <span class="k">if</span> <span class="n">i</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">data_retriever</span><span class="o">.</span><span class="n">data_window_params</span><span class="o">.</span><span class="n">nb_window_reuse</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">problem_inputs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data_retriever</span><span class="o">.</span><span class="n">get_data_window</span><span class="p">(</span>
+                    <span class="n">window_id</span><span class="o">=</span><span class="n">window_id</span>
+                <span class="p">)</span>
+                <span class="n">X_star_current_window</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">centralized_solution_for_input</span><span class="p">(</span>
+                    <span class="n">problem_inputs</span><span class="o">=</span><span class="n">problem_inputs</span><span class="p">,</span> <span class="n">initial_estimate</span><span class="o">=</span><span class="n">X</span>
+                <span class="p">)</span>
+                <span class="n">window_id</span> <span class="o">+=</span> <span class="mi">1</span>
+
+            <span class="c1"># Global - local transition matrix</span>
+            <span class="n">Cq</span> <span class="o">=</span> <span class="p">[]</span>
+
+            <span class="n">compressed_inputs</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="n">X_tilde</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nb_variables</span><span class="p">):</span>
+                <span class="n">Cq_k</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_build_Cq</span><span class="p">(</span>
+                    <span class="n">X</span><span class="o">=</span><span class="n">X</span><span class="p">[</span><span class="n">k</span><span class="p">],</span>
+                    <span class="n">updating_node</span><span class="o">=</span><span class="n">updating_node</span><span class="p">,</span>
+                    <span class="n">neighbors</span><span class="o">=</span><span class="n">neighbors</span><span class="p">,</span>
+                    <span class="n">clusters</span><span class="o">=</span><span class="n">clusters</span><span class="p">,</span>
+                <span class="p">)</span>
+                <span class="n">Cq</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Cq_k</span><span class="p">)</span>
+                <span class="c1"># Compute the compressed data for each input</span>
+                <span class="n">compressed_inputs_k</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_compress</span><span class="p">(</span>
+                    <span class="n">problem_inputs</span><span class="o">=</span><span class="n">problem_inputs</span><span class="p">[</span><span class="n">k</span><span class="p">],</span> <span class="n">Cq</span><span class="o">=</span><span class="n">Cq</span><span class="p">[</span><span class="n">k</span><span class="p">]</span>
+                <span class="p">)</span>
+                <span class="n">compressed_inputs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">compressed_inputs_k</span><span class="p">)</span>
+
+                <span class="c1"># Compute each local variable</span>
+                <span class="n">Xq_k</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_block_q</span><span class="p">(</span><span class="n">X</span><span class="o">=</span><span class="n">X</span><span class="p">[</span><span class="n">k</span><span class="p">],</span> <span class="n">updating_node</span><span class="o">=</span><span class="n">updating_node</span><span class="p">)</span>
+                <span class="n">X_tilde_k</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">(</span>
+                    <span class="p">(</span>
+                        <span class="n">Xq_k</span><span class="p">,</span>
+                        <span class="n">np</span><span class="o">.</span><span class="n">tile</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">eye</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">problem</span><span class="o">.</span><span class="n">nb_filters</span><span class="p">),</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">neighbors</span><span class="p">),</span> <span class="mi">1</span><span class="p">)),</span>
+                    <span class="p">),</span>
+                    <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+                <span class="p">)</span>
+                <span class="n">X_tilde</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">X_tilde_k</span><span class="p">)</span>
+
+            <span class="c1"># Solve the local problem with the algorithm for the global problem using the compressed data</span>
+            <span class="n">X_tilde_new</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">problem</span><span class="o">.</span><span class="n">solve</span><span class="p">(</span>
+                <span class="n">problem_inputs</span><span class="o">=</span><span class="n">compressed_inputs</span><span class="p">,</span>
+                <span class="n">convergence_parameters</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">solver_convergence_parameters</span><span class="p">,</span>
+                <span class="n">initial_estimate</span><span class="o">=</span><span class="n">X_tilde</span><span class="p">,</span>
+            <span class="p">)</span>
+
+            <span class="c1"># Select a solution among potential ones if the problem has multiple solutions</span>
+            <span class="n">X_tilde_new</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">problem</span><span class="o">.</span><span class="n">resolve_ambiguity</span><span class="p">(</span>
+                <span class="n">X_reference</span><span class="o">=</span><span class="n">X_tilde</span><span class="p">,</span> <span class="n">X_current</span><span class="o">=</span><span class="n">X_tilde_new</span><span class="p">,</span> <span class="n">updating_node</span><span class="o">=</span><span class="n">updating_node</span>
+            <span class="p">)</span>
+
+            <span class="c1"># Global variable</span>
+            <span class="n">X_new</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nb_variables</span><span class="p">):</span>
+                <span class="n">X_new</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Cq</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">@</span> <span class="n">X_tilde_new</span><span class="p">[</span><span class="n">k</span><span class="p">])</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">X_over_iterations</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">X_new</span><span class="p">)</span>
+            <span class="n">X_star_current_window</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">problem</span><span class="o">.</span><span class="n">resolve_ambiguity</span><span class="p">(</span>
+                <span class="n">X_reference</span><span class="o">=</span><span class="n">X_new</span><span class="p">,</span>
+                <span class="n">X_current</span><span class="o">=</span><span class="n">X_star_current_window</span><span class="p">,</span>
+                <span class="n">updating_node</span><span class="o">=</span><span class="n">updating_node</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">X_star_over_iterations</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">X_star_current_window</span><span class="p">)</span>
+            <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">problem</span><span class="p">,</span> <span class="s2">&quot;evaluate_objective&quot;</span><span class="p">):</span>
+                <span class="n">f_new</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">problem</span><span class="o">.</span><span class="n">evaluate_objective</span><span class="p">(</span>
+                    <span class="n">X</span><span class="o">=</span><span class="n">X_tilde_new</span><span class="p">,</span> <span class="n">problem_inputs</span><span class="o">=</span><span class="n">compressed_inputs</span>
+                <span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">f_over_iterations</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">f_new</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">f_star_over_iterations</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">problem</span><span class="o">.</span><span class="n">evaluate_objective</span><span class="p">(</span>
+                        <span class="n">X</span><span class="o">=</span><span class="n">X_star_current_window</span><span class="p">,</span> <span class="n">problem_inputs</span><span class="o">=</span><span class="n">problem_inputs</span>
+                    <span class="p">)</span>
+                <span class="p">)</span>
+
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">dynamic_plot</span><span class="p">:</span>
+                <span class="n">X_stack</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">(</span><span class="n">X_new</span><span class="p">)</span>
+                <span class="n">X_star_stack</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">(</span><span class="n">X_star_current_window</span><span class="p">)</span>
+                <span class="n">Y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">(</span>
+                    <span class="p">[</span>
+                        <span class="n">p_i</span><span class="o">.</span><span class="n">fused_signals</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">dynamic_plot_params</span><span class="o">.</span><span class="n">Y_id</span><span class="p">]</span>
+                        <span class="k">for</span> <span class="n">p_i</span> <span class="ow">in</span> <span class="n">problem_inputs</span>
+                    <span class="p">]</span>
+                <span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_update_dynamic_plot</span><span class="p">(</span>
+                    <span class="n">X</span><span class="o">=</span><span class="n">X_stack</span><span class="p">,</span>
+                    <span class="n">X_star</span><span class="o">=</span><span class="n">X_star_stack</span><span class="p">,</span>
+                    <span class="n">Y</span><span class="o">=</span><span class="n">Y</span><span class="p">,</span>
+                    <span class="n">line_x</span><span class="o">=</span><span class="n">line_x</span><span class="p">,</span>
+                    <span class="n">line_xs</span><span class="o">=</span><span class="n">line_xs</span><span class="p">,</span>
+                    <span class="n">line_xTY</span><span class="o">=</span><span class="n">line_xTY</span><span class="p">,</span>
+                    <span class="n">line_xsTY</span><span class="o">=</span><span class="n">line_xsTY</span><span class="p">,</span>
+                <span class="p">)</span>
+
+            <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
+
+            <span class="k">if</span> <span class="p">(</span>
+                <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">problem</span><span class="p">,</span> <span class="s2">&quot;evaluate_objective&quot;</span><span class="p">)</span>
+                <span class="ow">and</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dasf_convergence_params</span><span class="o">.</span><span class="n">objective_tolerance</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">)</span>
+                <span class="ow">and</span> <span class="p">(</span>
+                    <span class="n">np</span><span class="o">.</span><span class="n">absolute</span><span class="p">(</span><span class="n">f_new</span> <span class="o">-</span> <span class="n">f</span><span class="p">)</span>
+                    <span class="o">&lt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dasf_convergence_params</span><span class="o">.</span><span class="n">objective_tolerance</span>
+                <span class="p">)</span>
+            <span class="p">):</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">&quot;Stopped after </span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2"> iterations due to reaching the threshold in difference in objectives&quot;</span>
+                <span class="p">)</span>
+                <span class="k">break</span>
+
+            <span class="k">if</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dasf_convergence_params</span><span class="o">.</span><span class="n">argument_tolerance</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span>
+                <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">(</span><span class="n">X_new</span><span class="p">)</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">(</span><span class="n">X</span><span class="p">),</span> <span class="s2">&quot;fro&quot;</span><span class="p">)</span>
+                <span class="o">&lt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dasf_convergence_params</span><span class="o">.</span><span class="n">argument_tolerance</span>
+            <span class="p">):</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">&quot;Stopped after </span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2"> iterations due to reaching the threshold in difference in arguments&quot;</span>
+                <span class="p">)</span>
+                <span class="k">break</span>
+
+            <span class="n">X</span> <span class="o">=</span> <span class="n">X_new</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+            <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">problem</span><span class="p">,</span> <span class="s2">&quot;evaluate_objective&quot;</span><span class="p">):</span>
+                <span class="n">f</span> <span class="o">=</span> <span class="n">f_new</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">dynamic_plot</span><span class="p">:</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">ioff</span><span class="p">()</span>
+            <span class="c1"># plt.show(block=False)</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+
+        <span class="k">return</span> <span class="kc">None</span></div>
+
+
+    <span class="k">def</span> <span class="nf">_validate_problem</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Validates the problem and its inputs.&quot;&quot;&quot;</span>
+        <span class="n">problem_inputs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data_retriever</span><span class="o">.</span><span class="n">get_data_window</span><span class="p">(</span><span class="n">window_id</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">nb_variables</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">problem_inputs</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;The number of variables </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">nb_variables</span><span class="si">}</span><span class="s2"> does not match the number of problem inputs </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">problem_inputs</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="p">)</span>
+        <span class="n">nb_sensor</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">network_graph</span><span class="o">.</span><span class="n">nb_sensors_total</span>
+        <span class="k">for</span> <span class="n">input_id</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">problem_inputs</span><span class="p">)):</span>
+            <span class="k">for</span> <span class="n">index</span><span class="p">,</span> <span class="n">signal</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">problem_inputs</span><span class="p">[</span><span class="n">input_id</span><span class="p">]</span><span class="o">.</span><span class="n">fused_signals</span><span class="p">):</span>
+                <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="n">signal</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span> <span class="o">!=</span> <span class="n">nb_sensor</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                        <span class="sa">f</span><span class="s2">&quot;The number of rows in data </span><span class="si">{</span><span class="n">index</span><span class="si">}</span><span class="s2"> does not match the number of sensors in the network graph for input </span><span class="si">{</span><span class="n">input_id</span><span class="si">}</span><span class="s2">.&quot;</span>
+                    <span class="p">)</span>
+            <span class="k">if</span> <span class="n">problem_inputs</span><span class="p">[</span><span class="n">input_id</span><span class="p">]</span><span class="o">.</span><span class="n">fused_constants</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">index</span><span class="p">,</span> <span class="n">constant</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span>
+                    <span class="n">problem_inputs</span><span class="p">[</span><span class="n">input_id</span><span class="p">]</span><span class="o">.</span><span class="n">fused_constants</span>
+                <span class="p">):</span>
+                    <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="n">constant</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span> <span class="o">!=</span> <span class="n">nb_sensor</span><span class="p">:</span>
+                        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                            <span class="sa">f</span><span class="s2">&quot;The number of rows in the fused constant </span><span class="si">{</span><span class="n">index</span><span class="si">}</span><span class="s2"> does not match the number of sensors in the network graph for input </span><span class="si">{</span><span class="n">input_id</span><span class="si">}</span><span class="s2">.&quot;</span>
+                        <span class="p">)</span>
+            <span class="k">if</span> <span class="n">problem_inputs</span><span class="p">[</span><span class="n">input_id</span><span class="p">]</span><span class="o">.</span><span class="n">fused_quadratics</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">index</span><span class="p">,</span> <span class="n">quadratic</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span>
+                    <span class="n">problem_inputs</span><span class="p">[</span><span class="n">input_id</span><span class="p">]</span><span class="o">.</span><span class="n">fused_quadratics</span>
+                <span class="p">):</span>
+                    <span class="k">if</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="n">quadratic</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span> <span class="o">!=</span> <span class="n">nb_sensor</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span>
+                        <span class="n">np</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="n">quadratic</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span> <span class="o">!=</span> <span class="n">nb_sensor</span>
+                    <span class="p">):</span>
+                        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                            <span class="sa">f</span><span class="s2">&quot;The number of rows or columns in the fused quadratic </span><span class="si">{</span><span class="n">index</span><span class="si">}</span><span class="s2"> does not match the number of sensors in the network graph for input </span><span class="si">{</span><span class="n">input_id</span><span class="si">}</span><span class="s2">.&quot;</span>
+                        <span class="p">)</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">initial_estimate</span><span class="p">[</span><span class="n">input_id</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span> <span class="o">!=</span> <span class="p">(</span>
+                <span class="n">nb_sensor</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">problem</span><span class="o">.</span><span class="n">nb_filters</span><span class="p">,</span>
+            <span class="p">):</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">&quot;The initial estimate of the variable corresponding to input </span><span class="si">{</span><span class="n">input_id</span><span class="si">}</span><span class="s2"> does not have the correct shape for the problem.&quot;</span>
+                <span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">problem</span><span class="p">,</span> <span class="s2">&quot;solve&quot;</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;The problem does not have a solve method.&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">problem</span><span class="p">,</span> <span class="s2">&quot;evaluate_objective&quot;</span><span class="p">):</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+                <span class="s2">&quot;The problem does not have an evaluate_objective method. The objective will not be evaluated.&quot;</span>
+            <span class="p">)</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Cem Ates Musluoglu, Alexander Bertrand.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

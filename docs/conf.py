@@ -1,10 +1,17 @@
-import os
-import sys
+extensions = [
+    "sphinx.ext.viewcode",
+    "sphinx.ext.autosummary",
+    "sphinx.ext.mathjax",
+    "sphinx.ext.inheritance_diagram",
+]
 
-sys.path.insert(0, os.path.abspath(".."))
-sys.path.insert(0, os.path.abspath("../dasftoolbox"))
-sys.path.insert(0, os.path.abspath("../dasftoolbox/optimizations_problems"))
-sys.path.insert(0, os.path.abspath("../dasftoolbox/data_retrievers"))
+extensions.append("sphinx.ext.autodoc")
+autodoc_default_options = {
+    "members": True,
+    "undoc-members": True,
+    "member-order": "groupwise",  # alphabetical, groupwise, bysource
+}
+extensions.append("sphinx.ext.napoleon")
 
 # Configuration file for the Sphinx documentation builder.
 #
@@ -21,10 +28,10 @@ author = "Cem Ates Musluoglu, Alexander Bertrand"
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
 
-extensions = [
-    "sphinx.ext.autodoc",
-    "sphinx.ext.napoleon",  # if you use Google style or Numpy style docstrings
-]
+# extensions = [
+#     "sphinx.ext.autodoc",
+#     "sphinx.ext.napoleon",
+# ]
 
 templates_path = ["_templates"]
 exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]

@@ -9,6 +9,21 @@ logger = logging.getLogger(__name__)
 
 
 class ProblemInputs:
+    """
+    Class storing the inputs, i.e., the data, of the problem.
+
+    Attributes
+    ----------
+    fused_signals : list[np.ndarray]
+        List of signals to be fused by the variable.
+    fused_constants : list[np.ndarray] | None = None
+        List of constant arrays to be fused by the variable. Similar to the signals, but do not change in time.
+    fused_quadratics : list[np.ndarray] | None = None
+        List of block-diagonal arrays to be fused by the variable from both sides, e.g., X.T @ M @ X.
+    global_parameters : list[np.ndarray] | None = None
+        List of arrays that are not fused by the variable, but are needed to solve the optimization problem.
+    """
+
     def __init__(
         self,
         fused_signals: list[np.ndarray],
@@ -24,6 +39,21 @@ class ProblemInputs:
 
 @dataclass
 class NetworkGraph:
+    """
+    Class storing the properties of the network graph.
+
+    Attributes
+    ----------
+    nb_nodes : int
+        Number of nodes in the network.
+    nb_sensors_per_node : np.ndarray
+        Array storing the number of sensors per node in the network.
+    adjacency_matrix : np.ndarray
+        Adjacency matrix of the network.
+    nb_sensors_total : int
+        Total number of sensors in the network.
+    """
+
     def __init__(
         self,
         nb_nodes: int,
@@ -43,6 +73,7 @@ class NetworkGraph:
             )
 
     def plot_graph(self) -> None:
+        """Plots the adjacency matrix and the graph of the network."""
         fig, ax = plt.subplots(1, 2)
         ax[0].imshow(self.adjacency_matrix)
         ax[0].set_xticks(np.arange(0, self.nb_nodes, 1))
@@ -64,6 +95,19 @@ class NetworkGraph:
 
 @dataclass
 class ConvergenceParameters:
+    """
+    Class storing the convergence parameters of an optimization problem. This class is used both by the centralized solver and the DASF solver.
+
+    Attributes
+    ----------
+    max_iterations : int | None
+        Maximum number of iterations the solver applies.
+    objective_tolerance : float | None
+        Threshold for two consecutive objective function values. If the absolute difference is below this value, the solver stops.
+    argument_tolerance : float | None
+        Threshold for two consecutive iterates. If the norm of the difference is below this value, the solver stops.
+    """
+
     max_iterations: int | None = None
     objective_tolerance: float | None = None
     argument_tolerance: float | None = None

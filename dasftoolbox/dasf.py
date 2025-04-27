@@ -21,6 +21,24 @@ logger = logging.getLogger(__name__)
 
 @dataclass
 class DynamicPlotParameters:
+    """
+    Parameters for dynamic plots.
+
+    Attributes
+    ----------
+    tau : int
+        Sampling period for the dynamic plot.
+    show_x : bool
+        Flag to show the current estimate of X, i.e., the filter weights.
+    show_xTY : bool
+        Flag to show the current estimate of X.T @ Y, i.e., the filtered signal, per sample.
+    X_col : int
+        Index of the column of X (i.e., the filter) to be plotted.
+    XTY_col : int
+        Index of the column of X.T@Y (i.e., the filtered signal) to be plotted for the filtered signal.
+
+    """
+
     tau: int = 10
     show_x: bool = True
     show_xTY: bool = True
@@ -31,6 +49,9 @@ class DynamicPlotParameters:
     def apply_correction(
         self, nb_filters: int, nb_samples: int
     ) -> DynamicPlotParameters:
+        """
+        Function ensuring that parameters are set correctly, and making modifications if necessary.
+        """
         new_values = self.__dict__.copy()
 
         if self.tau > nb_samples / 2:
@@ -56,6 +77,35 @@ class DynamicPlotParameters:
 
 
 class DASF:
+    """
+    Base class for the DASF algorithm.
+
+    Attributes
+    ----------
+
+    problem : OptimizationProblem
+        The optimization problem to be solved.
+    data_retriever : DataRetriever
+        The data retriever object retrieving data for the optimization problem.
+    network_graph : NetworkGraph
+        The network graph representing the sensor network.
+    dasf_convergence_params : ConvergenceParameters
+        The convergence parameters for the DASF algorithm.
+    updating_path : np.ndarray | None
+        The path followed to select updating nodes.
+    initial_estimate : np.ndarray | None
+        The initial estimate for the optimization problem.
+    rng : np.random.Generator | None
+        Random number generator for reproducibility.
+    solver_convergence_parameters : ConvergenceParameters | None
+        The convergence parameters of the provided optimization problem. Adds an additional degree of freedom to select different parameters than the ones used by the centralized solver.
+    dynamic_plot : bool
+        Flag to enable dynamic plotting during the algorithm run.
+    dynamic_plot_params : DynamicPlotParameters | None
+        Parameters for dynamic plotting.
+
+    """
+
     def __init__(
         self,
         problem: OptimizationProblem,
@@ -127,7 +177,20 @@ class DASF:
         problem_inputs: ProblemInputs | list[ProblemInputs],
         initial_estimate: np.ndarray | list[np.ndarray] | None,
     ) -> np.ndarray | list[np.ndarray]:
-        """Solves the centralized problem, used for comparison"""
+        """
+        Solves the centralized problem, used for comparison.
+
+        Parameters
+        ----------
+        problem_inputs : ProblemInputs | list[ProblemInputs]
+            The inputs of the problem.
+        initial_estimate : np.ndarray | list[np.ndarray] | None
+            The initial estimate for the problem.
+        Returns
+        -------
+        np.ndarray | list[np.ndarray]
+            The solution to the centralized problem.
+        """
         return self.problem.solve(
             problem_inputs=problem_inputs,
             save_solution=False,
@@ -139,7 +202,13 @@ class DASF:
 
     @property
     def X_estimate(self):
-        """Final estimate of te optimal solution using DASF"""
+        """
+        Final estimate of te optimal solution using DASF.
+
+        Returns
+        -------
+        np.ndarray | None
+            The final estimate of the optimal solution using DASF."""
         if len(self.X_over_iterations) == 0:
             logger.warning("No iterates have been computed, use the run method first.")
             return None
@@ -202,9 +271,14 @@ class DASF:
 
     @property
     def total_iterations(self):
+        """Returns the number of iterations performed during the run."""
         return len(self.X_over_iterations) - 1
 
     def run(self) -> None:
+        """
+        Main method to run the DASF algorithm.
+        Values summarizing the result are stored in various attributes of the class.
+        """
         self.X_over_iterations.clear()
         self.f_over_iterations.clear()
         self.X_star_over_iterations.clear()
@@ -356,14 +430,19 @@ class DASF:
         """
         Finds the neighbors of a given node and determines the shortest path to every other node in the network.
 
-        Args:
-            updating_node (int): The source node for which neighbors and shortest paths are computed.
+        Parameters
+        ----------
+        updating_node : int
+            The source node for which neighbors and shortest paths are computed.
 
-        Returns:
+        Returns
+        -------
+        tuple
             A tuple containing:
-                - `neighbors` (list[int]): A sorted list of nodes that are direct neighbors of `updating_node`.
-                - `path` (list[list[int]]): A list where the element at index `k` contains the shortest path
-                from `updating_node` to node `k`.
+            - neighbors : list of int
+                A sorted list of nodes that are direct neighbors of `updating_node`.
+            - path : list of list of int
+                A list where the element at index `k` contains the shortest path from `updating_node` to node `k`.
         """
         dist, path = self._shortest_path(updating_node)
         neighbors = [x for x in range(len(path)) if len(path[x]) == 2]
@@ -376,19 +455,24 @@ class DASF:
         Computes the shortest path distances from a given source node to all other nodes
         in the network using Dijkstra's algorithm.
 
-        Note:
-            - This implementation assumes that all edges have a weight of 1.
-            - Uses an adjacency matrix representation for the graph.
+        Note
+        ----
+        - This implementation assumes that all edges have a weight of 1.
+        - Uses an adjacency matrix representation for the graph.
 
-        Args:
-            updating_node (int): The source node from which shortest paths are calculated.
+        Parameters
+        ----------
+        updating_node : int
+            The source node from which shortest paths are calculated.
 
-        Returns:
+        Returns
+        -------
+        tuple
             A tuple containing:
-                - `dist` (np.ndarray): A 1D array where the value at index `k` represents
-                the shortest distance from `updating_node` to node `k`.
-                - `path` (list[list[int]]): A list where the element at index `k` contains
-                the shortest path from `updating_node` to node `k`.
+            - dist : np.ndarray
+                A 1D array where the value at index `k` represents the shortest distance from `updating_node` to node `k`.
+            - path : list of list of int
+                A list where the element at index `k` contains the shortest path from `updating_node` to node `k`.
         """
         nb_nodes = self.network_graph.nb_nodes
         dist = np.inf * np.ones(self.network_graph.nb_nodes)
@@ -439,15 +523,18 @@ class DASF:
         """
         Obtains clusters of nodes for each neighbor by removing their direct connection to the source node.
 
-        Args:
-            neighbors (list[int]): List of neighbors of the source node.
-            path (list[list[int]]): A list where the element at index `k` contains the shortest path
-                                    from the source node to node `k`.
+        Parameters
+        ----------
+        neighbors : list of int
+            List of neighbors of the source node.
+        path : list of list of int
+            A list where the element at index `k` contains the shortest path from the source node to node `k`.
 
-        Returns:
-            `clusters` (list[list[int]]): A list of clusters. Each sublist corresponds to a neighbor
-                and contains the nodes that belong to the subgraph formed after removing the direct connection
-                between the source node and that neighbor.
+        Returns
+        -------
+        list of list of int
+            A list of clusters. Each sublist corresponds to a neighbor and contains the nodes that belong to the subgraph
+            formed after removing the direct connection between the source node and that neighbor.
         """
         clusters = []
         for k in neighbors:
@@ -465,18 +552,23 @@ class DASF:
         """
         Constructs the transition matrix that maps the local data and variables to the global ones.
 
-        Args:
-            X (np.ndarray): A matrix of shape (nb_sensors, nb_filters) representing the global variable,
-                            structured as [X1; ...; Xq; ...; XK].
-            updating_node (int): The current updating node.
-            neighbors (list[int]): A list of neighbors of the updating node.
-            clusters (list[list[int]]): A list of clusters, where each sublist corresponds to a neighbor
-                                        and contains nodes in the subgraph formed by cutting the link
-                                        between the updating node and that neighbor.
+        Parameters
+        ----------
+        X : np.ndarray
+            A matrix of shape (nb_sensors, nb_filters) representing the global variable,
+            structured as [X1; ...; Xq; ...; XK].
+        updating_node : int
+            The current updating node.
+        neighbors : list of int
+            A list of neighbors of the updating node.
+        clusters : list of list of int
+            A list of clusters, where each sublist corresponds to a neighbor and contains nodes in the subgraph formed by
+            cutting the link between the updating node and that neighbor.
 
-        Returns:
-            np.ndarray: The transition matrix `Cq`, which facilitates the transition between
-                        local and global data representations.
+        Returns
+        -------
+        np.ndarray
+            The transition matrix `Cq`, which facilitates the transition between local and global data representations.
         """
         nb_sensors_per_node = self.network_graph.nb_sensors_per_node
         nb_filters = self.problem.nb_filters
@@ -534,20 +626,29 @@ class DASF:
         """
         Compresses the data using the transition matrix `Cq`.
 
-        Args:
-            problem_inputs (ProblemInputs): An object containing the original problem data, including:
-                - `fused_signals`: List of signal to be fused.
-                - `fused_constants`: List of constants to be fused (if present).
-                - `fused_quadratics`: List of quadratic matrices to be fused (if present).
-                - `global_parameters`: Additional global parameters (if present).
-            Cq (np.ndarray): The transition matrix that maps the local data to the global one.
+        Parameters
+        ----------
+        problem_inputs : ProblemInputs
+            An object containing the original problem data, including:
+            - fused_signals : list
+                List of signals to be fused.
+            - fused_constants : list, optional
+                List of constants to be fused (if present).
+            - fused_quadratics : list, optional
+                List of quadratic matrices to be fused (if present).
+            - global_parameters : object, optional
+                Additional global parameters (if present).
+        Cq : np.ndarray
+            The transition matrix that maps the local data to the global one.
 
-        Returns:
-            ProblemInputs: A new instance of `ProblemInputs` containing the compressed versions of:
-                - `fused_signals`
-                - `fused_constants`
-                - `fused_quadratics`
-                - `global_parameters` (unchanged)
+        Returns
+        -------
+        ProblemInputs
+            A new instance of `ProblemInputs` containing the compressed versions of:
+            - fused_signals
+            - fused_constants
+            - fused_quadratics
+            - global_parameters (unchanged)
         """
         fused_data = problem_inputs.fused_signals
         fused_constants = problem_inputs.fused_constants
@@ -588,14 +689,19 @@ class DASF:
         """
         Extracts the block of `X` corresponding to the specified updating node.
 
-        Args:
-            X (np.ndarray): A matrix of shape (nb_sensors, nb_filters) representing the global variable,
-                            structured as [X1; ...; Xq; ...; XK].
-            updating_node (int): The node for which the corresponding block of `X` is extracted.
+        Parameters
+        ----------
+        X : np.ndarray
+            A matrix of shape (nb_sensors, nb_filters) representing the global variable,
+            structured as [X1; ...; Xq; ...; XK].
+        updating_node : int
+            The node for which the corresponding block of `X` is extracted.
 
-        Returns:
-            np.ndarray: A matrix `Xq` of shape (nb_sensors_per_node[updating_node], nb_filters), containing the block of `X`
-                        corresponding to `updating_node`.
+        Returns
+        -------
+        np.ndarray
+            A matrix `Xq` of shape (nb_sensors_per_node[updating_node], nb_filters), containing the block of `X`
+            corresponding to `updating_node`.
         """
         Mq = self.network_graph.nb_sensors_per_node[updating_node]
         row_blk = np.cumsum(self.network_graph.nb_sensors_per_node)
@@ -611,10 +717,14 @@ class DASF:
         """
         Initializes the dynamic plot.
 
-        Args:
-            X (np.ndarray): Current estimate matrix.
-            X_star (np.ndarray): Optimal solution matrix.
-            Y (np.ndarray): Signal fused using X.
+        Parameters
+        ----------
+        X : np.ndarray
+            Current estimate matrix.
+        X_star : np.ndarray
+            Optimal solution matrix.
+        Y : np.ndarray
+            Signal fused using X.
         """
         plt.ion()
         if self.dynamic_plot_params.show_x & self.dynamic_plot_params.show_xTY:
@@ -715,14 +825,22 @@ class DASF:
         """
         Updates the dynamic plot.
 
-        Args:
-            X (np.ndarray): Current estimate matrix.
-            X_star (np.ndarray): Optimal solution matrix.
-            Y (np.ndarray): Signal fused using X.
-            line_x: Line object for X.
-            line_xs: Line object for X_star.
-            line_xTY: Line object for X.T @ Y.
-            line_xsTY: Line object for X_star.T @ Y.
+        Parameters
+        ----------
+        X : np.ndarray
+            Current estimate matrix.
+        X_star : np.ndarray
+            Optimal solution matrix.
+        Y : np.ndarray
+            Signal fused using X.
+        line_x : object
+            Line object for X.
+        line_xs : object
+            Line object for X_star.
+        line_xTY : object
+            Line object for X.T @ Y.
+        line_xsTY : object
+            Line object for X_star.T @ Y.
         """
 
         if self.dynamic_plot_params.show_x:
@@ -886,6 +1004,35 @@ class DASF:
 
 
 class DASFMultiVar(DASF):
+    """
+    Class inheriting from the DASF class and implementing the DASF algorithm for a setting with multiple variables.
+
+    Attributes
+    ----------
+
+    problem : OptimizationProblem
+        The optimization problem to be solved.
+    data_retriever : DataRetriever
+        The data retriever object retrieving data for the optimization problem.
+    network_graph : NetworkGraph
+        The network graph representing the sensor network.
+    dasf_convergence_params : ConvergenceParameters
+        The convergence parameters for the DASF algorithm.
+    updating_path : np.ndarray | None
+        The path followed to select updating nodes.
+    initial_estimate : list[np.ndarray] | None
+        The list of initial estimates for the optimization problem, one for each variable.
+    rng : np.random.Generator | None
+        Random number generator for reproducibility.
+    solver_convergence_parameters : ConvergenceParameters | None
+        The convergence parameters of the provided optimization problem. Adds an additional degree of freedom to select different parameters than the ones used by the centralized solver.
+    dynamic_plot : bool
+        Flag to enable dynamic plotting during the algorithm run.
+    dynamic_plot_params : DynamicPlotParameters | None
+        Parameters for dynamic plotting.
+
+    """
+
     def __init__(
         self,
         problem: OptimizationProblem,
@@ -958,6 +1105,7 @@ class DASFMultiVar(DASF):
             ]
 
     def run(self) -> None:
+        """Main method to run the DASF algorithm in a setting with multiple variables."""
         self.X_over_iterations.clear()
         self.f_over_iterations.clear()
         self.X_star_over_iterations.clear()
@@ -1137,6 +1285,7 @@ class DASFMultiVar(DASF):
         return None
 
     def _validate_problem(self):
+        """Validates the problem and its inputs."""
         problem_inputs = self.data_retriever.get_data_window(window_id=0)
         if self.nb_variables != len(problem_inputs):
             raise ValueError(
