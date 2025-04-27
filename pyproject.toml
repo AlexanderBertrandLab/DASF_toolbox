@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "dasftoolbox"
-version="0.1.0"
+dynamic = ["version"]
 description = "A toolbox for the distributed adaptive signal fusion (DASF) framework"
 authors = [{ name = "Cem Musluoglu", email = "musluoglucem@gmail.com" }]
 readme = "README.md"
