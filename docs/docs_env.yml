@@ -10,4 +10,5 @@ dependencies:
   - matplotlib
   - pip
   - pip:
+      - e .
       - sphinx-autodoc-typehints
