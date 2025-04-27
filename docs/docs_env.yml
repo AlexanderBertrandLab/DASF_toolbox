@@ -1,0 +1,13 @@
+name: dasf-docs
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - python=3.11
+  - sphinx
+  - sphinx_rtd_theme
+  - numpy
+  - matplotlib
+  - pip
+  - pip:
+      - sphinx-autodoc-typehints

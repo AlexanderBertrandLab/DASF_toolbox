@@ -9,7 +9,7 @@ build:
     python: "mambaforge-22.9"  # Or whichever Python version you need
 
 conda:
-  environment: environment.yml
+  environment: docs/docs_env.yml
 
 # Build documentation in the "docs/" directory with Sphinx
 sphinx:
