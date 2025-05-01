@@ -1,4 +1,4 @@
-DASF
+The DASF Algorithm
 ==========================
 
 .. automodule:: dasftoolbox.dasf

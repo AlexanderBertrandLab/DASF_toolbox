@@ -7,7 +7,7 @@ Documentation
     :show-inheritance:
 
 .. toctree::
-    :maxdepth: 2
+    :maxdepth: 1
     
 
     dasf

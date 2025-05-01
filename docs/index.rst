@@ -8,9 +8,11 @@ DASF toolbox documentation
 
 
 .. toctree::
+   :maxdepth: 2
 
    Documentation/index
    Examples/index
+   Tutorials/index
 
 Indices and tables
 ==================

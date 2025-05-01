@@ -1,4 +1,4 @@
-Documentation
+Tutorials
 =============
 
 .. automodule:: dasftoolbox
@@ -9,9 +9,6 @@ Documentation
 .. toctree::
     :maxdepth: 1
     
-
-    dasf
-    optimization_problems
-    data_retrievers
-    problem_settings
-    utils
+    tutorial_setting_up.ipynb
+    tutorial_from_scratch.ipynb
+    tutorial_resolve_ambiguity.ipynb

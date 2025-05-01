@@ -8,6 +8,12 @@ extensions = [
     "sphinx.ext.autosummary",
     "sphinx.ext.mathjax",
     "sphinx.ext.inheritance_diagram",
+    "myst_nb",
+]
+
+myst_enable_extensions = [
+    "amsmath",
+    "dollarmath",
 ]
 
 extensions.append("sphinx.ext.autodoc")
