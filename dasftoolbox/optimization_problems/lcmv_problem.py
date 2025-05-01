@@ -16,7 +16,26 @@ class LCMVProblem(OptimizationProblem):
         convergence_parameters=None,
         initial_estimate=None,
     ) -> np.ndarray:
-        """Solve the LCMV problem min E[||X.T @ y(t)||**2] s.t. X.T @ B = H."""
+        """
+        Solve the LCMV problem
+        :math:`\min_X\; \mathbb{E}[\| X^T \mathbf{y}(t)\|^2]` subject to :math:`X^TB=H`.
+
+        Parameters
+        ----------
+        problem_inputs : ProblemInputs
+            The problem inputs containing the observed signal :math:`\mathbf{y}` and the matrices :math:`B` and  :math:`H`.
+        save_solution : bool, optional
+            Whether to save the solution or not, by default False
+        convergence_parameters : None, optional
+            Convergence parameters, by default None
+        initial_estimate : None, optional
+            Initial estimate, by default None
+
+        Returns
+        -------
+        np.ndarray
+            The solution to the LCMV problem.
+        """
         Y = problem_inputs.fused_signals[0]
         B = problem_inputs.fused_constants[0]
         H = problem_inputs.global_parameters[0]
@@ -33,7 +52,21 @@ class LCMVProblem(OptimizationProblem):
         return X_star
 
     def evaluate_objective(self, X: np.ndarray, problem_inputs: ProblemInputs) -> float:
-        """Evaluate the LCMV objective E[||X.T @ y(t)||**2]."""
+        """
+        Evaluate the LCMV objective :math:`\mathbb{E}[|\X^T \mathbf{y}(t)\|^2]`.
+
+        Parameters
+        ----------
+        X : np.ndarray
+            The point to evaluate.
+        problem_inputs : ProblemInputs
+            The problem inputs containing the observed signal :math:`\mathbf{y}` and the matrices :math:`B` and  :math:`H`.
+        
+        Returns
+        -------
+        float
+            The value of the objective function at the point X.
+        """
         Y = problem_inputs.fused_signals[0]
 
         Ryy = autocorrelation_matrix(Y)

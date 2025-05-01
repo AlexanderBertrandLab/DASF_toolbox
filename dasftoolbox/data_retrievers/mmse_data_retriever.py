@@ -9,6 +9,9 @@ from dasftoolbox.data_retrievers.data_retriever import (
 
 
 class MMSEDataRetriever(DataRetriever):
+    """
+    MMSE data retriever class.
+    """
     def __init__(
         self,
         data_window_params: DataWindowParameters,

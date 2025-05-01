@@ -10,6 +10,7 @@ DASF toolbox documentation
 .. toctree::
 
    Documentation/index
+   Examples/index
 
 Indices and tables
 ==================
