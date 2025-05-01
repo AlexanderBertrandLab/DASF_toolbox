@@ -1,6 +1,6 @@
 name: DASF_env
 channels:
-  - condna-forge
+  - conda-forge
   - defaults
 dependencies:
   - archspec=0.2.1
