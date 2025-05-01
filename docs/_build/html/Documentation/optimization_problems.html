@@ -48,11 +48,6 @@
 <li class="toctree-l2"><a class="reference internal" href="dasf.html">DASF</a></li>
 <li class="toctree-l2 current"><a class="current reference internal" href="#">Optimization Problems</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#dasftoolbox.optimization_problems.optimization_problem.OptimizationProblem"><code class="docutils literal notranslate"><span class="pre">OptimizationProblem</span></code></a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#dasftoolbox.optimization_problems.optimization_problem.OptimizationProblem.nb_filters"><code class="docutils literal notranslate"><span class="pre">OptimizationProblem.nb_filters</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#dasftoolbox.optimization_problems.optimization_problem.OptimizationProblem.convergence_parameters"><code class="docutils literal notranslate"><span class="pre">OptimizationProblem.convergence_parameters</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#dasftoolbox.optimization_problems.optimization_problem.OptimizationProblem.initial_estimate"><code class="docutils literal notranslate"><span class="pre">OptimizationProblem.initial_estimate</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#dasftoolbox.optimization_problems.optimization_problem.OptimizationProblem.rng"><code class="docutils literal notranslate"><span class="pre">OptimizationProblem.rng</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#dasftoolbox.optimization_problems.optimization_problem.OptimizationProblem.nb_variables"><code class="docutils literal notranslate"><span class="pre">OptimizationProblem.nb_variables</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#dasftoolbox.optimization_problems.optimization_problem.OptimizationProblem.solve"><code class="docutils literal notranslate"><span class="pre">OptimizationProblem.solve()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#dasftoolbox.optimization_problems.optimization_problem.OptimizationProblem.evaluate_objective"><code class="docutils literal notranslate"><span class="pre">OptimizationProblem.evaluate_objective()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#dasftoolbox.optimization_problems.optimization_problem.OptimizationProblem.resolve_ambiguity"><code class="docutils literal notranslate"><span class="pre">OptimizationProblem.resolve_ambiguity()</span></code></a></li>
@@ -100,61 +95,17 @@
 <em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">dasftoolbox.optimization_problems.optimization_problem.</span></span><span class="sig-name descname"><span class="pre">OptimizationProblem</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">nb_filters</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">convergence_parameters</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="problem_settings.html#dasftoolbox.problem_settings.ConvergenceParameters" title="dasftoolbox.problem_settings.ConvergenceParameters"><span class="pre">ConvergenceParameters</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">initial_estimate</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">ndarray</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rng</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Generator</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nb_variables</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/dasftoolbox/optimization_problems/optimization_problem.html#OptimizationProblem"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dasftoolbox.optimization_problems.optimization_problem.OptimizationProblem" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">ABC</span></code></p>
 <p>Base class for optimization problems in the DASF format.</p>
-<dl class="py attribute">
-<dt class="sig sig-object py" id="dasftoolbox.optimization_problems.optimization_problem.OptimizationProblem.nb_filters">
-<span class="sig-name descname"><span class="pre">nb_filters</span></span><a class="headerlink" href="#dasftoolbox.optimization_problems.optimization_problem.OptimizationProblem.nb_filters" title="Link to this definition"></a></dt>
-<dd><p>Number of filters in the problem.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>int</p>
+<dt class="field-odd">Variables<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>nb_filters</strong> (<em>int</em>) – Number of filters in the problem.</p></li>
+<li><p><strong>convergence_parameters</strong> (<a class="reference internal" href="problem_settings.html#dasftoolbox.problem_settings.ConvergenceParameters" title="dasftoolbox.problem_settings.ConvergenceParameters"><em>ConvergenceParameters</em></a><em> | </em><em>None</em><em>, </em><em>optional</em>) – Convergence parameters for the optimization problem. Defaults to None.</p></li>
+<li><p><strong>initial_estimate</strong> (<em>np.ndarray</em><em> | </em><em>list</em><em>[</em><em>np.ndarray</em><em>] </em><em>| </em><em>None</em><em>, </em><em>optional</em>) – Initial estimate for the optimization problem. Defaults to None.</p></li>
+<li><p><strong>rng</strong> (<em>np.random.Generator</em><em> | </em><em>None</em><em>, </em><em>optional</em>) – Random number generator. Defaults to None.</p></li>
+<li><p><strong>nb_variables</strong> (<em>int</em><em>, </em><em>optional</em>) – Number of variables in the problem. Defaults to 1.</p></li>
+</ul>
 </dd>
 </dl>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="dasftoolbox.optimization_problems.optimization_problem.OptimizationProblem.convergence_parameters">
-<span class="sig-name descname"><span class="pre">convergence_parameters</span></span><a class="headerlink" href="#dasftoolbox.optimization_problems.optimization_problem.OptimizationProblem.convergence_parameters" title="Link to this definition"></a></dt>
-<dd><p>Convergence parameters for the optimization problem. Defaults to None.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference internal" href="problem_settings.html#dasftoolbox.problem_settings.ConvergenceParameters" title="dasftoolbox.problem_settings.ConvergenceParameters">ConvergenceParameters</a> | None, optional</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="dasftoolbox.optimization_problems.optimization_problem.OptimizationProblem.initial_estimate">
-<span class="sig-name descname"><span class="pre">initial_estimate</span></span><a class="headerlink" href="#dasftoolbox.optimization_problems.optimization_problem.OptimizationProblem.initial_estimate" title="Link to this definition"></a></dt>
-<dd><p>Initial estimate for the optimization problem. Defaults to None.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>np.ndarray | list[np.ndarray] | None, optional</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="dasftoolbox.optimization_problems.optimization_problem.OptimizationProblem.rng">
-<span class="sig-name descname"><span class="pre">rng</span></span><a class="headerlink" href="#dasftoolbox.optimization_problems.optimization_problem.OptimizationProblem.rng" title="Link to this definition"></a></dt>
-<dd><p>Random number generator. Defaults to None.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>np.random.Generator | None, optional</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="dasftoolbox.optimization_problems.optimization_problem.OptimizationProblem.nb_variables">
-<span class="sig-name descname"><span class="pre">nb_variables</span></span><a class="headerlink" href="#dasftoolbox.optimization_problems.optimization_problem.OptimizationProblem.nb_variables" title="Link to this definition"></a></dt>
-<dd><p>Number of variables in the problem. Defaults to 1.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>int, optional</p>
-</dd>
-</dl>
-</dd></dl>
-
 <dl class="py method">
 <dt class="sig sig-object py" id="dasftoolbox.optimization_problems.optimization_problem.OptimizationProblem.solve">
 <em class="property"><span class="k"><span class="pre">abstractmethod</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">solve</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">problem_inputs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="problem_settings.html#dasftoolbox.problem_settings.ProblemInputs" title="dasftoolbox.problem_settings.ProblemInputs"><span class="pre">ProblemInputs</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="problem_settings.html#dasftoolbox.problem_settings.ProblemInputs" title="dasftoolbox.problem_settings.ProblemInputs"><span class="pre">ProblemInputs</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">save_solution</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">convergence_parameters</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="problem_settings.html#dasftoolbox.problem_settings.ConvergenceParameters" title="dasftoolbox.problem_settings.ConvergenceParameters"><span class="pre">ConvergenceParameters</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">initial_estimate</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">ndarray</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">ndarray</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">ndarray</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/dasftoolbox/optimization_problems/optimization_problem.html#OptimizationProblem.solve"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dasftoolbox.optimization_problems.optimization_problem.OptimizationProblem.solve" title="Link to this definition"></a></dt>

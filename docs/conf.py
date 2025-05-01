@@ -19,6 +19,7 @@ autodoc_default_options = {
 }
 extensions.append("sphinx.ext.napoleon")
 napoleon_numpy_docstring = True
+napoleon_use_ivar = True
 
 # Configuration file for the Sphinx documentation builder.
 #
