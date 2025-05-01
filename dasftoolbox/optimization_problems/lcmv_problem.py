@@ -6,6 +6,9 @@ from dasftoolbox.utils import autocorrelation_matrix
 
 
 class LCMVProblem(OptimizationProblem):
+    """
+    LCMV problem class.
+    """
     def __init__(self, nb_filters: int) -> None:
         super().__init__(nb_filters=nb_filters)
 
@@ -53,7 +56,7 @@ class LCMVProblem(OptimizationProblem):
 
     def evaluate_objective(self, X: np.ndarray, problem_inputs: ProblemInputs) -> float:
         """
-        Evaluate the LCMV objective :math:`\mathbb{E}[|\X^T \mathbf{y}(t)\|^2]`.
+        Evaluate the LCMV objective :math:`\mathbb{E}[\|X^T \mathbf{y}(t)\|^2]`.
 
         Parameters
         ----------

@@ -8,6 +8,15 @@ import scipy
 
 
 class GEVDProblem(OptimizationProblem):
+    """
+    GEVD problem class.
+
+    Attributes
+    ----------
+    nb_filters : int
+        Number of filters.
+    """
+
     def __init__(
         self,
         nb_filters: int,
@@ -21,7 +30,25 @@ class GEVDProblem(OptimizationProblem):
         convergence_parameters=None,
         initial_estimate=None,
     ) -> np.ndarray:
-        """Solve the GEVD problem max E[||X.T @ y(t)||**2] s.t. E[X.T @ v(t) @ v(t).T @ X] = I."""
+        """
+        Solve the GEVD problem :math:`\max_X \mathbb{E}[\|X^T \mathbf{y}(t)\|^2]` subject to :math:`\mathbb{E}[X^T \mathbf{v}(t) \mathbf{v}^T(t) X] = I`.
+
+        Parameters
+        ----------
+        problem_inputs : ProblemInputs
+            The problem inputs containing the observed signal :math:`\mathbf{y}` and the matrices :math:`B` and  :math:`H`.
+        save_solution : bool, optional
+            Whether to save the solution or not, by default False
+        convergence_parameters : None, optional
+            Convergence parameters, by default None
+        initial_estimate : None, optional
+            Initial estimate, by default None
+
+        Returns
+        -------
+        np.ndarray
+            The solution to the GEVD problem.
+        """
         Y = problem_inputs.fused_signals[0]
         V = problem_inputs.fused_signals[1]
 
@@ -39,7 +66,9 @@ class GEVDProblem(OptimizationProblem):
         return X_star
 
     def evaluate_objective(self, X: np.ndarray, problem_inputs: ProblemInputs) -> float:
-        """Evaluate the GEVD objective E[||X.T @ y(t)||**2]."""
+        """
+        Evaluate the GEVD objective :math:`\mathbb{E}[\|X^T \mathbf{y}(t)\|^2]`.
+        """
         Y = problem_inputs.fused_signals[0]
 
         Ryy = autocorrelation_matrix(Y)
@@ -54,7 +83,23 @@ class GEVDProblem(OptimizationProblem):
         X_current: np.ndarray | list[np.ndarray],
         updating_node: int | None = None,
     ) -> np.ndarray | list[np.ndarray]:
-        """Resolve the sign ambiguity for the GEVD problem."""
+        """
+        Resolve the sign ambiguity for the GEVD problem by selecting the sign for each column of the current point so as to minimize the distance to the reference point.
+
+        Parameters
+        ----------
+        X_reference : np.ndarray | list[np.ndarray]
+            The reference point.
+        X_current : np.ndarray | list[np.ndarray]
+            The current point.
+        updating_node : int | None
+            The index of the updating node (for more flexibility), by default None.
+
+        Returns
+        -------
+        np.ndarray | list[np.ndarray]
+            A fixed solution of the GEVD problem.
+        """
 
         for col in range(self.nb_filters):
             if np.linalg.norm(X_reference[:, col] - X_current[:, col]) > np.linalg.norm(

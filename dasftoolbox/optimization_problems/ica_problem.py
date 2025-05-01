@@ -14,6 +14,21 @@ logger = logging.getLogger(__name__)
 
 
 class ICAProblem(OptimizationProblem):
+    """
+    ICA problem class.
+
+    Attributes
+    ----------
+    nb_filters : int
+        Number of filters.
+    convergence_parameters : ConvergenceParameters
+        Convergence parameters.
+    negentropy : Literal["logcosh", "exponential", "kurtosis"]
+        Negentropy function to use, by default "logcosh".
+    alpha: int
+        Parameter for the negentropy function, by default 1.
+    """
+
     def __init__(
         self,
         nb_filters: int,
@@ -35,65 +50,209 @@ class ICAProblem(OptimizationProblem):
             raise ValueError
 
     class NegentropyFunction:
-        """Base class for negentropy functions."""
+        """
+        Base class for negentropy functions.
+        """
 
-        def evaluate(self, y):
-            """Evaluate the negentropy function."""
+        def evaluate(self, y: np.ndarray) -> np.ndarray:
+            """
+            Evaluate the negentropy function.
+            """
             raise NotImplementedError
 
-        def gradient(self, y):
-            """Calculate the gradient."""
+        def gradient(self, y: np.ndarray) -> np.ndarray:
+            """
+            Calculate the gradient.
+            """
             raise NotImplementedError
 
-        def hessian(self, y):
-            """Calculate the Hessian."""
+        def hessian(self, y: np.ndarray) -> np.ndarray:
+            """
+            Calculate the Hessian.
+            """
             raise NotImplementedError
 
     class LogCoshNegentropy(NegentropyFunction):
-        """Log cosh negentropy."""
+        """
+        Log cosh negentropy: :math:`\\frac{1}{\\alpha} \\log(\\cosh(\\alpha y))`.
+
+        Attributes
+        ----------
+        alpha : float
+            Parameter for the negentropy function, by default 1.
+        """
 
         def __init__(self, alpha=1.0):
             self.alpha = alpha
 
-        def evaluate(self, y):
+        def evaluate(self, y: np.ndarray) -> np.ndarray:
+            """
+            Evaluate the log cosh negentropy function per channel.
+
+            Parameters
+            ----------
+            y : np.ndarray
+                The input signal.
+
+            Returns
+            -------
+            np.ndarray
+                The negentropy value per channel, averaged over all samples.
+            """
             return (np.log(np.cosh(self.alpha * y))).mean(axis=1) / self.alpha
 
-        def gradient(self, y):
+        def gradient(self, y: np.ndarray) -> np.ndarray:
+            """
+            Calculate the first derivative of the log cosh negentropy per channel: :math:`\\tanh(\\alpha y)`.
+
+            Parameters
+            ----------
+            y : np.ndarray
+                The input signal.
+
+            Returns
+            -------
+            np.ndarray
+                The vector of first derivatives for each signal sample.
+            """
             return np.tanh(self.alpha * y)
 
-        def hessian(self, y):
+        def hessian(self, y: np.ndarray) -> np.ndarray:
+            """
+            Calculate the second derivative of the log cosh negentropy per channel: :math:`\\alpha (1-\\tanh(\\alpha y)^2)`.
+
+            Parameters
+            ----------
+            y : np.ndarray
+                The input signal.
+
+            Returns
+            -------
+            np.ndarray
+                The vector of second derivatives for each signal sample.
+            """
             return self.alpha * (1 - np.tanh(self.alpha * y) ** 2)
 
     class ExponentialNegentropy(NegentropyFunction):
-        """Exponential negentropy."""
+        """Exponential negentropy: :math:`-\\exp(-\\alpha y^2)`.
+
+        Attributes
+        ----------
+        alpha : float
+            Parameter for the negentropy function, by default 1.
+        """
 
         def __init__(self, alpha=1.0):
             self.alpha = alpha
 
-        def evaluate(self, y):
+        def evaluate(self, y: np.ndarray) -> np.ndarray:
+            """
+            Evaluate the exponential negentropy function per channel.
+
+            Parameters
+            ----------
+            y : np.ndarray
+                The input signal.
+
+            Returns
+            -------
+            np.ndarray
+                The negentropy value per channel, averaged over all samples.
+            """
             return -(np.exp(-self.alpha * y**2)).mean(axis=1)
 
-        def gradient(self, y):
+        def gradient(self, y: np.ndarray) -> np.ndarray:
+            """
+            Calculate the first derivative of the exponential negentropy per channel: :math:`2\\alpha y \\exp(-\\alpha y^2)`.
+
+            Parameters
+            ----------
+            y : np.ndarray
+                The input signal.
+
+            Returns
+            -------
+            np.ndarray
+                The vector of first derivatives for each signal sample.
+            """
             return 2 * self.alpha * y * np.exp(-self.alpha * y**2)
 
-        def hessian(self, y):
+        def hessian(self, y: np.ndarray) -> np.ndarray:
+            """
+            Calculate the second derivative of the exponential negentropy per channel: :math:`\\alpha (1-\\tanh(\\alpha y)^2)`.
+
+            Parameters
+            ----------
+            y : np.ndarray
+                The input signal.
+
+            Returns
+            -------
+            np.ndarray
+                The vector of second derivatives for each signal sample.
+            """
             return (2 * self.alpha - 4 * self.alpha**2 * y**2) * np.exp(
                 -self.alpha * y**2
             )
 
     class KurtosisNegentropy(NegentropyFunction):
-        """Kurtosis negentropy."""
+        """Kurtosis negentropy :math:`-\\mathbb{E}[y^4]-\\alpha \\mathbb{E}[y^2]^2`.
+
+        Attributes
+        ----------
+        alpha : float
+            Parameter for the negentropy function, by default 1.
+        """
 
         def __init__(self, alpha=1.0):
             self.alpha = alpha
 
-        def evaluate(self, y):
+        def evaluate(self, y: np.ndarray) -> np.ndarray:
+            """
+            Evaluate the kurtosis negentropy function per channel.
+
+            Parameters
+            ----------
+            y : np.ndarray
+                The input signal.
+
+            Returns
+            -------
+            np.ndarray
+                The negentropy value per channel, averaged over all samples.
+            """
             return (y**4).mean(axis=1) - self.alpha * ((y**2).mean(axis=1) ** 2)
 
-        def gradient(self, y):
+        def gradient(self, y: np.ndarray) -> np.ndarray:
+            """
+            Calculate the first derivative of the kurtosis negentropy per channel: :math:`4 y^3 -2\\alpha y`.
+
+            Parameters
+            ----------
+            y : np.ndarray
+                The input signal.
+
+            Returns
+            -------
+            np.ndarray
+                The vector of first derivatives for each signal sample.
+            """
             return 4 * y**3 - 2 * self.alpha * y
 
-        def hessian(self, y):
+        def hessian(self, y: np.ndarray) -> np.ndarray:
+            """
+            Calculate the second derivative of the kurtosis negentropy per channel: :math:`12y^2-2\\alpha`.
+
+            Parameters
+            ----------
+            y : np.ndarray
+                The input signal.
+
+            Returns
+            -------
+            np.ndarray
+                The vector of second derivatives for each signal sample.
+            """
             return 12 * y**2 - 2 * self.alpha
 
     def solve(
@@ -103,7 +262,25 @@ class ICAProblem(OptimizationProblem):
         convergence_parameters=None,
         initial_estimate=None,
     ) -> np.ndarray:
-        """Solve the ICA problem max sum_m E[F(X_m.T @ y(t))] s.t. E[X.T @ y(t) @ y(t).T @ X] = I."""
+        """
+        Solve the ICA problem :math:`\max_X \sum_m \mathbb{E}[F(X_m^T \mathbf{y}(t))]` subject to :math:`\mathbb{E}[X^T \mathbf{y}(t)\mathbf{y}^T(t) X] = I`, where :math:`X_m` is the :math:`m`-th column of :math:`X` and :math:`F` is the negentropy function.
+
+        Parameters
+        ----------
+        problem_inputs : ProblemInputs
+            The problem inputs containing the observed signal :math:`\mathbf{y}` and the matrices :math:`B` and  :math:`H`.
+        save_solution : bool, optional
+            Whether to save the solution or not, by default False
+        convergence_parameters : None, optional
+            Convergence parameters, by default None
+        initial_estimate : None, optional
+            Initial estimate, by default None
+
+        Returns
+        -------
+        np.ndarray
+            The solution to the ICA problem.
+        """
         Y = problem_inputs.fused_signals[0]
 
         if initial_estimate is None:
@@ -170,7 +347,9 @@ class ICAProblem(OptimizationProblem):
         return X_star
 
     def evaluate_objective(self, X: np.ndarray, problem_inputs: ProblemInputs) -> float:
-        """Evaluate the ICA objective sum_m E[F(X_m.T @ y(t))]."""
+        """
+        Evaluate the ICA objective :math:`\\sum_m \\mathbb{E}[F(X_m^T \\mathbf{y}(t))]`, where :math:`X_m` is the :math:`m`-th column of :math:`X` and :math:`F` is the negentropy function.
+        """
         Y = problem_inputs.fused_signals[0]
         f = self.negentropy.evaluate(X.T @ Y).sum()
         return f
@@ -181,7 +360,23 @@ class ICAProblem(OptimizationProblem):
         X_current: np.ndarray | list[np.ndarray],
         updating_node: int | None = None,
     ) -> np.ndarray | list[np.ndarray]:
-        """Resolve the sign ambiguity for the ICA problem."""
+        """
+        Resolve the sign ambiguity for the ICA problem by selecting the sign for each column of the current point so as to minimize the distance to the reference point.
+
+        Parameters
+        ----------
+        X_reference : np.ndarray | list[np.ndarray]
+            The reference point.
+        X_current : np.ndarray | list[np.ndarray]
+            The current point.
+        updating_node : int | None
+            The index of the updating node (for more flexibility), by default None.
+
+        Returns
+        -------
+        np.ndarray | list[np.ndarray]
+            A fixed solution of the ICA problem.
+        """
 
         for col in range(self.nb_filters):
             if np.linalg.norm(X_reference[:, col] - X_current[:, col]) > np.linalg.norm(
