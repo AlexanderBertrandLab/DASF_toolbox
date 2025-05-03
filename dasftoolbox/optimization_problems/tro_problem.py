@@ -12,6 +12,17 @@ logger = logging.getLogger(__name__)
 
 
 class TROProblem(OptimizationProblem):
+    """
+    TRO problem class.
+
+    Attributes
+    ----------
+    nb_filters : int
+        Number of filters.
+    convergence_parameters : ConvergenceParameters
+        Convergence parameters of the solver.
+    """
+
     def __init__(
         self, nb_filters: int, convergence_parameters: ConvergenceParameters
     ) -> None:
@@ -23,10 +34,28 @@ class TROProblem(OptimizationProblem):
         self,
         problem_inputs: ProblemInputs,
         save_solution: bool = False,
-        convergence_parameters=None,
-        initial_estimate=None,
+        convergence_parameters: ConvergenceParameters | None = None,
+        initial_estimate: np.ndarray | None = None,
     ) -> np.ndarray:
-        """Solve the TRO problem max E[||X.T @ y(t)||**2] / E[||X.T @ v(t)||**2] s.t. X.T @ Gamma @ X = I."""
+        """
+        Solve the TRO problem :math:`\max_X\; \\frac{\mathbb{E}[\|X^T \mathbf{y}(t)\|^2]}{\mathbb{E}[\|X^T \mathbf{v}(t)\|^2]}` subject to :math:`X^T \Gamma X = I`.
+
+        Parameters
+        ----------
+        problem_inputs : ProblemInputs
+            The problem inputs containing the observed signals :math:`\mathbf{y}`, :math:`\mathbf{v}` and the :math:`\Gamma` matrix in the field `fused_quadratics`.
+        save_solution : bool, optional
+            Whether to save the solution or not, by default False
+        convergence_parameters : ConvergenceParameters | None, optional
+            Convergence parameters, by default None
+        initial_estimate : np.ndarray | None, optional
+            Initial estimate, by default None
+
+        Returns
+        -------
+        np.ndarray
+            The solution to the TRO problem.
+        """
         Y = problem_inputs.fused_signals[0]
         V = problem_inputs.fused_signals[1]
         Gamma = problem_inputs.fused_quadratics[0]
@@ -93,7 +122,21 @@ class TROProblem(OptimizationProblem):
         return X_star
 
     def evaluate_objective(self, X: np.ndarray, problem_inputs: ProblemInputs) -> float:
-        """Evaluate the TRO objective E[||X.T @ y(t)||**2] / E[||X.T @ v(t)||**2]."""
+        """
+        Evaluate the TRO objective :math:`\\frac{\mathbb{E}[\|X^T \mathbf{y}(t)\|^2]}{\mathbb{E}[\|X^T \mathbf{v}(t)\|^2]}`.
+
+        Parameters
+        ----------
+        X : np.ndarray
+            The point to evaluate.
+        problem_inputs : ProblemInputs
+            The problem inputs containing the observed signals :math:`\mathbf{y}`, :math:`\mathbf{v}` and the :math:`\Gamma` matrix in the field `fused_quadratics`.
+
+        Returns
+        -------
+        float
+            The value of the objective function at point `X`.
+        """
 
         Y = problem_inputs.fused_signals[0]
         V = problem_inputs.fused_signals[1]
@@ -111,7 +154,23 @@ class TROProblem(OptimizationProblem):
         X_current: np.ndarray | list[np.ndarray],
         updating_node: int | None = None,
     ) -> np.ndarray | list[np.ndarray]:
-        """Resolve the sign ambiguity for the TRO problem."""
+        """
+        Resolve the sign ambiguity for the TRO problem by selecting the sign for each column of the current point so as to minimize the distance to the reference point.
+
+        Parameters
+        ----------
+        X_reference : np.ndarray | list[np.ndarray]
+            The reference point.
+        X_current : np.ndarray | list[np.ndarray]
+            The current point.
+        updating_node : int | None
+            The index of the updating node (for more flexibility), by default None.
+
+        Returns
+        -------
+        np.ndarray | list[np.ndarray]
+            A fixed solution of the TRO problem.
+        """
 
         for col in range(self.nb_filters):
             if np.linalg.norm(X_reference[:, col] - X_current[:, col]) > np.linalg.norm(

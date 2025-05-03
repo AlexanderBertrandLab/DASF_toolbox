@@ -22,7 +22,7 @@ class ICAProblem(OptimizationProblem):
     nb_filters : int
         Number of filters.
     convergence_parameters : ConvergenceParameters
-        Convergence parameters.
+        Convergence parameters of the solver.
     negentropy : Literal["logcosh", "exponential", "kurtosis"]
         Negentropy function to use, by default "logcosh".
     alpha: int
@@ -259,8 +259,8 @@ class ICAProblem(OptimizationProblem):
         self,
         problem_inputs: ProblemInputs,
         save_solution: bool = False,
-        convergence_parameters=None,
-        initial_estimate=None,
+        convergence_parameters: ConvergenceParameters | None = None,
+        initial_estimate: np.ndarray | None = None,
     ) -> np.ndarray:
         """
         Solve the ICA problem :math:`\max_X \sum_m \mathbb{E}[F(X_m^T \mathbf{y}(t))]` subject to :math:`\mathbb{E}[X^T \mathbf{y}(t)\mathbf{y}^T(t) X] = I`, where :math:`X_m` is the :math:`m`-th column of :math:`X` and :math:`F` is the negentropy function.
@@ -268,12 +268,12 @@ class ICAProblem(OptimizationProblem):
         Parameters
         ----------
         problem_inputs : ProblemInputs
-            The problem inputs containing the observed signal :math:`\mathbf{y}` and the matrices :math:`B` and  :math:`H`.
+            The problem inputs containing the observed signal :math:`\mathbf{y}`.
         save_solution : bool, optional
             Whether to save the solution or not, by default False
-        convergence_parameters : None, optional
+        convergence_parameters : ConvergenceParameters | None, optional
             Convergence parameters, by default None
-        initial_estimate : None, optional
+        initial_estimate : np.ndarray | None, optional
             Initial estimate, by default None
 
         Returns
@@ -349,6 +349,18 @@ class ICAProblem(OptimizationProblem):
     def evaluate_objective(self, X: np.ndarray, problem_inputs: ProblemInputs) -> float:
         """
         Evaluate the ICA objective :math:`\\sum_m \\mathbb{E}[F(X_m^T \\mathbf{y}(t))]`, where :math:`X_m` is the :math:`m`-th column of :math:`X` and :math:`F` is the negentropy function.
+
+        Parameters
+        ----------
+        X : np.ndarray
+            The point to evaluate.
+        problem_inputs : ProblemInputs
+            The problem inputs containing the observed signal :math:`\mathbf{y}`.
+
+        Returns
+        -------
+        float
+            The value of the objective function at point `X`.
         """
         Y = problem_inputs.fused_signals[0]
         f = self.negentropy.evaluate(X.T @ Y).sum()

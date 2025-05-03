@@ -1,6 +1,7 @@
 import numpy as np
 from dasftoolbox.problem_settings import ProblemInputs
 from dasftoolbox.optimization_problems.optimization_problem import OptimizationProblem
+from dasftoolbox.problem_settings import ConvergenceParameters
 
 from dasftoolbox.utils import autocorrelation_matrix
 
@@ -8,7 +9,13 @@ from dasftoolbox.utils import autocorrelation_matrix
 class LCMVProblem(OptimizationProblem):
     """
     LCMV problem class.
+
+    Attributes
+    ----------
+    nb_filters : int
+        Number of filters.
     """
+
     def __init__(self, nb_filters: int) -> None:
         super().__init__(nb_filters=nb_filters)
 
@@ -16,8 +23,8 @@ class LCMVProblem(OptimizationProblem):
         self,
         problem_inputs: ProblemInputs,
         save_solution: bool = False,
-        convergence_parameters=None,
-        initial_estimate=None,
+        convergence_parameters: ConvergenceParameters | None = None,
+        initial_estimate: np.ndarray | None = None,
     ) -> np.ndarray:
         """
         Solve the LCMV problem
@@ -29,9 +36,9 @@ class LCMVProblem(OptimizationProblem):
             The problem inputs containing the observed signal :math:`\mathbf{y}` and the matrices :math:`B` and  :math:`H`.
         save_solution : bool, optional
             Whether to save the solution or not, by default False
-        convergence_parameters : None, optional
+        convergence_parameters : ConvergenceParameters | None, optional
             Convergence parameters, by default None
-        initial_estimate : None, optional
+        initial_estimate : np.ndarray | None, optional
             Initial estimate, by default None
 
         Returns
@@ -64,11 +71,11 @@ class LCMVProblem(OptimizationProblem):
             The point to evaluate.
         problem_inputs : ProblemInputs
             The problem inputs containing the observed signal :math:`\mathbf{y}` and the matrices :math:`B` and  :math:`H`.
-        
+
         Returns
         -------
         float
-            The value of the objective function at the point X.
+            The value of the objective function at point `X`.
         """
         Y = problem_inputs.fused_signals[0]
 

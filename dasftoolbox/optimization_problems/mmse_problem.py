@@ -1,6 +1,7 @@
 import numpy as np
 from dasftoolbox.problem_settings import ProblemInputs
 from dasftoolbox.optimization_problems.optimization_problem import OptimizationProblem
+from dasftoolbox.problem_settings import ConvergenceParameters
 
 from dasftoolbox.utils import (
     autocorrelation_matrix,
@@ -11,7 +12,13 @@ from dasftoolbox.utils import (
 class MMSEProblem(OptimizationProblem):
     """
     MMSE problem class.
+
+    Attributes
+    ----------
+    nb_filters : int
+        Number of filters.
     """
+
     def __init__(self, nb_filters: int) -> None:
         super().__init__(nb_filters=nb_filters)
 
@@ -19,8 +26,8 @@ class MMSEProblem(OptimizationProblem):
         self,
         problem_inputs: ProblemInputs,
         save_solution: bool = False,
-        convergence_parameters=None,
-        initial_estimate=None,
+        convergence_parameters: ConvergenceParameters | None = None,
+        initial_estimate: np.ndarray | None = None,
     ) -> np.ndarray:
         """
         Solve the MMSE problem
@@ -32,9 +39,9 @@ class MMSEProblem(OptimizationProblem):
             The problem inputs containing the observed signal :math:`\mathbf{y}` and the target signal :math:`\mathbf{d}`.
         save_solution : bool, optional
             Whether to save the solution or not, by default False
-        convergence_parameters : None, optional
+        convergence_parameters : ConvergenceParameters | None, optional
             Convergence parameters, by default None
-        initial_estimate : None, optional
+        initial_estimate : np.ndarray | None, optional
             Initial estimate, by default None
 
         Returns
@@ -56,7 +63,7 @@ class MMSEProblem(OptimizationProblem):
         return X_star
 
     def evaluate_objective(self, X: np.ndarray, problem_inputs: ProblemInputs) -> float:
-        r"""
+        """
         Evaluate the MMSE objective
         :math:`\mathbb{E}[\|\mathbf{d}(t) - X^T \mathbf{y}(t)\|^2]`.
 
@@ -66,11 +73,11 @@ class MMSEProblem(OptimizationProblem):
             The point to evaluate.
         problem_inputs : ProblemInputs
             The problem inputs containing the observed signal :math:`\mathbf{y}` and the target signal :math:`\mathbf{d}`.
-        
+
         Returns
         -------
         float
-            The value of the objective function at the point X.
+            The value of the objective function at point `X`.
         """
         Y = problem_inputs.fused_signals[0]
         D = problem_inputs.global_parameters[0]

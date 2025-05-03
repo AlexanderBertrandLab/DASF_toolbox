@@ -14,6 +14,19 @@ logger = logging.getLogger(__name__)
 
 
 class RTLSProblem(OptimizationProblem):
+    """
+    RTLS problem class.
+
+    Attributes
+    ----------
+    nb_filters : int
+        Number of filters.
+    convergence_parameters : ConvergenceParameters
+        Convergence parameters of the solver.
+    initial_estimate : np.ndarray | None
+        Initial estimate.
+    """
+
     def __init__(
         self,
         nb_filters: int,
@@ -30,10 +43,28 @@ class RTLSProblem(OptimizationProblem):
         self,
         problem_inputs: ProblemInputs,
         save_solution: bool = False,
-        convergence_parameters=None,
-        initial_estimate=None,
+        convergence_parameters: ConvergenceParameters | None = None,
+        initial_estimate: np.ndarray | None = None,
     ) -> np.ndarray:
-        """Solve the RTLS problem max rho = E[|X.T @ y(t) - d(t)|**2] / (1 + X.T @ X) s.t. ||X.T @ L|| <= delta ** 2."""
+        """
+        Solve the RTLS problem :math:`\max_X\; \\frac{\mathbb{E}[\|X^T \mathbf{y}(t)-\mathbf{d}(t)\|^2]}{1+X^T\Gamma X}` subject to :math:`\|X^T L\|^2 \\leq \delta^2`.
+
+        Parameters
+        ----------
+        problem_inputs : ProblemInputs
+            The problem inputs containing the observed signal :math:`\mathbf{y}`, the observed signal :math:`\mathbf{d}` and the constants :math:`\Gamma` in the field `fused_quadratics`, :math:`L` and :math:`\delta`.
+        save_solution : bool, optional
+            Whether to save the solution or not, by default False
+        convergence_parameters : ConvergenceParameters | None, optional
+            Convergence parameters, by default None
+        initial_estimate : np.ndarray | None, optional
+            Initial estimate, by default None
+
+        Returns
+        -------
+        np.ndarray
+            The solution to the RTLS problem.
+        """
         Y = problem_inputs.fused_signals[0]
         L = problem_inputs.fused_constants[0]
         Gamma = problem_inputs.fused_quadratics[0]
@@ -127,7 +158,21 @@ class RTLSProblem(OptimizationProblem):
         return X_star
 
     def evaluate_objective(self, X: np.ndarray, problem_inputs: ProblemInputs) -> float:
-        """Evaluate the RTLS objective E[|X.T @ y(t) - d(t)|**2] / (1 + X.T @ Gamma @ X)."""
+        """
+        Evaluate the RTLS objective :math:`\\frac{\mathbb{E}[\|X^T \mathbf{y}(t)-\mathbf{d}(t)\|^2]}{1+X^T\Gamma X}`.
+
+        Parameters
+        ----------
+        X : np.ndarray
+            The point to evaluate.
+        problem_inputs : ProblemInputs
+            The problem inputs containing the observed signal :math:`\mathbf{y}`, the observed signal :math:`\mathbf{d}` and the constants :math:`\Gamma` in the field `fused_quadratics`, :math:`L` and :math:`\delta`.
+
+        Returns
+        -------
+        float
+            The value of the objective function at point `X`.
+        """
         Y = problem_inputs.fused_signals[0]
         Gamma = problem_inputs.fused_quadratics[0]
         d = problem_inputs.global_parameters[0]

@@ -1,6 +1,7 @@
 import numpy as np
 from dasftoolbox.problem_settings import ProblemInputs
 from dasftoolbox.optimization_problems.optimization_problem import OptimizationProblem
+from dasftoolbox.problem_settings import ConvergenceParameters
 
 from dasftoolbox.utils import (
     autocorrelation_matrix,
@@ -12,6 +13,15 @@ import scipy
 
 
 class CCAProblem(OptimizationProblem):
+    """
+    CCA problem class.
+
+    Attributes
+    ----------
+    nb_filters : int
+        Number of filters.
+    """
+
     def __init__(
         self,
         nb_filters: int,
@@ -22,11 +32,28 @@ class CCAProblem(OptimizationProblem):
         self,
         problem_inputs: list[ProblemInputs],
         save_solution: bool = False,
-        convergence_parameters=None,
-        initial_estimate=None,
+        convergence_parameters: ConvergenceParameters | None = None,
+        initial_estimate: list[np.ndarray] | None = None,
     ) -> list[np.ndarray]:
-        """Solve the CCA problem max_(X,W) E[trace(X.T @ y(t) @ v(t).T @ W)]
-        s.t. E[X.T @ y(t) @ y(t).T @ X] = I, E[W.T @ v(t) @ v(t).T @ W] = I."""
+        """
+        Solve the CCA problem :math:`\max_{X,W}\; \mathbb{E}[\\text{trace}(X^T \mathbf{y}(t) \mathbf{v}^T(t) W)]` subject to :math:`\mathbb{E}[X^T \mathbf{y}(t) \mathbf{y}^T(t) X] = I,\; \mathbb{E}[W^T \mathbf{v}(t) \mathbf{v}^T(t) W] = I`.
+
+        Parameters
+        ----------
+        problem_inputs : list[ProblemInputs]
+            The problem inputs containing the observed signals :math:`\mathbf{y}` for the first variable and :math:`\mathbf{v}` for the second variable.
+        save_solution : bool, optional
+            Whether to save the solution or not, by default False
+        convergence_parameters : ConvergenceParameters | None, optional
+            Convergence parameters, by default None
+        initial_estimate : list[np.ndarray] | None, optional
+            Initial estimate, by default None
+
+        Returns
+        -------
+        list[np.ndarray]
+            The solution to the CCA problem.
+        """
         inputs_X = problem_inputs[0]
         inputs_W = problem_inputs[1]
 
@@ -63,7 +90,21 @@ class CCAProblem(OptimizationProblem):
     def evaluate_objective(
         self, X: list[np.ndarray], problem_inputs: list[ProblemInputs]
     ) -> float:
-        """Evaluate the CCA objective E[trace(X.T @ y(t) @ v(t).T @ W)]."""
+        """
+        Evaluate the CCA objective :math:`\mathbb{E}[\\text{trace}(X^T \mathbf{y}(t) \mathbf{v}^T(t) W)]`.
+
+        Parameters
+        ----------
+        X : list[np.ndarray]
+            The point to evaluate.
+        problem_inputs : ProblemInputs
+            The problem inputs containing the observed signals :math:`\mathbf{y}` and :math:`\mathbf{v}`.
+
+        Returns
+        -------
+        float
+            The value of the objective function at point `X` consisting of a list of the two variables :math:`X` and :math:`W`.
+        """
         inputs_X = problem_inputs[0]
         inputs_W = problem_inputs[1]
 
@@ -82,7 +123,23 @@ class CCAProblem(OptimizationProblem):
         X_current: list[np.ndarray],
         updating_node: int | None = None,
     ) -> list[np.ndarray]:
-        """Resolve the sign ambiguity for the CCA problem."""
+        """
+        Resolve the sign ambiguity for the CCA problem by selecting the sign for each column of the current point so as to minimize the distance to the reference point.
+
+        Parameters
+        ----------
+        X_reference : list[np.ndarray]
+            The reference point.
+        X_current : list[np.ndarray]
+            The current point.
+        updating_node : int | None
+            The index of the updating node (for more flexibility), by default None.
+
+        Returns
+        -------
+        list[np.ndarray]
+            A fixed solution of the CCA problem.
+        """
         X = X_current[0]
         W = X_current[1]
         X_ref = X_reference[0]

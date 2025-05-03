@@ -1,6 +1,7 @@
 import numpy as np
 from dasftoolbox.problem_settings import ProblemInputs
 from dasftoolbox.optimization_problems.optimization_problem import OptimizationProblem
+from dasftoolbox.problem_settings import ConvergenceParameters
 
 from dasftoolbox.utils import autocorrelation_matrix
 
@@ -9,6 +10,15 @@ import warnings
 
 
 class QCQPProblem(OptimizationProblem):
+    """
+    QCQP problem class.
+
+    Attributes
+    ----------
+    nb_filters : int
+        Number of filters.
+    """
+
     def __init__(
         self,
         nb_filters: int,
@@ -19,10 +29,29 @@ class QCQPProblem(OptimizationProblem):
         self,
         problem_inputs: ProblemInputs,
         save_solution: bool = False,
-        convergence_parameters=None,
-        initial_estimate=None,
+        convergence_parameters: ConvergenceParameters | None = None,
+        initial_estimate: np.ndarray | None = None,
     ) -> np.ndarray:
-        """Solve the QCQP problem min 0.5 * E[||X.T @ y(t)||**2] - trace(X.T @ B) s.t. trace(X.T @ Gamma @ X) <= alpha**2; X.T @ c = d."""
+        """
+        Solve the QCQP problem
+        :math:`\min_X\; \\frac{1}{2}\mathbb{E}[\| X^T \mathbf{y}(t)\|^2] - \\text{trace}(X^T B)` subject to :math:`\\text{trace}(X^T \Gamma  X) \\leq \\alpha^2,\; X^T \mathbf{c} = \mathbf{d}`.
+
+        Parameters
+        ----------
+        problem_inputs : ProblemInputs
+            The problem inputs containing the observed signal :math:`\mathbf{y}` and the matrices and vectors :math:`B`, :math:`\Gamma`, :math:`\mathbf{c}` and :math:`\mathbf{d}`.
+        save_solution : bool, optional
+            Whether to save the solution or not, by default False
+        convergence_parameters : ConvergenceParameters | None, optional
+            Convergence parameters, by default None
+        initial_estimate : np.ndarray | None, optional
+            Initial estimate, by default None
+
+        Returns
+        -------
+        np.ndarray
+            The solution to the QCQP problem.
+        """
 
         def X_fun(mu: float, problem_inputs: ProblemInputs) -> np.ndarray:
             Y = problem_inputs.fused_signals[0]
@@ -82,7 +111,21 @@ class QCQPProblem(OptimizationProblem):
         return X_star
 
     def evaluate_objective(self, X: np.ndarray, problem_inputs: ProblemInputs) -> float:
-        """Evaluate the QCQP objective 0.5 * E[||X.T @ y(t)||**2] - trace(X.T @ B)."""
+        """
+        Evaluate the QCQP objective :math:`\\frac{1}{2}\mathbb{E}[\| X^T \mathbf{y}(t)\|^2] - \\text{trace}(X^T B)`.
+
+        Parameters
+        ----------
+        X : np.ndarray
+            The point to evaluate.
+        problem_inputs : ProblemInputs
+            The problem inputs containing the observed signal :math:`\mathbf{y}` and the matrices and vectors :math:`B`, :math:`\Gamma`, :math:`\mathbf{c}` and :math:`\mathbf{d}`.
+
+        Returns
+        -------
+        float
+            The value of the objective function at point `X`.
+        """
         Y = problem_inputs.fused_signals[0]
         B = problem_inputs.fused_constants[0]
 

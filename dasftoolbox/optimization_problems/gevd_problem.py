@@ -1,6 +1,7 @@
 import numpy as np
 from dasftoolbox.problem_settings import ProblemInputs
 from dasftoolbox.optimization_problems.optimization_problem import OptimizationProblem
+from dasftoolbox.problem_settings import ConvergenceParameters
 
 from dasftoolbox.utils import autocorrelation_matrix
 
@@ -27,21 +28,21 @@ class GEVDProblem(OptimizationProblem):
         self,
         problem_inputs: ProblemInputs,
         save_solution: bool = False,
-        convergence_parameters=None,
-        initial_estimate=None,
+        convergence_parameters: ConvergenceParameters | None = None,
+        initial_estimate: np.ndarray | None = None,
     ) -> np.ndarray:
         """
-        Solve the GEVD problem :math:`\max_X \mathbb{E}[\|X^T \mathbf{y}(t)\|^2]` subject to :math:`\mathbb{E}[X^T \mathbf{v}(t) \mathbf{v}^T(t) X] = I`.
+        Solve the GEVD problem :math:`\max_X\; \mathbb{E}[\|X^T \mathbf{y}(t)\|^2]` subject to :math:`\mathbb{E}[X^T \mathbf{v}(t) \mathbf{v}^T(t) X] = I`.
 
         Parameters
         ----------
         problem_inputs : ProblemInputs
-            The problem inputs containing the observed signal :math:`\mathbf{y}` and the matrices :math:`B` and  :math:`H`.
+            The problem inputs containing the observed signals :math:`\mathbf{y}` and :math:`\mathbf{v}`.
         save_solution : bool, optional
             Whether to save the solution or not, by default False
-        convergence_parameters : None, optional
+        convergence_parameters : ConvergenceParameters | None, optional
             Convergence parameters, by default None
-        initial_estimate : None, optional
+        initial_estimate : np.ndarray | None, optional
             Initial estimate, by default None
 
         Returns
@@ -68,6 +69,18 @@ class GEVDProblem(OptimizationProblem):
     def evaluate_objective(self, X: np.ndarray, problem_inputs: ProblemInputs) -> float:
         """
         Evaluate the GEVD objective :math:`\mathbb{E}[\|X^T \mathbf{y}(t)\|^2]`.
+
+        Parameters
+        ----------
+        X : np.ndarray
+            The point to evaluate.
+        problem_inputs : ProblemInputs
+            The problem inputs containing the observed signals :math:`\mathbf{y}` and :math:`\mathbf{v}`.
+
+        Returns
+        -------
+        float
+            The value of the objective function at point `X`.
         """
         Y = problem_inputs.fused_signals[0]
 
