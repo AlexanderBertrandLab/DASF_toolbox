@@ -1,4 +1,12 @@
-# Distributed Adaptive Signal Fusion Algorithm
+# DASF toolbox
+
+The distributed adaptive signal fusion (DASF) algorithm framework solves feature-partitioned/spatial filtering problems in a distributed fashion without centralizing the raw data. The implementation is based on the published work in [1] and [2]. To cite this toolbox, please use:
+
+      @misc{dasftoolbox,
+            title={DASF toolbox},
+            author={Musluoglu, Cem Ates and Bertrand, Alexander},
+            year={2022}
+      }
 
 **News:**
 
@@ -18,8 +26,6 @@ A documentation is available in the link below (still under construction):
 ![](https://github.com/CemMusluoglu/DASF_toolbox/blob/main/assets/dasf_gif.gif)
 
 **Description:**
- 
-The distributed adaptive signal fusion (DASF) algorithm framework solves feature-partitioned/spatial filtering problems in a distributed fashion without centralizing the raw data. The implementation is based on the published work in [1] and [2].
 
 Formally, the DASF framework is built to solve optimization problems of the following form:
 

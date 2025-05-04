@@ -9,6 +9,7 @@
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=80d5e7a1" />
       <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=e59714d7" />
       <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css?v=4ae1632d" />
+      <link rel="stylesheet" type="text/css" href="../../_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css?v=be8a1c11" />
 
   
       <script src="../../_static/jquery.js?v=5d32c60e"></script>
@@ -43,6 +44,7 @@
               <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../Documentation/index.html">Documentation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../Examples/index.html">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../Tutorials/index.html">Tutorials</a></li>
 </ul>
 
         </div>
@@ -662,7 +664,7 @@
 <span class="sd">        ----------</span>
 <span class="sd">        X : np.ndarray</span>
 <span class="sd">            A matrix of shape (nb_sensors, nb_filters) representing the global variable,</span>
-<span class="sd">            structured as [X1; ...; Xq; ...; XK].</span>
+<span class="sd">            structured as :math:`[X_1^T,\dots, X_q^T, ..., X_K^T]^T`.</span>
 <span class="sd">        updating_node : int</span>
 <span class="sd">            The current updating node.</span>
 <span class="sd">        neighbors : list of int</span>
@@ -674,7 +676,7 @@
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
 <span class="sd">        np.ndarray</span>
-<span class="sd">            The transition matrix `Cq`, which facilitates the transition between local and global data representations.</span>
+<span class="sd">            The transition matrix `Cq`, mapping the local data to the global one.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">nb_sensors_per_node</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">network_graph</span><span class="o">.</span><span class="n">nb_sensors_per_node</span>
         <span class="n">nb_filters</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">problem</span><span class="o">.</span><span class="n">nb_filters</span>

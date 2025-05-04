@@ -1,11 +1,17 @@
-.. DASF toolbox documentation master file, created by
-   sphinx-quickstart on Sun Apr 27 14:46:22 2025.
-   You can adapt this file completely to your liking, but it should at least
-   contain the root `toctree` directive.
-
 DASF toolbox documentation
 ==========================
 
+The DASF (Distributed Adaptive Signal Fusion) toolbox implements the DASF algorithm described in `[1] <https://doi.org/10.1109/TSP.2023.3275272>`_ and `[2] <https://doi.org/10.1109/TSP.2023.3275273>`_, allowing to solve in a optimization problems where features are partitioned across multiple nodes within a network, for example, spatial filtering problems in wireless sensor networks. Note that this toolbox is intended for simulations, and does not provide an actual distributed protocol.
+
+To cite this toolbox, please use:
+
+.. code-block::
+
+   @misc{dasftoolbox,
+      title={DASF toolbox},
+      author={Musluoglu, Cem Ates and Bertrand, Alexander},
+      year={2022}
+   }
 
 .. toctree::
    :maxdepth: 2

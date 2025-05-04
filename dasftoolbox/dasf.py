@@ -565,7 +565,7 @@ class DASF:
         ----------
         X : np.ndarray
             A matrix of shape (nb_sensors, nb_filters) representing the global variable,
-            structured as [X1; ...; Xq; ...; XK].
+            structured as :math:`[X_1^T,\dots, X_q^T, ..., X_K^T]^T`.
         updating_node : int
             The current updating node.
         neighbors : list of int
@@ -577,7 +577,7 @@ class DASF:
         Returns
         -------
         np.ndarray
-            The transition matrix `Cq`, which facilitates the transition between local and global data representations.
+            The transition matrix `Cq`, mapping the local data to the global one.
         """
         nb_sensors_per_node = self.network_graph.nb_sensors_per_node
         nb_filters = self.problem.nb_filters
