@@ -6,6 +6,8 @@ Tutorials
     :undoc-members:
     :show-inheritance:
 
+The following tutorials aim to give hands-on examples of use cases of the DASF toolbox, such as constructing problems, analyzing the DASF algorithm, and looking at some of its properties.
+
 .. toctree::
     :maxdepth: 1
     
