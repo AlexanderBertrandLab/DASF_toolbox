@@ -17,6 +17,8 @@ class RTLSProblem(OptimizationProblem):
     """
     RTLS problem class.
 
+    :math:`\max_X\; \\frac{\mathbb{E}[\|X^T \mathbf{y}(t)-\mathbf{d}(t)\|^2]}{1+X^T\Gamma X}` subject to :math:`\|X^T L\|^2 \\leq \delta^2.`
+
     Attributes
     ----------
     nb_filters : int
@@ -47,7 +49,9 @@ class RTLSProblem(OptimizationProblem):
         initial_estimate: np.ndarray | None = None,
     ) -> np.ndarray:
         """
-        Solve the RTLS problem :math:`\max_X\; \\frac{\mathbb{E}[\|X^T \mathbf{y}(t)-\mathbf{d}(t)\|^2]}{1+X^T\Gamma X}` subject to :math:`\|X^T L\|^2 \\leq \delta^2`.
+        Solve the RTLS problem.
+
+        The solver implements an iterative algorithm based on the Dinkelbach method, solving a convex quadratic problem at each iteration.
 
         Parameters
         ----------

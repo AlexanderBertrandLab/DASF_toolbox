@@ -10,6 +10,8 @@ class LCMVProblem(OptimizationProblem):
     """
     LCMV problem class.
 
+    :math:`\min_X\; \mathbb{E}[\| X^T \mathbf{y}(t)\|^2]` subject to :math:`X^TB=H.`
+
     Attributes
     ----------
     nb_filters : int
@@ -27,8 +29,10 @@ class LCMVProblem(OptimizationProblem):
         initial_estimate: np.ndarray | None = None,
     ) -> np.ndarray:
         """
-        Solve the LCMV problem
-        :math:`\min_X\; \mathbb{E}[\| X^T \mathbf{y}(t)\|^2]` subject to :math:`X^TB=H`.
+        Solve the LCMV problem.
+
+        The solver implements the closed-form solution: :math:`X^*=R_{\mathbf{yy}}^{-1}B(B^TR_{\mathbf{yy}}^{-1}B)^{-1}H^T)`, where :math:`R_{\mathbf{yy}}` corresponds to the autocorrelation matrix of the observed signal :math:`\mathbf{y}`.
+
 
         Parameters
         ----------

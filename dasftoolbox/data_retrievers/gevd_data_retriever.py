@@ -9,6 +9,39 @@ from dasftoolbox.data_retrievers.data_retriever import (
 
 
 class GEVDDataRetriever(DataRetriever):
+    """
+    GEVD data retriever class.
+
+    Simulates a setting where noisy mixture of sources are observed by the nodes of the network.
+
+    Formally, the signals generated are given by :math:`\mathbf{v}(t)=B\cdot\mathbf{d}_1(t)+\mathbf{n}(t)` :math:`\mathbf{y}(t)=A(t)\cdot\mathbf{d}_2(t)+\mathbf{v}(t)`, where :math:`\mathbf{d}_1\in\mathbb{R}^L` and `math:`\mathbf{d}_2\in\mathbb{R}^{P-L}` correspond to the source signals, :math:`\mathbf{n}\in\mathbb{R}^M` to the noise and :math:`A\in\mathbb{R}^{M\times L}` and :math:`B\in\mathbb{R}^{M\times (P-L)}` to the mixture matrices. The non-stationarity of :math:`\mathbf{y}` follows from the dependence of :math:`A` on time, where :math:`A(t)=A_0+\Delta\cdot w(t)`, with :math:`w` representing a weight function varying in time.
+
+    The signals :math:`\mathbf{y}` and :math:`\mathbf{v}` are normalized to have unit norm and zero mean.
+
+    Attributes
+    ----------
+    data_window_params : DataWindowParameters
+        Class instance storing the parameters that define a window of data.
+    nb_sensors : int
+        Number of sensors in the network. Equals to :math:`M`, the dimension of :math:`\mathbf{y}` and :math:`\mathbf{v}`.
+    nb_sources : int
+        Number of sources. Represents the number of true number of sources that generate the data. Equals to :math:`L`, the dimension of :math:`\mathbf{d}_1`.
+    nb_windows : int
+        Number of windows of data.
+    rng : np.random.Generator
+        Random number generator for reproducibility.
+    latent_dim : int | None
+        Latent dimension :math:`P` of the problem. If None, will be fixed to :math:`2L`. By default None.
+    signal_var : float
+        Variance of the signals of interest, i.e., :math:`\mathbf{d}`. By default 0.5.
+    noise_var : float
+        Variance of the noise, i.e., :math:`\mathbf{n}`. By default 0.1.
+    mixture_var : float
+        Variance of the elements of mixture matrix :math:`A_0`. By default 0.5.
+    diff_var : float
+        Norm of :math:`\Delta`. By default 1.
+    """
+
     def __init__(
         self,
         data_window_params: DataWindowParameters,
@@ -70,7 +103,17 @@ class GEVDDataRetriever(DataRetriever):
         gevd_inputs = ProblemInputs(fused_signals=[Y_window, V_window])
         return gevd_inputs
 
+    get_data_window.__doc__ = DataRetriever.get_data_window.__doc__
+
     def weight_function(self, nb_windows: int) -> np.ndarray:
+        """
+        Weight function :math:`w` for the non-stationarity of the signals. Here, a piecewise linear function is used.
+
+        Parameters
+        ----------
+        nb_windows : int
+            Number of windows of data.
+        """
         if nb_windows < 10:
             weights = np.zeros(nb_windows)
         else:

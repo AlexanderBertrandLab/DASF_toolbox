@@ -16,6 +16,8 @@ class CCAProblem(OptimizationProblem):
     """
     CCA problem class.
 
+    :math:`\max_{X,W}\; \mathbb{E}[\\text{trace}(X^T \mathbf{y}(t) \mathbf{v}^T(t) W)]` subject to :math:`\mathbb{E}[X^T \mathbf{y}(t) \mathbf{y}^T(t) X] = I,\; \mathbb{E}[W^T \mathbf{v}(t) \mathbf{v}^T(t) W] = I.`
+
     Attributes
     ----------
     nb_filters : int
@@ -36,7 +38,9 @@ class CCAProblem(OptimizationProblem):
         initial_estimate: list[np.ndarray] | None = None,
     ) -> list[np.ndarray]:
         """
-        Solve the CCA problem :math:`\max_{X,W}\; \mathbb{E}[\\text{trace}(X^T \mathbf{y}(t) \mathbf{v}^T(t) W)]` subject to :math:`\mathbb{E}[X^T \mathbf{y}(t) \mathbf{y}^T(t) X] = I,\; \mathbb{E}[W^T \mathbf{v}(t) \mathbf{v}^T(t) W] = I`.
+        Solve the CCA problem.
+
+        The solver returns :math:`Q` eigenvectors corresponding to the :math:`Q` largest generalized eigenvalues of the matrix pair :math:`(R_{\mathbf{yv}}R_{\mathbf{vv}}^{-1}R_{\mathbf{vy}}, R_{\mathbf{yy}})`, where :math:`R_{\mathbf{yy}}` and :math:`R_{\mathbf{vv}}` correspond to the autocorrelation matrix of the observed signal :math:`\mathbf{y}` and :math:`\mathbf{y}`, respectively, while :math:`R_{\mathbf{yv}}=R_{\mathbf{vy}}^T` corresponds to the cross-correlation matrix between the observed signals :math:`\mathbf{y}` and :math:`\mathbf{v}`.
 
         Parameters
         ----------

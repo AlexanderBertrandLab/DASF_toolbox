@@ -15,6 +15,8 @@ class TROProblem(OptimizationProblem):
     """
     TRO problem class.
 
+    :math:`\max_X\; \\frac{\mathbb{E}[\|X^T \mathbf{y}(t)\|^2]}{\mathbb{E}[\|X^T \mathbf{v}(t)\|^2]}` subject to :math:`X^T \Gamma X = I.`
+
     Attributes
     ----------
     nb_filters : int
@@ -38,7 +40,9 @@ class TROProblem(OptimizationProblem):
         initial_estimate: np.ndarray | None = None,
     ) -> np.ndarray:
         """
-        Solve the TRO problem :math:`\max_X\; \\frac{\mathbb{E}[\|X^T \mathbf{y}(t)\|^2]}{\mathbb{E}[\|X^T \mathbf{v}(t)\|^2]}` subject to :math:`X^T \Gamma X = I`.
+        Solve the TRO problem.
+
+        The solver implements an iterative algorithm based on the Dinkelbach method, solving a generalized eigenvalue decomposition at each iteration.
 
         Parameters
         ----------

@@ -9,6 +9,7 @@
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=80d5e7a1" />
       <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=e59714d7" />
       <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css?v=4ae1632d" />
+      <link rel="stylesheet" type="text/css" href="../../_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css?v=be8a1c11" />
 
   
       <script src="../../_static/jquery.js?v=5d32c60e"></script>
@@ -43,6 +44,7 @@
               <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../Documentation/index.html">Documentation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../Examples/index.html">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../Tutorials/index.html">Tutorials</a></li>
 </ul>
 
         </div>
@@ -189,6 +191,10 @@
 <span class="sd">        Threshold for two consecutive objective function values. If the absolute difference is below this value, the solver stops.</span>
 <span class="sd">    argument_tolerance : float | None</span>
 <span class="sd">        Threshold for two consecutive iterates. If the norm of the difference is below this value, the solver stops.</span>
+
+<span class="sd">    Note</span>
+<span class="sd">    -----</span>
+<span class="sd">    If all parameters are None, the default value for `max_iterations` is set to a default value of 100.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">max_iterations</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>

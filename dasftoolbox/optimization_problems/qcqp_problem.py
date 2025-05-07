@@ -13,6 +13,8 @@ class QCQPProblem(OptimizationProblem):
     """
     QCQP problem class.
 
+    :math:`\min_X\; \\frac{1}{2}\mathbb{E}[\| X^T \mathbf{y}(t)\|^2] - \\text{trace}(X^T B)` subject to :math:`\\text{trace}(X^T \Gamma  X) \\leq \\alpha^2,\; X^T \mathbf{c} = \mathbf{d}.`
+
     Attributes
     ----------
     nb_filters : int
@@ -33,8 +35,9 @@ class QCQPProblem(OptimizationProblem):
         initial_estimate: np.ndarray | None = None,
     ) -> np.ndarray:
         """
-        Solve the QCQP problem
-        :math:`\min_X\; \\frac{1}{2}\mathbb{E}[\| X^T \mathbf{y}(t)\|^2] - \\text{trace}(X^T B)` subject to :math:`\\text{trace}(X^T \Gamma  X) \\leq \\alpha^2,\; X^T \mathbf{c} = \mathbf{d}`.
+        Solve the QCQP problem.
+
+        The solver is derived from the KKT conditions of the problem.
 
         Parameters
         ----------

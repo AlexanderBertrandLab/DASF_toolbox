@@ -106,6 +106,10 @@ class ConvergenceParameters:
         Threshold for two consecutive objective function values. If the absolute difference is below this value, the solver stops.
     argument_tolerance : float | None
         Threshold for two consecutive iterates. If the norm of the difference is below this value, the solver stops.
+
+    Note
+    -----
+    If all parameters are None, the default value for `max_iterations` is set to a default value of 100.
     """
 
     max_iterations: int | None = None

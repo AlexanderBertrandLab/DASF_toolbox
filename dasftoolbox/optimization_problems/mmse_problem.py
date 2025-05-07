@@ -13,6 +13,8 @@ class MMSEProblem(OptimizationProblem):
     """
     MMSE problem class.
 
+    :math:`\min_X\; \mathbb{E}[\|\mathbf{d}(t) - X^T \mathbf{y}(t)\|^2].`
+
     Attributes
     ----------
     nb_filters : int
@@ -30,8 +32,9 @@ class MMSEProblem(OptimizationProblem):
         initial_estimate: np.ndarray | None = None,
     ) -> np.ndarray:
         """
-        Solve the MMSE problem
-        :math:`\min_X\; \mathbb{E}[\|\mathbf{d}(t) - X^T \mathbf{y}(t)\|^2]`.
+        Solve the MMSE problem.
+
+        The solver implements the closed-form solution: :math:`X^*=R_{\mathbf{yy}}^{-1}R_{\mathbf{yd}}`, where :math:`R_{\mathbf{yy}}` corresponds to the autocorrelation matrix of the observed signal :math:`\mathbf{y}` and :math:`R_{\mathbf{yd}}` to the cross-correlation matrix between the observed signal :math:`\mathbf{y}` and the target signal :math:`\mathbf{d}`.
 
         Parameters
         ----------

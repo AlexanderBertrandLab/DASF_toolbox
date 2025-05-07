@@ -28,7 +28,7 @@ class DataWindowParameters:
 
 
 def get_stationary_setting(window_length: int, iterations: int) -> DataWindowParameters:
-    r"""
+    """
     Get the parameters to simulate a stationary setting by setting the sliding window offset to 0.
 
     Parameters

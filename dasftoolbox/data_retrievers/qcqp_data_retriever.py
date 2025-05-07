@@ -109,7 +109,17 @@ class QCQPDataRetriever(DataRetriever):
 
         return qcqp_inputs
 
+    get_data_window.__doc__ = DataRetriever.get_data_window.__doc__
+
     def weight_function(self, nb_windows: int) -> np.ndarray:
+        """
+        Weight function :math:`w` for the non-stationarity of the signals. Here, a piecewise linear function is used.
+
+        Parameters
+        ----------
+        nb_windows : int
+            Number of windows of data.
+        """
         if nb_windows < 10:
             weights = np.zeros(nb_windows)
         else:

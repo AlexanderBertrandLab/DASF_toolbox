@@ -17,6 +17,8 @@ class ICAProblem(OptimizationProblem):
     """
     ICA problem class.
 
+    :math:`\max_X \sum_m \mathbb{E}[F(X_m^T \mathbf{y}(t))]` subject to :math:`\mathbb{E}[X^T \mathbf{y}(t)\mathbf{y}^T(t) X] = I`, where :math:`X_m` is the :math:`m`-th column of :math:`X` and :math:`F` is the negentropy function.
+
     Attributes
     ----------
     nb_filters : int
@@ -263,7 +265,9 @@ class ICAProblem(OptimizationProblem):
         initial_estimate: np.ndarray | None = None,
     ) -> np.ndarray:
         """
-        Solve the ICA problem :math:`\max_X \sum_m \mathbb{E}[F(X_m^T \mathbf{y}(t))]` subject to :math:`\mathbb{E}[X^T \mathbf{y}(t)\mathbf{y}^T(t) X] = I`, where :math:`X_m` is the :math:`m`-th column of :math:`X` and :math:`F` is the negentropy function.
+        Solve the ICA problem.
+
+        The solver implements the deflation-based FastICA algorithm.
 
         Parameters
         ----------

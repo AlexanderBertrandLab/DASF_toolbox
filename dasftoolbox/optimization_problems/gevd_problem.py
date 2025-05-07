@@ -12,6 +12,8 @@ class GEVDProblem(OptimizationProblem):
     """
     GEVD problem class.
 
+    :math:`\max_X\; \mathbb{E}[\|X^T \mathbf{y}(t)\|^2]` subject to :math:`\mathbb{E}[X^T \mathbf{v}(t) \mathbf{v}^T(t) X] = I.`
+
     Attributes
     ----------
     nb_filters : int
@@ -32,7 +34,9 @@ class GEVDProblem(OptimizationProblem):
         initial_estimate: np.ndarray | None = None,
     ) -> np.ndarray:
         """
-        Solve the GEVD problem :math:`\max_X\; \mathbb{E}[\|X^T \mathbf{y}(t)\|^2]` subject to :math:`\mathbb{E}[X^T \mathbf{v}(t) \mathbf{v}^T(t) X] = I`.
+        Solve the GEVD problem.
+
+        The solver returns the :math:`Q` eigenvectors corresponding to the :math:`Q` largest generalized eigenvalues of the matrix pair :math:`(R_{\mathbf{yy}}, R_{\mathbf{vv}})`, where :math:`R_{\mathbf{yy}}` and :math:`R_{\mathbf{vv}}` correspond to the autocorrelation matrix of the signals :math:`\mathbf{y}` and :math:`\mathbf{v}`, respectively.
 
         Parameters
         ----------
