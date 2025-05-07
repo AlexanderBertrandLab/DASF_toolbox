@@ -5,6 +5,7 @@ The distributed adaptive signal fusion (DASF) algorithm framework solves feature
       @misc{dasftoolbox,
             title={DASF toolbox},
             author={Musluoglu, Cem Ates and Bertrand, Alexander},
+            howpublished = "\url{https://github.com/AlexanderBertrandLab/DASF_toolbox}",
             year={2022}
       }
 
