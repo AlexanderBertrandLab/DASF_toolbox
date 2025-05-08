@@ -9,6 +9,39 @@ from dasftoolbox.data_retrievers.data_retriever import (
 
 
 class CCADataRetriever(DataRetriever):
+    """
+    CCA data retriever class.
+
+    Simulates a setting where noisy mixture of sources are observed by the nodes of the network.
+
+    Formally, the signals generated are given by :math:`\mathbf{y}(t)=A(t)\cdot\mathbf{d}(t)+\mathbf{n}(t)` and :math:`\mathbf{v}(t)=\mathbf{y}(t-\\tau)`, where :math:`\mathbf{d}\in\mathbb{R}^L` corresponds to the source signal, :math:`\mathbf{n}\in\mathbb{R}^M` to the noise and :math:`A\in\mathbb{R}^{M\times L}` to the mixture matrix. The non-stationarity of :math:`\mathbf{y}` and :math:`\mathbf{v}` follows from the dependence of :math:`A` on time, where :math:`A(t)=A_0+\Delta\cdot w(t)`, with :math:`w` representing a weight function varying in time.
+
+    The signals :math:`\mathbf{y}` and :math:`\mathbf{v}` are normalized to have unit norm and zero mean.
+
+    Attributes
+    ----------
+    data_window_params : DataWindowParameters
+        Class instance storing the parameters that define a window of data.
+    nb_sensors : int
+        Number of sensors in the network. Equals to :math:`M`, the dimension of :math:`\mathbf{y}` and :math:`\mathbf{v}`.
+    nb_sources : int
+        Number of sources. Represents the number of true number of sources that generate the data. Equals to :math:`L`, the dimension of :math:`\mathbf{d}`.
+    nb_windows : int
+        Number of windows of data.
+    rng : np.random.Generator
+        Random number generator for reproducibility.
+    lags : int
+        The lag :math:`tau` of :math:`\mathbf{v}` compared to :math:`\mathbf{y}`. By default 5.
+    signal_var : float
+        Variance of the signals of interest, i.e., :math:`\mathbf{d}`. By default 0.5.
+    noise_var : float
+        Variance of the noise, i.e., :math:`\mathbf{n}`. By default 0.1.
+    mixture_var : float
+        Variance of the elements of mixture matrix :math:`A_0`. By default 0.5.
+    diff_var : float
+        Norm of :math:`\Delta`. By default 1.
+    """
+
     def __init__(
         self,
         data_window_params: DataWindowParameters,

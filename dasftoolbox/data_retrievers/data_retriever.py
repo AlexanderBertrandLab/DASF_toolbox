@@ -1,6 +1,7 @@
 from dasftoolbox.problem_settings import ProblemInputs
 from abc import abstractmethod
 from dataclasses import dataclass
+from typing import Tuple
 
 
 @dataclass
@@ -25,6 +26,10 @@ class DataWindowParameters:
     def __post_init__(self) -> None:
         if self.sliding_window_offset is None:
             self.sliding_window_offset = self.window_length
+
+    def get_window_sample_interval(self, window_id: int) -> Tuple[int, int]:
+        start = window_id * self.sliding_window_offset
+        return start, start + self.window_length
 
 
 def get_stationary_setting(window_length: int, iterations: int) -> DataWindowParameters:
