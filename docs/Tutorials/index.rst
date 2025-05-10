@@ -14,3 +14,4 @@ The following tutorials aim to give hands-on examples of use cases of the DASF t
     tutorial_setting_up.ipynb
     tutorial_from_scratch.ipynb
     tutorial_resolve_ambiguity.ipynb
+    tutorial_theoretical_properties.ipynb
