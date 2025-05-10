@@ -1,8 +1,7 @@
 import numpy as np
-from dasftoolbox.problem_settings import ProblemInputs
-from dasftoolbox.optimization_problems.optimization_problem import OptimizationProblem
-from dasftoolbox.problem_settings import ConvergenceParameters
 
+from dasftoolbox.optimization_problems.optimization_problem import OptimizationProblem
+from dasftoolbox.problem_settings import ConvergenceParameters, ProblemInputs
 from dasftoolbox.utils import (
     autocorrelation_matrix,
     cross_correlation_matrix,

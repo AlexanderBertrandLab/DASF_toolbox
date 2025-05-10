@@ -73,21 +73,24 @@
              
   <h1>Source code for dasftoolbox.dasf</h1><div class="highlight"><pre>
 <span></span><span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">annotations</span>
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">from</span> <span class="nn">dasftoolbox.problem_settings</span> <span class="kn">import</span> <span class="p">(</span>
-    <span class="n">NetworkGraph</span><span class="p">,</span>
-    <span class="n">ProblemInputs</span><span class="p">,</span>
-    <span class="n">ConvergenceParameters</span><span class="p">,</span>
-<span class="p">)</span>
-<span class="kn">from</span> <span class="nn">dasftoolbox.data_retrievers.data_retriever</span> <span class="kn">import</span> <span class="n">DataRetriever</span>
-<span class="kn">from</span> <span class="nn">dasftoolbox.optimization_problems.optimization_problem</span> <span class="kn">import</span> <span class="n">OptimizationProblem</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Tuple</span>
-<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
-<span class="kn">from</span> <span class="nn">matplotlib.lines</span> <span class="kn">import</span> <span class="n">Line2D</span>
-<span class="kn">from</span> <span class="nn">matplotlib.figure</span> <span class="kn">import</span> <span class="n">Figure</span>
+
 <span class="kn">import</span> <span class="nn">logging</span>
 <span class="kn">from</span> <span class="nn">dataclasses</span> <span class="kn">import</span> <span class="n">dataclass</span><span class="p">,</span> <span class="n">replace</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Tuple</span>
+
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">from</span> <span class="nn">matplotlib.figure</span> <span class="kn">import</span> <span class="n">Figure</span>
+<span class="kn">from</span> <span class="nn">matplotlib.lines</span> <span class="kn">import</span> <span class="n">Line2D</span>
+
+<span class="kn">from</span> <span class="nn">dasftoolbox.data_retrievers.data_retriever</span> <span class="kn">import</span> <span class="n">DataRetriever</span>
+<span class="kn">from</span> <span class="nn">dasftoolbox.optimization_problems.optimization_problem</span> <span class="kn">import</span> <span class="n">OptimizationProblem</span>
+<span class="kn">from</span> <span class="nn">dasftoolbox.problem_settings</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">ConvergenceParameters</span><span class="p">,</span>
+    <span class="n">NetworkGraph</span><span class="p">,</span>
+    <span class="n">ProblemInputs</span><span class="p">,</span>
+<span class="p">)</span>
 
 <span class="n">logging</span><span class="o">.</span><span class="n">basicConfig</span><span class="p">(</span><span class="n">level</span><span class="o">=</span><span class="n">logging</span><span class="o">.</span><span class="n">INFO</span><span class="p">)</span>
 <span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
@@ -814,8 +817,7 @@
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
 <span class="sd">        np.ndarray</span>
-<span class="sd">            A matrix :math:`X_q` of shape (nb_sensors_per_node[updating_node], nb_filters), containing the block of :math:`X`</span>
-<span class="sd">            corresponding to `updating_node`.</span>
+<span class="sd">            A matrix :math:`X_q` of shape (nb_sensors_per_node[updating_node], nb_filters), containing the block of :math:`X` corresponding to `updating_node`.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">Mq</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">network_graph</span><span class="o">.</span><span class="n">nb_sensors_per_node</span><span class="p">[</span><span class="n">updating_node</span><span class="p">]</span>
         <span class="n">row_blk</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">cumsum</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">network_graph</span><span class="o">.</span><span class="n">nb_sensors_per_node</span><span class="p">)</span>
@@ -982,7 +984,9 @@
 <div class="viewcode-block" id="DASF._validate_problem">
 <a class="viewcode-back" href="../../Documentation/dasf.html#dasftoolbox.dasf.DASF._validate_problem">[docs]</a>
     <span class="k">def</span> <span class="nf">_validate_problem</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Validates the problem and its inputs.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Validates the problem and its inputs.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">problem_inputs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data_retriever</span><span class="o">.</span><span class="n">get_data_window</span><span class="p">(</span><span class="n">window_id</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
         <span class="n">nb_sensor</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">network_graph</span><span class="o">.</span><span class="n">nb_sensors_total</span>
         <span class="k">for</span> <span class="n">index</span><span class="p">,</span> <span class="n">signal</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">problem_inputs</span><span class="o">.</span><span class="n">fused_signals</span><span class="p">):</span>
@@ -1017,6 +1021,90 @@
             <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
                 <span class="s2">&quot;The problem does not have an evaluate_objective method. The objective will not be evaluated.&quot;</span>
             <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="DASF.number_of_constraints_valid_for_convergence">
+<a class="viewcode-back" href="../../Documentation/dasf.html#dasftoolbox.dasf.DASF.number_of_constraints_valid_for_convergence">[docs]</a>
+    <span class="k">def</span> <span class="nf">number_of_constraints_valid_for_convergence</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">constraints</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]</span>
+        <span class="o">|</span> <span class="nb">list</span><span class="p">[</span><span class="n">Callable</span><span class="p">[[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]],</span>
+        <span class="n">return_constraints</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span> <span class="o">|</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">bool</span><span class="p">,</span> <span class="nb">int</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Verifies that the number of constraints does not exceed the theoretical thresholds. If it is the case, convergence cannot be guaranteed.</span>
+
+<span class="sd">        Formally, the number of (unique) constraints :math:`J` of the problem should satisfy either :math:`J\leq Q^2` or :math:`J\\leq \min\left(\\frac{Q^2}{K-1}\sum_{k\in\mathcal{K}}n_k,\; (1+\min_{k\in\mathcal{K}} n_k)Q^2\\right)`, where :math:`Q` is the number of filters, i.e., of columns of the variable :math:`X`, :math:`K` is the number of nodes in the network - where each node is represented in the set :math:`\mathcal{K}` - and for each node :math:`k`, :math:`n_k` represents the number of neighbor it has.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        constraints : Callable[[np.ndarray], np.ndarray] | list[Callable[[np.ndarray], np.ndarray]]</span>
+<span class="sd">            Constraint of list of constraints as callables with respect to the variable of the problem.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        bool</span>
+<span class="sd">            Boolean value returning `True` if the number of constraints does not exceed the threshold, `False` otherwise.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">nb_filters</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">problem</span><span class="o">.</span><span class="n">nb_filters</span>
+        <span class="n">network_graph</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">network_graph</span>
+        <span class="n">dummy_X</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span>
+            <span class="n">network_graph</span><span class="o">.</span><span class="n">nb_sensors_total</span><span class="p">,</span> <span class="n">nb_filters</span> <span class="k">if</span> <span class="n">nb_filters</span> <span class="o">&gt;</span> <span class="mi">1</span> <span class="k">else</span> <span class="kc">None</span>
+        <span class="p">)</span>
+        <span class="n">random_X</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">standard_normal</span><span class="p">(</span><span class="n">dummy_X</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+        <span class="n">nb_constraints</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">constraints</span><span class="p">,</span> <span class="n">Callable</span><span class="p">):</span>
+            <span class="n">constraints</span> <span class="o">=</span> <span class="p">[</span><span class="n">constraints</span><span class="p">]</span>
+        <span class="k">for</span> <span class="n">constraint</span> <span class="ow">in</span> <span class="n">constraints</span><span class="p">:</span>
+            <span class="n">contraint_dummy</span> <span class="o">=</span> <span class="n">constraint</span><span class="p">(</span><span class="n">dummy_X</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+            <span class="n">constraint_random</span> <span class="o">=</span> <span class="n">constraint</span><span class="p">(</span><span class="n">random_X</span><span class="p">)</span>
+            <span class="n">nb_constraint</span> <span class="o">=</span> <span class="n">contraint_dummy</span><span class="o">.</span><span class="n">size</span>
+            <span class="k">if</span> <span class="n">contraint_dummy</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">contraint_dummy</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="ow">and</span> <span class="n">np</span><span class="o">.</span><span class="n">allclose</span><span class="p">(</span>
+                <span class="n">constraint_random</span><span class="p">,</span> <span class="n">constraint_random</span><span class="o">.</span><span class="n">T</span><span class="p">,</span> <span class="n">atol</span><span class="o">=</span><span class="mf">1e-8</span>
+            <span class="p">):</span>
+                <span class="n">constraint_size</span> <span class="o">=</span> <span class="n">contraint_dummy</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                <span class="n">nb_constraint</span> <span class="o">=</span> <span class="n">constraint_size</span> <span class="o">*</span> <span class="p">(</span><span class="n">constraint_size</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span>
+            <span class="n">nb_constraints</span> <span class="o">+=</span> <span class="n">nb_constraint</span>
+
+        <span class="n">total_edges_upper_bound</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">nb_filters</span><span class="o">**</span><span class="mi">2</span>
+            <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">network_graph</span><span class="o">.</span><span class="n">adjacency_matrix</span><span class="p">)</span>
+            <span class="o">/</span> <span class="p">(</span><span class="n">network_graph</span><span class="o">.</span><span class="n">nb_nodes</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="p">)</span>
+        <span class="n">minimum_edges_upper_bound</span> <span class="o">=</span> <span class="n">nb_filters</span><span class="o">**</span><span class="mi">2</span> <span class="o">*</span> <span class="p">(</span>
+            <span class="mi">1</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">network_graph</span><span class="o">.</span><span class="n">adjacency_matrix</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">))</span>
+        <span class="p">)</span>
+        <span class="n">second_upper_bound</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">total_edges_upper_bound</span><span class="p">,</span> <span class="n">minimum_edges_upper_bound</span><span class="p">)</span>
+        <span class="n">is_valid</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">if</span> <span class="n">nb_constraints</span> <span class="o">&lt;=</span> <span class="n">nb_filters</span><span class="o">**</span><span class="mi">2</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">nb_constraint</span> <span class="o">==</span> <span class="n">nb_filters</span><span class="o">**</span><span class="mi">2</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+                    <span class="s2">&quot;Constraints are valid for convergence. The threshold is met with equality and can therefore impact convergence speed.&quot;</span>
+                <span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Constraints are valid for convergence.&quot;</span><span class="p">)</span>
+            <span class="n">is_valid</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">elif</span> <span class="n">nb_constraints</span> <span class="o">&lt;=</span> <span class="n">second_upper_bound</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">nb_constraints</span> <span class="o">==</span> <span class="n">second_upper_bound</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+                    <span class="s2">&quot;High probability that constraints are valid for convergence (dependent on the value of `X` and result cannot be generalized. The threshold is met with equality and can therefore impact convergence speed.&quot;</span>
+                <span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+                    <span class="s2">&quot;High probability that constraints are valid for convergence (dependent on the value of `X` and result cannot be generalized).&quot;</span>
+                <span class="p">)</span>
+            <span class="n">is_valid</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;Too many constraints, convergence not guaranteed. The number of constraints of the problem exceeds the theoretical threshold by </span><span class="si">{</span><span class="n">nb_constraint</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">second_upper_bound</span><span class="si">}</span><span class="s2">.&quot;</span>
+            <span class="p">)</span>
+            <span class="n">is_valid</span> <span class="o">=</span> <span class="kc">False</span>
+
+        <span class="k">if</span> <span class="n">return_constraints</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">is_valid</span><span class="p">,</span> <span class="n">nb_constraints</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">is_valid</span></div>
 
 
 <div class="viewcode-block" id="DASF.plot_error">
@@ -1119,7 +1207,9 @@
 <div class="viewcode-block" id="DASF.get_summary_df">
 <a class="viewcode-back" href="../../Documentation/dasf.html#dasftoolbox.dasf.DASF.get_summary_df">[docs]</a>
     <span class="k">def</span> <span class="nf">get_summary_df</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Returns a pandas DataFrame summarizing the simulation results.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns a pandas DataFrame summarizing the simulation results.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">X_over_iterations</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;No iterates have been computed, use the run method first.&quot;</span><span class="p">)</span>
             <span class="k">return</span> <span class="kc">None</span>

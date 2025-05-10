@@ -1,8 +1,9 @@
-import numpy as np
-from dataclasses import dataclass
-import networkx as nx
-import matplotlib.pyplot as plt
 import logging
+from dataclasses import dataclass
+
+import matplotlib.pyplot as plt
+import networkx as nx
+import numpy as np
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -67,6 +68,14 @@ class NetworkGraph:
 
         if self.adjacency_matrix.shape != (self.nb_nodes, self.nb_nodes):
             raise ValueError("The adjacency matrix does not have the correct shape.")
+        if np.any(self.adjacency_matrix != self.adjacency_matrix.T):
+            raise ValueError("The adjacency matrix must be symmetric.")
+        if np.diag(self.adjacency_matrix).any() != 0:
+            np.fill_diagonal(self.adjacency_matrix, 0)
+            logger.warning(
+                "The adjacency matrix is expected to be a hollow matrix. Its diagonal is now set to 0."
+            )
+
         if len(self.nb_sensors_per_node) != self.nb_nodes:
             raise ValueError(
                 "The number of sensors per node does not match the number of nodes."

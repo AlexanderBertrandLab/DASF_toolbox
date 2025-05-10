@@ -1,11 +1,11 @@
 import numpy as np
-from dasftoolbox.problem_settings import ProblemInputs
-from dasftoolbox.utils import normalize
 
 from dasftoolbox.data_retrievers.data_retriever import (
     DataRetriever,
     DataWindowParameters,
 )
+from dasftoolbox.problem_settings import ProblemInputs
+from dasftoolbox.utils import normalize
 
 
 class MMSEDataRetriever(DataRetriever):

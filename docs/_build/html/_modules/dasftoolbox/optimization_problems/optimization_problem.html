@@ -9,6 +9,7 @@
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=80d5e7a1" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=e59714d7" />
       <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css?v=4ae1632d" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css?v=be8a1c11" />
 
   
       <script src="../../../_static/jquery.js?v=5d32c60e"></script>
@@ -43,6 +44,7 @@
               <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../Documentation/index.html">Documentation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../Examples/index.html">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../Tutorials/index.html">Tutorials</a></li>
 </ul>
 
         </div>
@@ -70,13 +72,15 @@
            <div itemprop="articleBody">
              
   <h1>Source code for dasftoolbox.optimization_problems.optimization_problem</h1><div class="highlight"><pre>
-<span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">from</span> <span class="nn">dasftoolbox.problem_settings</span> <span class="kn">import</span> <span class="p">(</span>
-    <span class="n">ProblemInputs</span><span class="p">,</span>
-    <span class="n">ConvergenceParameters</span><span class="p">,</span>
-<span class="p">)</span>
+<span></span><span class="kn">import</span> <span class="nn">logging</span>
 <span class="kn">from</span> <span class="nn">abc</span> <span class="kn">import</span> <span class="n">ABC</span><span class="p">,</span> <span class="n">abstractmethod</span>
-<span class="kn">import</span> <span class="nn">logging</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+<span class="kn">from</span> <span class="nn">dasftoolbox.problem_settings</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">ConvergenceParameters</span><span class="p">,</span>
+    <span class="n">ProblemInputs</span><span class="p">,</span>
+<span class="p">)</span>
 
 <span class="n">logging</span><span class="o">.</span><span class="n">basicConfig</span><span class="p">(</span><span class="n">level</span><span class="o">=</span><span class="n">logging</span><span class="o">.</span><span class="n">INFO</span><span class="p">)</span>
 <span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>

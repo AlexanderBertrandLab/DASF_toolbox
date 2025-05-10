@@ -1,19 +1,22 @@
 from __future__ import annotations
-import numpy as np
-from dasftoolbox.problem_settings import (
-    NetworkGraph,
-    ProblemInputs,
-    ConvergenceParameters,
-)
-from dasftoolbox.data_retrievers.data_retriever import DataRetriever
-from dasftoolbox.optimization_problems.optimization_problem import OptimizationProblem
-from typing import Tuple
-import matplotlib.pyplot as plt
-from matplotlib.lines import Line2D
-from matplotlib.figure import Figure
+
 import logging
 from dataclasses import dataclass, replace
+from typing import Callable, Tuple
+
+import matplotlib.pyplot as plt
+import numpy as np
 import pandas as pd
+from matplotlib.figure import Figure
+from matplotlib.lines import Line2D
+
+from dasftoolbox.data_retrievers.data_retriever import DataRetriever
+from dasftoolbox.optimization_problems.optimization_problem import OptimizationProblem
+from dasftoolbox.problem_settings import (
+    ConvergenceParameters,
+    NetworkGraph,
+    ProblemInputs,
+)
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -709,8 +712,7 @@ class DASF:
         Returns
         -------
         np.ndarray
-            A matrix :math:`X_q` of shape (nb_sensors_per_node[updating_node], nb_filters), containing the block of :math:`X`
-            corresponding to `updating_node`.
+            A matrix :math:`X_q` of shape (nb_sensors_per_node[updating_node], nb_filters), containing the block of :math:`X` corresponding to `updating_node`.
         """
         Mq = self.network_graph.nb_sensors_per_node[updating_node]
         row_blk = np.cumsum(self.network_graph.nb_sensors_per_node)
@@ -868,7 +870,9 @@ class DASF:
         plt.pause(0.05)
 
     def _validate_problem(self) -> None:
-        """Validates the problem and its inputs."""
+        """
+        Validates the problem and its inputs.
+        """
         problem_inputs = self.data_retriever.get_data_window(window_id=0)
         nb_sensor = self.network_graph.nb_sensors_total
         for index, signal in enumerate(problem_inputs.fused_signals):
@@ -903,6 +907,87 @@ class DASF:
             logger.warning(
                 "The problem does not have an evaluate_objective method. The objective will not be evaluated."
             )
+
+    def number_of_constraints_valid_for_convergence(
+        self,
+        constraints: Callable[[np.ndarray], np.ndarray]
+        | list[Callable[[np.ndarray], np.ndarray]],
+        return_constraints: bool = False,
+    ) -> bool | Tuple[bool, int]:
+        """
+        Verifies that the number of constraints does not exceed the theoretical thresholds. If it is the case, convergence cannot be guaranteed.
+
+        Formally, the number of (unique) constraints :math:`J` of the problem should satisfy either :math:`J\leq Q^2` or :math:`J\\leq \min\left(\\frac{Q^2}{K-1}\sum_{k\in\mathcal{K}}n_k,\; (1+\min_{k\in\mathcal{K}} n_k)Q^2\\right)`, where :math:`Q` is the number of filters, i.e., of columns of the variable :math:`X`, :math:`K` is the number of nodes in the network - where each node is represented in the set :math:`\mathcal{K}` - and for each node :math:`k`, :math:`n_k` represents the number of neighbor it has.
+
+        Parameters
+        ----------
+        constraints : Callable[[np.ndarray], np.ndarray] | list[Callable[[np.ndarray], np.ndarray]]
+            Constraint of list of constraints as callables with respect to the variable of the problem.
+
+        Returns
+        -------
+        bool
+            Boolean value returning `True` if the number of constraints does not exceed the threshold, `False` otherwise.
+
+        """
+        nb_filters = self.problem.nb_filters
+        network_graph = self.network_graph
+        dummy_X = np.empty(
+            network_graph.nb_sensors_total, nb_filters if nb_filters > 1 else None
+        )
+        random_X = np.random.standard_normal(dummy_X.shape)
+        nb_constraints = 0
+        if isinstance(constraints, Callable):
+            constraints = [constraints]
+        for constraint in constraints:
+            contraint_dummy = constraint(dummy_X).reshape(-1, 1)
+            constraint_random = constraint(random_X)
+            nb_constraint = contraint_dummy.size
+            if contraint_dummy.shape[0] == contraint_dummy.shape[1] and np.allclose(
+                constraint_random, constraint_random.T, atol=1e-8
+            ):
+                constraint_size = contraint_dummy.shape[0]
+                nb_constraint = constraint_size * (constraint_size + 1) / 2
+            nb_constraints += nb_constraint
+
+        total_edges_upper_bound = (
+            nb_filters**2
+            * np.sum(network_graph.adjacency_matrix)
+            / (network_graph.nb_nodes - 1)
+        )
+        minimum_edges_upper_bound = nb_filters**2 * (
+            1 + np.min(np.sum(network_graph.adjacency_matrix, axis=0))
+        )
+        second_upper_bound = min(total_edges_upper_bound, minimum_edges_upper_bound)
+        is_valid = False
+        if nb_constraints <= nb_filters**2:
+            if nb_constraint == nb_filters**2:
+                logger.info(
+                    "Constraints are valid for convergence. The threshold is met with equality and can therefore impact convergence speed."
+                )
+            else:
+                logger.info("Constraints are valid for convergence.")
+            is_valid = True
+        elif nb_constraints <= second_upper_bound:
+            if nb_constraints == second_upper_bound:
+                logger.info(
+                    "High probability that constraints are valid for convergence (dependent on the value of `X` and result cannot be generalized. The threshold is met with equality and can therefore impact convergence speed."
+                )
+            else:
+                logger.info(
+                    "High probability that constraints are valid for convergence (dependent on the value of `X` and result cannot be generalized)."
+                )
+            is_valid = True
+        else:
+            logger.info(
+                f"Too many constraints, convergence not guaranteed. The number of constraints of the problem exceeds the theoretical threshold by {nb_constraint - second_upper_bound}."
+            )
+            is_valid = False
+
+        if return_constraints:
+            return is_valid, nb_constraints
+        else:
+            return is_valid
 
     def plot_error(self) -> Figure:
         """
@@ -990,7 +1075,9 @@ class DASF:
         return fig
 
     def get_summary_df(self) -> pd.DataFrame | None:
-        """Returns a pandas DataFrame summarizing the simulation results."""
+        """
+        Returns a pandas DataFrame summarizing the simulation results.
+        """
         if len(self.X_over_iterations) == 0:
             logger.warning("No iterates have been computed, use the run method first.")
             return None

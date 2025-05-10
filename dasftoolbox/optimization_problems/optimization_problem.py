@@ -1,10 +1,12 @@
-import numpy as np
-from dasftoolbox.problem_settings import (
-    ProblemInputs,
-    ConvergenceParameters,
-)
-from abc import ABC, abstractmethod
 import logging
+from abc import ABC, abstractmethod
+
+import numpy as np
+
+from dasftoolbox.problem_settings import (
+    ConvergenceParameters,
+    ProblemInputs,
+)
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)

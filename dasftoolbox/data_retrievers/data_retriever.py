@@ -1,7 +1,8 @@
-from dasftoolbox.problem_settings import ProblemInputs
 from abc import abstractmethod
 from dataclasses import dataclass
 from typing import Tuple
+
+from dasftoolbox.problem_settings import ProblemInputs
 
 
 @dataclass

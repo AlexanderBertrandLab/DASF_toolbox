@@ -1,13 +1,12 @@
 import numpy as np
-from dasftoolbox.problem_settings import ProblemInputs
-from dasftoolbox.utils import normalize
+from scipy import signal
 
 from dasftoolbox.data_retrievers.data_retriever import (
     DataRetriever,
     DataWindowParameters,
 )
-
-from scipy import signal
+from dasftoolbox.problem_settings import ProblemInputs
+from dasftoolbox.utils import normalize
 
 
 class ICADataRetriever(DataRetriever):

@@ -1,12 +1,11 @@
-import numpy as np
-from dasftoolbox.problem_settings import ProblemInputs
-from dasftoolbox.optimization_problems.optimization_problem import OptimizationProblem
-from dasftoolbox.problem_settings import ConvergenceParameters
-
-from dasftoolbox.utils import autocorrelation_matrix
-
-import scipy.optimize as opt
 import warnings
+
+import numpy as np
+import scipy.optimize as opt
+
+from dasftoolbox.optimization_problems.optimization_problem import OptimizationProblem
+from dasftoolbox.problem_settings import ConvergenceParameters, ProblemInputs
+from dasftoolbox.utils import autocorrelation_matrix
 
 
 class QCQPProblem(OptimizationProblem):

@@ -1,17 +1,15 @@
-import numpy as np
 import matplotlib as mpl
 import matplotlib.pyplot as plt
+import numpy as np
 
 # Choose plot backend.
 mpl.use("macosx")
 # mpl.use('Qt5Agg')
 # mpl.use('TkAgg')
 # mpl.use("Agg")
-from dasftoolbox import NetworkGraph, ConvergenceParameters
-from dasftoolbox.optimization_problems.lcmv_problem import LCMVProblem
+from dasftoolbox import DASF, ConvergenceParameters, DataWindowParameters, NetworkGraph
 from dasftoolbox.data_retrievers.lcmv_data_retriever import LCMVDataRetriever
-from dasftoolbox import DataWindowParameters
-from dasftoolbox import DASF
+from dasftoolbox.optimization_problems.lcmv_problem import LCMVProblem
 
 random_seed = 2025
 rng = np.random.default_rng(random_seed)

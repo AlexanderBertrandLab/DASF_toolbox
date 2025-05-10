@@ -1,17 +1,21 @@
-import numpy as np
 import matplotlib as mpl
 import matplotlib.pyplot as plt
+import numpy as np
 
 # Choose plot backend.
 mpl.use("macosx")
 # mpl.use('Qt5Agg')
 # mpl.use('TkAgg')
 # mpl.use("Agg")
-from dasftoolbox import NetworkGraph, ConvergenceParameters
-from dasftoolbox.optimization_problems.cca_problem import CCAProblem
+from dasftoolbox import (
+    ConvergenceParameters,
+    DASFMultiVar,
+    DynamicPlotParameters,
+    NetworkGraph,
+    get_stationary_setting,
+)
 from dasftoolbox.data_retrievers.cca_data_retriever import CCADataRetriever
-from dasftoolbox import get_stationary_setting
-from dasftoolbox import DASFMultiVar, DynamicPlotParameters
+from dasftoolbox.optimization_problems.cca_problem import CCAProblem
 
 random_seed = 2025
 rng = np.random.default_rng(random_seed)

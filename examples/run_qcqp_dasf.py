@@ -1,6 +1,6 @@
-import numpy as np
 import matplotlib as mpl
 import matplotlib.pyplot as plt
+import numpy as np
 
 # Choose plot backend.
 mpl.use("macosx")
@@ -8,13 +8,14 @@ mpl.use("macosx")
 # mpl.use('TkAgg')
 # mpl.use("Agg")
 from dasftoolbox import (
-    NetworkGraph,
+    DASF,
     ConvergenceParameters,
+    DataWindowParameters,
+    DynamicPlotParameters,
+    NetworkGraph,
 )
-from dasftoolbox.optimization_problems.qcqp_problem import QCQPProblem
 from dasftoolbox.data_retrievers.qcqp_data_retriever import QCQPDataRetriever
-from dasftoolbox import DataWindowParameters
-from dasftoolbox import DASF, DynamicPlotParameters
+from dasftoolbox.optimization_problems.qcqp_problem import QCQPProblem
 
 random_seed = 2025
 rng = np.random.default_rng(random_seed)

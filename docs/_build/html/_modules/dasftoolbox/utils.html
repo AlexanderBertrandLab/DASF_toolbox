@@ -9,6 +9,7 @@
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=80d5e7a1" />
       <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=e59714d7" />
       <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css?v=4ae1632d" />
+      <link rel="stylesheet" type="text/css" href="../../_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css?v=be8a1c11" />
 
   
       <script src="../../_static/jquery.js?v=5d32c60e"></script>
@@ -43,6 +44,7 @@
               <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../Documentation/index.html">Documentation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../Examples/index.html">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../Tutorials/index.html">Tutorials</a></li>
 </ul>
 
         </div>
@@ -83,6 +85,7 @@
 <span class="sd">    ----------</span>
 <span class="sd">    matrix : np.ndarray</span>
 <span class="sd">        The matrix to make symmetric.</span>
+
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
 <span class="sd">    np.ndarray</span>
@@ -93,7 +96,9 @@
 
 <div class="viewcode-block" id="autocorrelation_matrix">
 <a class="viewcode-back" href="../../Documentation/utils.html#dasftoolbox.utils.autocorrelation_matrix">[docs]</a>
-<span class="k">def</span> <span class="nf">autocorrelation_matrix</span><span class="p">(</span><span class="n">data</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="k">def</span> <span class="nf">autocorrelation_matrix</span><span class="p">(</span>
+    <span class="n">data</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">normalizer</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Computes the autocorrelation matrix of the data.</span>
 
@@ -101,19 +106,24 @@
 <span class="sd">    ----------</span>
 <span class="sd">    data : np.ndarray</span>
 <span class="sd">        The data to compute the autocorrelation matrix for.</span>
+
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
 <span class="sd">    np.ndarray</span>
 <span class="sd">        The autocorrelation matrix.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">matrix</span> <span class="o">=</span> <span class="n">data</span> <span class="o">@</span> <span class="n">data</span><span class="o">.</span><span class="n">T</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">normalizer</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">normalizer</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="n">matrix</span> <span class="o">=</span> <span class="n">data</span> <span class="o">@</span> <span class="n">data</span><span class="o">.</span><span class="n">T</span> <span class="o">/</span> <span class="n">normalizer</span>
     <span class="k">return</span> <span class="n">make_symmetric</span><span class="p">(</span><span class="n">matrix</span><span class="p">)</span></div>
 
 
 
 <div class="viewcode-block" id="cross_correlation_matrix">
 <a class="viewcode-back" href="../../Documentation/utils.html#dasftoolbox.utils.cross_correlation_matrix">[docs]</a>
-<span class="k">def</span> <span class="nf">cross_correlation_matrix</span><span class="p">(</span><span class="n">data1</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">data2</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="k">def</span> <span class="nf">cross_correlation_matrix</span><span class="p">(</span>
+    <span class="n">data1</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">data2</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">normalizer</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Computes the cross-correlation matrix of the data.</span>
 
@@ -123,18 +133,21 @@
 <span class="sd">        The first data to compute the cross-correlation matrix for.</span>
 <span class="sd">    data2 : np.ndarray</span>
 <span class="sd">        The second data to compute the cross-correlation matrix for.</span>
+
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
 <span class="sd">    np.ndarray</span>
 <span class="sd">        The cross-correlation matrix.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="n">data1</span> <span class="o">@</span> <span class="n">data2</span><span class="o">.</span><span class="n">T</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="n">data1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span></div>
+    <span class="k">if</span> <span class="n">normalizer</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">normalizer</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="n">data1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">data1</span> <span class="o">@</span> <span class="n">data2</span><span class="o">.</span><span class="n">T</span> <span class="o">/</span> <span class="n">normalizer</span></div>
 
 
 
 <div class="viewcode-block" id="covariance_matrix">
 <a class="viewcode-back" href="../../Documentation/utils.html#dasftoolbox.utils.covariance_matrix">[docs]</a>
-<span class="k">def</span> <span class="nf">covariance_matrix</span><span class="p">(</span><span class="n">data</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="k">def</span> <span class="nf">covariance_matrix</span><span class="p">(</span><span class="n">data</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">normalizer</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Computes the covariance matrix of the data.</span>
 
@@ -142,14 +155,16 @@
 <span class="sd">    ---------</span>
 <span class="sd">    data : np.ndarray</span>
 <span class="sd">        The data to compute the covariance matrix for.</span>
+
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
 <span class="sd">    np.ndarray</span>
 <span class="sd">        The covariance matrix.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">normalizer</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">normalizer</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
     <span class="n">matrix</span> <span class="o">=</span> <span class="p">(</span>
-        <span class="n">data</span> <span class="o">@</span> <span class="n">data</span><span class="o">.</span><span class="n">T</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
-        <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span> <span class="o">@</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">T</span>
+        <span class="n">data</span> <span class="o">@</span> <span class="n">data</span><span class="o">.</span><span class="n">T</span> <span class="o">/</span> <span class="n">normalizer</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span> <span class="o">@</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">T</span>
     <span class="p">)</span>
     <span class="k">return</span> <span class="n">make_symmetric</span><span class="p">(</span><span class="n">matrix</span><span class="p">)</span></div>
 
@@ -157,7 +172,9 @@
 
 <div class="viewcode-block" id="cross_covariance_matrix">
 <a class="viewcode-back" href="../../Documentation/utils.html#dasftoolbox.utils.cross_covariance_matrix">[docs]</a>
-<span class="k">def</span> <span class="nf">cross_covariance_matrix</span><span class="p">(</span><span class="n">data1</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">data2</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="k">def</span> <span class="nf">cross_covariance_matrix</span><span class="p">(</span>
+    <span class="n">data1</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">data2</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">normalizer</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Computes the cross-covariance matrix of the data.</span>
 
@@ -167,14 +184,16 @@
 <span class="sd">        The first data to compute the cross-covariance matrix for.</span>
 <span class="sd">    data2 : np.ndarray</span>
 <span class="sd">        The second data to compute the cross-covariance matrix for.</span>
+
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
 <span class="sd">    np.ndarray</span>
 <span class="sd">        The cross-covariance matrix.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">normalizer</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">normalizer</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="n">data1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
     <span class="k">return</span> <span class="p">(</span>
-        <span class="n">data1</span> <span class="o">@</span> <span class="n">data2</span><span class="o">.</span><span class="n">T</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="n">data1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
-        <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">data1</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span> <span class="o">@</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">data2</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">T</span>
+        <span class="n">data1</span> <span class="o">@</span> <span class="n">data2</span><span class="o">.</span><span class="n">T</span> <span class="o">/</span> <span class="n">normalizer</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">data1</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span> <span class="o">@</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">data2</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">T</span>
     <span class="p">)</span></div>
 
 
@@ -191,6 +210,7 @@
 <span class="sd">        The data to normalize.</span>
 <span class="sd">    scale : float</span>
 <span class="sd">        The scale to normalize the data to. Default is 1.</span>
+
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
 <span class="sd">    np.ndarray</span>

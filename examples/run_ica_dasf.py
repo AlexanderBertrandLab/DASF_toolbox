@@ -1,6 +1,6 @@
-import numpy as np
 import matplotlib as mpl
 import matplotlib.pyplot as plt
+import numpy as np
 
 # Choose plot backend.
 mpl.use("macosx")
@@ -8,13 +8,14 @@ mpl.use("macosx")
 # mpl.use('TkAgg')
 # mpl.use("Agg")
 from dasftoolbox import (
-    NetworkGraph,
+    DASF,
     ConvergenceParameters,
+    DynamicPlotParameters,
+    NetworkGraph,
+    get_stationary_setting,
 )
-from dasftoolbox.optimization_problems.ica_problem import ICAProblem
 from dasftoolbox.data_retrievers.ica_data_retriever import ICADataRetriever
-from dasftoolbox import get_stationary_setting
-from dasftoolbox import DASF, DynamicPlotParameters
+from dasftoolbox.optimization_problems.ica_problem import ICAProblem
 
 random_seed = 2025
 rng = np.random.default_rng(random_seed)

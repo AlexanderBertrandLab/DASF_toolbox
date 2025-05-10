@@ -9,6 +9,7 @@ def make_symmetric(matrix: np.ndarray) -> np.ndarray:
     ----------
     matrix : np.ndarray
         The matrix to make symmetric.
+
     Returns
     -------
     np.ndarray
@@ -16,7 +17,9 @@ def make_symmetric(matrix: np.ndarray) -> np.ndarray:
     return (matrix + matrix.T) / 2
 
 
-def autocorrelation_matrix(data: np.ndarray) -> np.ndarray:
+def autocorrelation_matrix(
+    data: np.ndarray, normalizer: int | None = None
+) -> np.ndarray:
     """
     Computes the autocorrelation matrix of the data.
 
@@ -24,16 +27,21 @@ def autocorrelation_matrix(data: np.ndarray) -> np.ndarray:
     ----------
     data : np.ndarray
         The data to compute the autocorrelation matrix for.
+
     Returns
     -------
     np.ndarray
         The autocorrelation matrix.
     """
-    matrix = data @ data.T / np.size(data, 1)
+    if normalizer is None:
+        normalizer = np.size(data, 1)
+    matrix = data @ data.T / normalizer
     return make_symmetric(matrix)
 
 
-def cross_correlation_matrix(data1: np.ndarray, data2: np.ndarray) -> np.ndarray:
+def cross_correlation_matrix(
+    data1: np.ndarray, data2: np.ndarray, normalizer: int | None = None
+) -> np.ndarray:
     """
     Computes the cross-correlation matrix of the data.
 
@@ -43,15 +51,18 @@ def cross_correlation_matrix(data1: np.ndarray, data2: np.ndarray) -> np.ndarray
         The first data to compute the cross-correlation matrix for.
     data2 : np.ndarray
         The second data to compute the cross-correlation matrix for.
+
     Returns
     -------
     np.ndarray
         The cross-correlation matrix.
     """
-    return data1 @ data2.T / np.size(data1, 1)
+    if normalizer is None:
+        normalizer = np.size(data1, 1)
+    return data1 @ data2.T / normalizer
 
 
-def covariance_matrix(data: np.ndarray) -> np.ndarray:
+def covariance_matrix(data: np.ndarray, normalizer: int | None = None) -> np.ndarray:
     """
     Computes the covariance matrix of the data.
 
@@ -59,19 +70,23 @@ def covariance_matrix(data: np.ndarray) -> np.ndarray:
     ---------
     data : np.ndarray
         The data to compute the covariance matrix for.
+
     Returns
     -------
     np.ndarray
         The covariance matrix.
     """
+    if normalizer is None:
+        normalizer = np.size(data, 1)
     matrix = (
-        data @ data.T / np.size(data, 1)
-        - np.mean(data, axis=1) @ np.mean(data, axis=1).T
+        data @ data.T / normalizer - np.mean(data, axis=1) @ np.mean(data, axis=1).T
     )
     return make_symmetric(matrix)
 
 
-def cross_covariance_matrix(data1: np.ndarray, data2: np.ndarray) -> np.ndarray:
+def cross_covariance_matrix(
+    data1: np.ndarray, data2: np.ndarray, normalizer: int | None = None
+) -> np.ndarray:
     """
     Computes the cross-covariance matrix of the data.
 
@@ -81,14 +96,16 @@ def cross_covariance_matrix(data1: np.ndarray, data2: np.ndarray) -> np.ndarray:
         The first data to compute the cross-covariance matrix for.
     data2 : np.ndarray
         The second data to compute the cross-covariance matrix for.
+
     Returns
     -------
     np.ndarray
         The cross-covariance matrix.
     """
+    if normalizer is None:
+        normalizer = np.size(data1, 1)
     return (
-        data1 @ data2.T / np.size(data1, 1)
-        - np.mean(data1, axis=1) @ np.mean(data2, axis=1).T
+        data1 @ data2.T / normalizer - np.mean(data1, axis=1) @ np.mean(data2, axis=1).T
     )
 
 
@@ -102,6 +119,7 @@ def normalize(data: np.ndarray, scale: float = 1):
         The data to normalize.
     scale : float
         The scale to normalize the data to. Default is 1.
+
     Returns
     -------
     np.ndarray

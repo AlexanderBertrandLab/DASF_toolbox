@@ -1,13 +1,11 @@
+import logging
+
 import numpy as np
-from dasftoolbox.problem_settings import ProblemInputs
-from dasftoolbox.optimization_problems.optimization_problem import OptimizationProblem
-from dasftoolbox.problem_settings import ConvergenceParameters
-
-from dasftoolbox.utils import autocorrelation_matrix, make_symmetric
-
 import scipy.optimize as opt
 
-import logging
+from dasftoolbox.optimization_problems.optimization_problem import OptimizationProblem
+from dasftoolbox.problem_settings import ConvergenceParameters, ProblemInputs
+from dasftoolbox.utils import autocorrelation_matrix, make_symmetric
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
