@@ -112,6 +112,7 @@
         <span class="n">initial_estimate</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">|</span> <span class="nb">list</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">rng</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">Generator</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">nb_variables</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">nb_filters</span> <span class="o">=</span> <span class="n">nb_filters</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">convergence_parameters</span> <span class="o">=</span> <span class="n">convergence_parameters</span>
@@ -119,6 +120,15 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">rng</span> <span class="o">=</span> <span class="n">rng</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">nb_variables</span> <span class="o">=</span> <span class="n">nb_variables</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_X_star</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_init_args</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
+            <span class="n">nb_filters</span><span class="o">=</span><span class="n">nb_filters</span><span class="p">,</span>
+            <span class="n">convergence_parameters</span><span class="o">=</span><span class="n">convergence_parameters</span><span class="p">,</span>
+            <span class="n">initial_estimate</span><span class="o">=</span><span class="n">initial_estimate</span><span class="p">,</span>
+            <span class="n">rng</span><span class="o">=</span><span class="n">rng</span><span class="p">,</span>
+            <span class="n">nb_variables</span><span class="o">=</span><span class="n">nb_variables</span><span class="p">,</span>
+            <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+        <span class="p">)</span>
 
 <div class="viewcode-block" id="OptimizationProblem.solve">
 <a class="viewcode-back" href="../../../Documentation/optimization_problems.html#dasftoolbox.optimization_problems.optimization_problem.OptimizationProblem.solve">[docs]</a>
@@ -218,7 +228,25 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_X_star</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;The problem has not been solved yet.&quot;</span><span class="p">)</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_X_star</span></div>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_X_star</span>
+
+<div class="viewcode-block" id="OptimizationProblem.copy">
+<a class="viewcode-back" href="../../../Documentation/optimization_problems.html#dasftoolbox.optimization_problems.optimization_problem.OptimizationProblem.copy">[docs]</a>
+    <span class="k">def</span> <span class="nf">copy</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return a copy of the class instance.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="p">(</span><span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">_init_args</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="OptimizationProblem.reset_X_star">
+<a class="viewcode-back" href="../../../Documentation/optimization_problems.html#dasftoolbox.optimization_problems.optimization_problem.OptimizationProblem.reset_X_star">[docs]</a>
+    <span class="k">def</span> <span class="nf">reset_X_star</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Reset the value of :math:`X^*` saved in the class.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_X_star</span> <span class="o">=</span> <span class="kc">None</span></div>
+</div>
 
 </pre></div>
 

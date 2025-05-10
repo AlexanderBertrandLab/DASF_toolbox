@@ -36,6 +36,7 @@ class OptimizationProblem(ABC):
         initial_estimate: np.ndarray | list[np.ndarray] | None = None,
         rng: np.random.Generator | None = None,
         nb_variables: int = 1,
+        **kwargs,
     ) -> None:
         self.nb_filters = nb_filters
         self.convergence_parameters = convergence_parameters
@@ -43,6 +44,15 @@ class OptimizationProblem(ABC):
         self.rng = rng
         self.nb_variables = nb_variables
         self._X_star = None
+
+        self._init_args = dict(
+            nb_filters=nb_filters,
+            convergence_parameters=convergence_parameters,
+            initial_estimate=initial_estimate,
+            rng=rng,
+            nb_variables=nb_variables,
+            **kwargs,
+        )
 
     @abstractmethod
     def solve(
@@ -134,3 +144,15 @@ class OptimizationProblem(ABC):
         if self._X_star is None:
             logger.warning("The problem has not been solved yet.")
         return self._X_star
+
+    def copy(self):
+        """
+        Return a copy of the class instance.
+        """
+        return self.__class__(**self._init_args)
+
+    def reset_X_star(self) -> None:
+        """
+        Reset the value of :math:`X^*` saved in the class.
+        """
+        self._X_star = None

@@ -32,11 +32,13 @@ class RTLSProblem(OptimizationProblem):
         nb_filters: int,
         convergence_parameters: ConvergenceParameters,
         initial_estimate: np.ndarray | None = None,
+        **kwargs,
     ) -> None:
         super().__init__(
             nb_filters=nb_filters,
             convergence_parameters=convergence_parameters,
             initial_estimate=initial_estimate,
+            **kwargs,
         )
 
     def solve(

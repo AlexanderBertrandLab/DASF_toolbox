@@ -35,9 +35,12 @@ class ICAProblem(OptimizationProblem):
         convergence_parameters: ConvergenceParameters,
         negentropy: Literal["logcosh", "exponential", "kurtosis"] = "logcosh",
         alpha: int = 1,
+        **kwargs,
     ) -> None:
         super().__init__(
-            nb_filters=nb_filters, convergence_parameters=convergence_parameters
+            nb_filters=nb_filters,
+            convergence_parameters=convergence_parameters,
+            **kwargs,
         )
         self.alpha = alpha
         if negentropy == "logcosh":

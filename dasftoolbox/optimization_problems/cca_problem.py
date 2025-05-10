@@ -22,11 +22,8 @@ class CCAProblem(OptimizationProblem):
         Number of filters.
     """
 
-    def __init__(
-        self,
-        nb_filters: int,
-    ) -> None:
-        super().__init__(nb_filters=nb_filters, nb_variables=2)
+    def __init__(self, nb_filters: int, **kwargs) -> None:
+        super().__init__(nb_filters=nb_filters, nb_variables=2, **kwargs)
 
     def solve(
         self,

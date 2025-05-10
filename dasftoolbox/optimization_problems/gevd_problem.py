@@ -18,11 +18,8 @@ class GEVDProblem(OptimizationProblem):
         Number of filters.
     """
 
-    def __init__(
-        self,
-        nb_filters: int,
-    ) -> None:
-        super().__init__(nb_filters=nb_filters)
+    def __init__(self, nb_filters: int, **kwargs) -> None:
+        super().__init__(nb_filters=nb_filters, **kwargs)
 
     def solve(
         self,

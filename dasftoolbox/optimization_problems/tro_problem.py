@@ -25,10 +25,12 @@ class TROProblem(OptimizationProblem):
     """
 
     def __init__(
-        self, nb_filters: int, convergence_parameters: ConvergenceParameters
+        self, nb_filters: int, convergence_parameters: ConvergenceParameters, **kwargs
     ) -> None:
         super().__init__(
-            nb_filters=nb_filters, convergence_parameters=convergence_parameters
+            nb_filters=nb_filters,
+            convergence_parameters=convergence_parameters,
+            **kwargs,
         )
 
     def solve(
