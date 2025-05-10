@@ -27,6 +27,8 @@ def autocorrelation_matrix(
     ----------
     data : np.ndarray
         The data to compute the autocorrelation matrix for.
+    normalizer : int | None
+        The integer to divide for normalization. If None, it is set to the number of columns (i.e., samples) of `data`.
 
     Returns
     -------
@@ -51,6 +53,8 @@ def cross_correlation_matrix(
         The first data to compute the cross-correlation matrix for.
     data2 : np.ndarray
         The second data to compute the cross-correlation matrix for.
+    normalizer : int | None
+        The integer to divide for normalization. If None, it is set to the number of columns (i.e., samples) of `data1`.
 
     Returns
     -------
@@ -70,6 +74,8 @@ def covariance_matrix(data: np.ndarray, normalizer: int | None = None) -> np.nda
     ---------
     data : np.ndarray
         The data to compute the covariance matrix for.
+    normalizer : int | None
+        The integer to divide for normalization. If None, it is set to the number of columns (i.e., samples) of `data`.
 
     Returns
     -------
@@ -96,6 +102,8 @@ def cross_covariance_matrix(
         The first data to compute the cross-covariance matrix for.
     data2 : np.ndarray
         The second data to compute the cross-covariance matrix for.
+    normalizer : int | None
+        The integer to divide for normalization. If None, it is set to the number of columns (i.e., samples) of `data1`.
 
     Returns
     -------

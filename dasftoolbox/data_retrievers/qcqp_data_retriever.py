@@ -30,7 +30,7 @@ class QCQPDataRetriever(DataRetriever):
     nb_filters : int
         Number of filters, i.e., number of columns :math:`Q` of :math:`X`.
     nb_sensors : int
-        Number of sensors in the network. Equals to :math:`M`, the dimension of :math:`\mathbf{y}` and :math:`\mathbf{v}`.
+        Number of sensors in the network. Equals to :math:`M`, the dimension of :math:`\mathbf{y}`.
     nb_windows : int
         Number of windows of data.
     rng : np.random.Generator

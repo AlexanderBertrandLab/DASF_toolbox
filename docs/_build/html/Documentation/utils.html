@@ -115,7 +115,10 @@
 <dd><p>Computes the autocorrelation matrix of the data.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>data</strong> (<em>np.ndarray</em>) – The data to compute the autocorrelation matrix for.</p>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>data</strong> (<em>np.ndarray</em>) – The data to compute the autocorrelation matrix for.</p></li>
+<li><p><strong>normalizer</strong> (<em>int</em><em> | </em><em>None</em>) – The integer to divide for normalization. If None, it is set to the number of columns (i.e., samples) of <cite>data</cite>.</p></li>
+</ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>The autocorrelation matrix.</p>
@@ -135,6 +138,7 @@
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>data1</strong> (<em>np.ndarray</em>) – The first data to compute the cross-correlation matrix for.</p></li>
 <li><p><strong>data2</strong> (<em>np.ndarray</em>) – The second data to compute the cross-correlation matrix for.</p></li>
+<li><p><strong>normalizer</strong> (<em>int</em><em> | </em><em>None</em>) – The integer to divide for normalization. If None, it is set to the number of columns (i.e., samples) of <cite>data1</cite>.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
@@ -152,7 +156,10 @@
 <dd><p>Computes the covariance matrix of the data.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>data</strong> (<em>np.ndarray</em>) – The data to compute the covariance matrix for.</p>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>data</strong> (<em>np.ndarray</em>) – The data to compute the covariance matrix for.</p></li>
+<li><p><strong>normalizer</strong> (<em>int</em><em> | </em><em>None</em>) – The integer to divide for normalization. If None, it is set to the number of columns (i.e., samples) of <cite>data</cite>.</p></li>
+</ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>The covariance matrix.</p>
@@ -172,6 +179,7 @@
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>data1</strong> (<em>np.ndarray</em>) – The first data to compute the cross-covariance matrix for.</p></li>
 <li><p><strong>data2</strong> (<em>np.ndarray</em>) – The second data to compute the cross-covariance matrix for.</p></li>
+<li><p><strong>normalizer</strong> (<em>int</em><em> | </em><em>None</em>) – The integer to divide for normalization. If None, it is set to the number of columns (i.e., samples) of <cite>data1</cite>.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>

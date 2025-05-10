@@ -14,13 +14,13 @@ class RTLSDataRetriever(DataRetriever):
 
     Simulates a setting where noisy mixture of sources are observed by the nodes of the network.
 
-    Formally, the signals generated are given by :math:`\mathbf{y}(t)=A(t)\cdot\mathbf{s}(t)+\mathbf{n}(t)`, where :math:`\mathbf{s}\in\mathbb{R}^L` corresponds to the source signal, :math:`\mathbf{n}\in\mathbb{R}^M` to the noise and :math:`A\in\mathbb{R}^{M\times L}` to the mixture matrix. The non-stationarity of :math:`\mathbf{y}` follows from the dependence of :math:`A` on time, where :math:`A(t)=A_0+\Delta\cdot w(t)`, with :math:`w` representing a weight function varying in time.
+    Formally, the signals generated are given by :math:`\mathbf{y}(t)=A(t)\cdot\mathbf{s}(t)+\mathbf{n}(t)`, where :math:`\mathbf{s}\in\mathbb{R}^P` corresponds to the source signal, :math:`\mathbf{n}\in\mathbb{R}^M` to the noise and :math:`A\in\mathbb{R}^{M\times P}` to the mixture matrix. The non-stationarity of :math:`\mathbf{y}` follows from the dependence of :math:`A` on time, where :math:`A(t)=A_0+\Delta\cdot w(t)`, with :math:`w` representing a weight function varying in time.
 
-    Additionally, the target signal :math:`\mathbf{d}\in\mathbb{R}^L` is also noisy, where :math:`\mathbf{d}(t)=\mathbf{s}(t)+\mathbf{n}_d(t)`.
+    Additionally, the target signal :math:`\mathbf{d}\in\mathbb{R}^P` is also noisy, where :math:`\mathbf{d}(t)=\mathbf{s}(t)+\mathbf{n}_d(t)`.
 
     The signal :math:`\mathbf{y}` is normalized to have unit norm and zero mean.
 
-    The constants of the problem are chosen as :math:`\delta=1` and :math:`L\in\mahbb{R}^{L\\times L}` is a diagonal matrix with diagonal entries following a Gaussian distribution centered around 1.
+    The constants of the problem are chosen as :math:`\delta=1` and :math:`L\in\mahbb{R}^{M\\times M}` is a diagonal matrix with diagonal entries following a Gaussian distribution centered around 1.
 
 
     Attributes
@@ -28,9 +28,9 @@ class RTLSDataRetriever(DataRetriever):
     data_window_params : DataWindowParameters
         Class instance storing the parameters that define a window of data.
     nb_sources : int
-        Number of sources. Represents the number of true number of sources that generate the data. Equals to :math:`L`, the dimension of :math:`\mathbf{d}`. By default 10.
+        Number of sources. Represents the number of true number of sources that generate the data. Equals to :math:`P`, the dimension of :math:`\mathbf{d}`.
     nb_sensors : int
-        Number of sensors in the network. Equals to :math:`M`, the dimension of :math:`\mathbf{y}` and :math:`\mathbf{v}`.
+        Number of sensors in the network. Equals to :math:`M`, the dimension of :math:`\mathbf{y}`.
     nb_windows : int
         Number of windows of data.
     rng : np.random.Generator
@@ -40,7 +40,7 @@ class RTLSDataRetriever(DataRetriever):
     noise_var : float
         Variance of the noise, i.e., :math:`\mathbf{n}`. By default 0.1.
     noise_var_D : float
-        Variance of the noise on :math:`\mathbf{d}`, i.e., :math:`\mathbf{n}`. By default 0.02.
+        Variance of the noise on :math:`\mathbf{d}`, i.e., :math:`\mathbf{n}_d`. By default 0.02.
     mixture_var : float
         Variance of the elements of mixture matrix :math:`A_0`. By default 0.5.
     diff_var : float

@@ -912,7 +912,7 @@ class DASF:
         self,
         constraints: Callable[[np.ndarray], np.ndarray]
         | list[Callable[[np.ndarray], np.ndarray]],
-        return_constraints: bool = False,
+        return_nb_constraints: bool = False,
     ) -> bool | Tuple[bool, int]:
         """
         Verifies that the number of constraints does not exceed the theoretical thresholds. If it is the case, convergence cannot be guaranteed.
@@ -984,7 +984,7 @@ class DASF:
             )
             is_valid = False
 
-        if return_constraints:
+        if return_nb_constraints:
             return is_valid, nb_constraints
         else:
             return is_valid
