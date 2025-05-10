@@ -20,7 +20,7 @@ class ProblemInputs:
     fused_constants : list[np.ndarray] | None = None
         List of constant arrays to be fused by the variable. Similar to the signals, but do not change in time.
     fused_quadratics : list[np.ndarray] | None = None
-        List of block-diagonal arrays to be fused by the variable from both sides, e.g., X.T @ M @ X.
+        List of block-diagonal arrays to be fused by the variable from both sides, e.g., :math:`X^T M X`.
     global_parameters : list[np.ndarray] | None = None
         List of arrays that are not fused by the variable, but are needed to solve the optimization problem.
     """

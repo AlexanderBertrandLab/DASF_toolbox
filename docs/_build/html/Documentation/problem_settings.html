@@ -18,6 +18,8 @@
       <script src="../_static/documentation_options.js?v=5929fcd5"></script>
       <script src="../_static/doctools.js?v=9bcbadda"></script>
       <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script>window.MathJax = {"options": {"processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+      <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
@@ -106,7 +108,7 @@
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>fused_signals</strong> (<em>list</em><em>[</em><em>np.ndarray</em><em>]</em>) – List of signals to be fused by the variable.</p></li>
 <li><p><strong>fused_constants</strong> (<em>list</em><em>[</em><em>np.ndarray</em><em>] </em><em>| </em><em>None = None</em>) – List of constant arrays to be fused by the variable. Similar to the signals, but do not change in time.</p></li>
-<li><p><strong>fused_quadratics</strong> (<em>list</em><em>[</em><em>np.ndarray</em><em>] </em><em>| </em><em>None = None</em>) – List of block-diagonal arrays to be fused by the variable from both sides, e.g., X.T &#64; M &#64; X.</p></li>
+<li><p><strong>fused_quadratics</strong> (<em>list</em><em>[</em><em>np.ndarray</em><em>] </em><em>| </em><em>None = None</em>) – List of block-diagonal arrays to be fused by the variable from both sides, e.g., <span class="math notranslate nohighlight">\(X^T M X\)</span>.</p></li>
 <li><p><strong>global_parameters</strong> (<em>list</em><em>[</em><em>np.ndarray</em><em>] </em><em>| </em><em>None = None</em>) – List of arrays that are not fused by the variable, but are needed to solve the optimization problem.</p></li>
 </ul>
 </dd>

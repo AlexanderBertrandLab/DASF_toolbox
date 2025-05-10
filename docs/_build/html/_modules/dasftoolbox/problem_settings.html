@@ -96,7 +96,7 @@
 <span class="sd">    fused_constants : list[np.ndarray] | None = None</span>
 <span class="sd">        List of constant arrays to be fused by the variable. Similar to the signals, but do not change in time.</span>
 <span class="sd">    fused_quadratics : list[np.ndarray] | None = None</span>
-<span class="sd">        List of block-diagonal arrays to be fused by the variable from both sides, e.g., X.T @ M @ X.</span>
+<span class="sd">        List of block-diagonal arrays to be fused by the variable from both sides, e.g., :math:`X^T M X`.</span>
 <span class="sd">    global_parameters : list[np.ndarray] | None = None</span>
 <span class="sd">        List of arrays that are not fused by the variable, but are needed to solve the optimization problem.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
