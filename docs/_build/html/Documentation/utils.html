@@ -57,6 +57,7 @@
 <li class="toctree-l3"><a class="reference internal" href="#dasftoolbox.utils.covariance_matrix"><code class="docutils literal notranslate"><span class="pre">covariance_matrix()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#dasftoolbox.utils.cross_covariance_matrix"><code class="docutils literal notranslate"><span class="pre">cross_covariance_matrix()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#dasftoolbox.utils.normalize"><code class="docutils literal notranslate"><span class="pre">normalize()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#dasftoolbox.utils.is_method_overridden"><code class="docutils literal notranslate"><span class="pre">is_method_overridden()</span></code></a></li>
 </ul>
 </li>
 </ul>
@@ -207,6 +208,27 @@
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>np.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="dasftoolbox.utils.is_method_overridden">
+<span class="sig-prename descclassname"><span class="pre">dasftoolbox.utils.</span></span><span class="sig-name descname"><span class="pre">is_method_overridden</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">instance</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">base_class</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="reference internal" href="../_modules/dasftoolbox/utils.html#is_method_overridden"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dasftoolbox.utils.is_method_overridden" title="Link to this definition"></a></dt>
+<dd><p>Check whether a method has been overridden in an instance compared to a base class.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>instance</strong> (<em>Any</em>) – The instance to check for the overridden method.</p></li>
+<li><p><strong>base_class</strong> (<em>Type</em>) – The base class to compare the method against.</p></li>
+<li><p><strong>method_name</strong> (<em>str</em>) – Name of the method to check.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>True if the method has been overridden in the instance, False otherwise.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bool</p>
 </dd>
 </dl>
 </dd></dl>

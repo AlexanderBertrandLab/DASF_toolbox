@@ -3,7 +3,10 @@ import logging
 import numpy as np
 import scipy.optimize as opt
 
-from dasftoolbox.optimization_problems.optimization_problem import OptimizationProblem
+from dasftoolbox.optimization_problems.optimization_problem import (
+    ConstraintType,
+    OptimizationProblem,
+)
 from dasftoolbox.problem_settings import ConvergenceParameters, ProblemInputs
 from dasftoolbox.utils import autocorrelation_matrix, make_symmetric
 
@@ -188,3 +191,19 @@ class RTLSProblem(OptimizationProblem):
         f = (X.T @ Ryy @ X - 2 * X.T @ ryd + rdd) / (X.T @ Gamma @ X + 1)
 
         return f
+
+    def get_problem_constraints(self, problem_inputs: ProblemInputs) -> ConstraintType:
+        L = problem_inputs.fused_constants[0]
+        delta = problem_inputs.global_parameters[1]
+
+        LL = L @ L.T
+        LL = make_symmetric(LL)
+
+        def inequality_constraint(X: np.ndarray) -> np.ndarray:
+            return np.trace(X.T @ LL @ X) - delta**2
+
+        return None, inequality_constraint
+
+    get_problem_constraints.__doc__ = (
+        OptimizationProblem.get_problem_constraints.__doc__
+    )

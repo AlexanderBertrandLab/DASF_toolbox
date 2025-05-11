@@ -1,6 +1,9 @@
 import numpy as np
 
-from dasftoolbox.optimization_problems.optimization_problem import OptimizationProblem
+from dasftoolbox.optimization_problems.optimization_problem import (
+    ConstraintType,
+    OptimizationProblem,
+)
 from dasftoolbox.problem_settings import ConvergenceParameters, ProblemInputs
 from dasftoolbox.utils import (
     autocorrelation_matrix,
@@ -91,3 +94,10 @@ class MMSEProblem(OptimizationProblem):
         f = np.trace(X.T @ Ryy @ X) - 2 * np.trace(X.T @ Ryd) + np.trace(Rdd)
 
         return f
+
+    def get_problem_constraints(self, **kwargs) -> ConstraintType:
+        return None
+
+    get_problem_constraints.__doc__ = (
+        OptimizationProblem.get_problem_constraints.__doc__
+    )

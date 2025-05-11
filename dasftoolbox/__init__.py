@@ -19,6 +19,7 @@ from .data_retrievers.data_retriever import (
     get_stationary_setting as get_stationary_setting,
 )
 from .optimization_problems import optimization_problem
+from .optimization_problems.optimization_problem import ConstraintType as ConstraintType
 from .optimization_problems.optimization_problem import (
     OptimizationProblem as OptimizationProblem,
 )

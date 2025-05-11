@@ -1,5 +1,6 @@
 import logging
 from abc import ABC, abstractmethod
+from typing import Callable, Tuple
 
 import numpy as np
 
@@ -10,6 +11,11 @@ from dasftoolbox.problem_settings import (
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
+
+ConstraintType = (
+    Callable[[np.ndarray | list[np.ndarray]], np.ndarray]
+    | list[Callable[[np.ndarray | list[np.ndarray]], np.ndarray]]
+)
 
 
 class OptimizationProblem(ABC):
@@ -130,6 +136,104 @@ class OptimizationProblem(ABC):
             Resolved solution.
         """
         return X_current
+
+    @abstractmethod
+    def get_problem_constraints(
+        self,
+        problem_inputs: ProblemInputs | list[ProblemInputs],
+    ) -> Tuple[ConstraintType | None, ConstraintType | None] | None:
+        """
+        Return the constraints of the optimization problem. By convention, every ineuality constraint is given by :math:`h(X)\leq 0`.
+
+        Parameters
+        ----------
+        problem_inputs : ProblemInputs or list of ProblemInputs
+            The inputs of the problem.
+
+        Returns
+        -------
+        constraints : tuple of (ConstraintType or None, ConstraintType or None) or None
+            If constraints are defined, returns a tuple:
+            - First element: equality constraints (or None if not present).
+            - Second element: inequality constraints (or None if not present).
+            If no constraints are defined, returns None.
+        """
+        pass
+
+    def X_satisfies_constraints(
+        self,
+        X: np.ndarray | list[np.ndarray],
+        problem_inputs: ProblemInputs | list[ProblemInputs],
+    ) -> bool:
+        """
+        Verify whether the constraints of the problem are satisfied at a given point.
+
+        Parameters
+        ----------
+        X : np.ndarray or list of np.ndarray
+            Point at which to check the constraints.
+
+        Returns
+        -------
+        bool
+            Boolean which is `True` if all constraints are satisfied or if the problem is unbounded, and `false` otherwise.
+        """
+        tolerance = 1e-8
+        all_constraints = self.get_problem_constraints(problem_inputs=problem_inputs)
+        if all_constraints is None:
+            logger.info("Problem is unconstrained.")
+            return True
+        equality_constraints, inequality_constraints = all_constraints
+        if equality_constraints is None and inequality_constraints is None:
+            raise ValueError(
+                "Both equality and inequality constraints are `None`. If the problem is unconstrained, please return `None` from `get_problem_constraints`."
+            )
+        elif equality_constraints is None and inequality_constraints is not None:
+            valid_constraints = (
+                [inequality_constraints]
+                if isinstance(inequality_constraints, Callable)
+                else inequality_constraints
+            )
+            return np.all(
+                [np.all(constr(X) <= tolerance) for constr in valid_constraints]
+            )
+        elif equality_constraints is not None and inequality_constraints is None:
+            valid_constraints = (
+                [equality_constraints]
+                if isinstance(equality_constraints, Callable)
+                else equality_constraints
+            )
+            return np.all(
+                [
+                    np.allclose(constr(X), 0.0, atol=tolerance)
+                    for constr in valid_constraints
+                ]
+            )
+        else:
+            valid_equality_constraints = (
+                [equality_constraints]
+                if isinstance(equality_constraints, Callable)
+                else equality_constraints
+            )
+            check_equality = np.all(
+                [
+                    np.allclose(constr(X), 0.0, atol=tolerance)
+                    for constr in valid_equality_constraints
+                ]
+            )
+            valid_inequality_constraints = (
+                [inequality_constraints]
+                if isinstance(inequality_constraints, Callable)
+                else inequality_constraints
+            )
+            check_inequality = np.all(
+                [
+                    np.all(constr(X) <= tolerance)
+                    for constr in valid_inequality_constraints
+                ]
+            )
+
+            return check_equality and check_inequality
 
     @property
     def X_star(self):

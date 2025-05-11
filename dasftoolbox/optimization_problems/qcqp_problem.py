@@ -3,7 +3,10 @@ import warnings
 import numpy as np
 import scipy.optimize as opt
 
-from dasftoolbox.optimization_problems.optimization_problem import OptimizationProblem
+from dasftoolbox.optimization_problems.optimization_problem import (
+    ConstraintType,
+    OptimizationProblem,
+)
 from dasftoolbox.problem_settings import ConvergenceParameters, ProblemInputs
 from dasftoolbox.utils import autocorrelation_matrix
 
@@ -133,3 +136,21 @@ class QCQPProblem(OptimizationProblem):
         f = 0.5 * np.trace(X.T @ Ryy @ X) - np.trace(X.T @ B)
 
         return f
+
+    def get_problem_constraints(self, problem_inputs: ProblemInputs) -> ConstraintType:
+        c = problem_inputs.fused_constants[1]
+        Gamma = problem_inputs.fused_quadratics[0]
+        alpha = problem_inputs.global_parameters[0]
+        d = problem_inputs.global_parameters[1]
+
+        def equality_constraint(X: np.ndarray) -> np.ndarray:
+            return X.T @ c - d
+
+        def inequality_constraint(X: np.ndarray) -> np.ndarray:
+            return np.trace(X.T @ Gamma @ X) - alpha**2
+
+        return equality_constraint, inequality_constraint
+
+    get_problem_constraints.__doc__ = (
+        OptimizationProblem.get_problem_constraints.__doc__
+    )

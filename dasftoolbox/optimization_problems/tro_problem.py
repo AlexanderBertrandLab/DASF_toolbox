@@ -2,7 +2,10 @@ import logging
 
 import numpy as np
 
-from dasftoolbox.optimization_problems.optimization_problem import OptimizationProblem
+from dasftoolbox.optimization_problems.optimization_problem import (
+    ConstraintType,
+    OptimizationProblem,
+)
 from dasftoolbox.problem_settings import ConvergenceParameters, ProblemInputs
 from dasftoolbox.utils import autocorrelation_matrix
 
@@ -184,3 +187,15 @@ class TROProblem(OptimizationProblem):
                 X_current[:, col] = -X_current[:, col]
 
         return X_current
+
+    def get_problem_constraints(self, problem_inputs: ProblemInputs) -> ConstraintType:
+        Gamma = problem_inputs.fused_quadratics[0]
+
+        def equality_constraint(X: np.ndarray) -> np.ndarray:
+            return X.T @ Gamma @ X - np.eye(self.nb_filters)
+
+        return equality_constraint, None
+
+    get_problem_constraints.__doc__ = (
+        OptimizationProblem.get_problem_constraints.__doc__
+    )

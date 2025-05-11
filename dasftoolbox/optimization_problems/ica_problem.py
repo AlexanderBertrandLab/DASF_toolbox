@@ -3,7 +3,10 @@ from typing import Literal
 
 import numpy as np
 
-from dasftoolbox.optimization_problems.optimization_problem import OptimizationProblem
+from dasftoolbox.optimization_problems.optimization_problem import (
+    ConstraintType,
+    OptimizationProblem,
+)
 from dasftoolbox.problem_settings import ConvergenceParameters, ProblemInputs
 from dasftoolbox.utils import autocorrelation_matrix
 
@@ -402,3 +405,16 @@ class ICAProblem(OptimizationProblem):
                 X_current[:, col] = -X_current[:, col]
 
         return X_current
+
+    def get_problem_constraints(self, problem_inputs: ProblemInputs) -> ConstraintType:
+        Y = problem_inputs.fused_signals[0]
+        Ryy = autocorrelation_matrix(Y)
+
+        def equality_constraint(X: np.ndarray) -> np.ndarray:
+            return X.T @ Ryy @ X - np.eye(self.nb_filters)
+
+        return equality_constraint, None
+
+    get_problem_constraints.__doc__ = (
+        OptimizationProblem.get_problem_constraints.__doc__
+    )

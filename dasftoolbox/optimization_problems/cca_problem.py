@@ -1,7 +1,10 @@
 import numpy as np
 import scipy
 
-from dasftoolbox.optimization_problems.optimization_problem import OptimizationProblem
+from dasftoolbox.optimization_problems.optimization_problem import (
+    ConstraintType,
+    OptimizationProblem,
+)
 from dasftoolbox.problem_settings import ConvergenceParameters, ProblemInputs
 from dasftoolbox.utils import (
     autocorrelation_matrix,
@@ -151,3 +154,27 @@ class CCAProblem(OptimizationProblem):
                 W[:, col] = -W[:, col]
 
         return [X, W]
+
+    def get_problem_constraints(
+        self, problem_inputs: list[ProblemInputs]
+    ) -> ConstraintType:
+        inputs_X = problem_inputs[0]
+        inputs_W = problem_inputs[1]
+
+        Y = inputs_X.fused_signals[0]
+        V = inputs_W.fused_signals[0]
+
+        Ryy = autocorrelation_matrix(Y)
+        Rvv = autocorrelation_matrix(V)
+
+        def equality_constraints(X: list[np.ndarray]) -> list[np.ndarray]:
+            return [
+                X[0].T @ Ryy @ X[0] - np.eye(self.nb_filters),
+                X[1].T @ Rvv @ X[1] - np.eye(self.nb_filters),
+            ]
+
+        return equality_constraints, None
+
+    get_problem_constraints.__doc__ = (
+        OptimizationProblem.get_problem_constraints.__doc__
+    )

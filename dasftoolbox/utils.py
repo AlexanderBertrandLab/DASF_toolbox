@@ -1,3 +1,5 @@
+from typing import Any, Type
+
 import numpy as np
 
 
@@ -138,3 +140,26 @@ def normalize(data: np.ndarray, scale: float = 1):
     data = data - data_mean
     data = scale * data / data_var
     return data
+
+
+def is_method_overridden(instance: Any, base_class: Type, method_name: str) -> bool:
+    """
+    Check whether a method has been overridden in an instance compared to a base class.
+
+    Parameters
+    ----------
+    instance : Any
+        The instance to check for the overridden method.
+    base_class : Type
+        The base class to compare the method against.
+    method_name : str
+        Name of the method to check.
+
+    Returns
+    -------
+    bool
+        True if the method has been overridden in the instance, False otherwise.
+    """
+    method = getattr(type(instance), method_name, None)
+    base_method = getattr(base_class, method_name, None)
+    return method is not None and method is not base_method

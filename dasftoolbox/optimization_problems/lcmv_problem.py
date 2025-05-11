@@ -1,6 +1,9 @@
 import numpy as np
 
-from dasftoolbox.optimization_problems.optimization_problem import OptimizationProblem
+from dasftoolbox.optimization_problems.optimization_problem import (
+    ConstraintType,
+    OptimizationProblem,
+)
 from dasftoolbox.problem_settings import ConvergenceParameters, ProblemInputs
 from dasftoolbox.utils import autocorrelation_matrix
 
@@ -87,3 +90,16 @@ class LCMVProblem(OptimizationProblem):
         f = np.trace(X.T @ Ryy @ X)
 
         return f
+
+    def get_problem_constraints(self, problem_inputs: ProblemInputs) -> ConstraintType:
+        B = problem_inputs.fused_constants[0]
+        H = problem_inputs.global_parameters[0]
+
+        def equality_constraint(X: np.ndarray) -> np.ndarray:
+            return X.T @ B - H
+
+        return equality_constraint, None
+
+    get_problem_constraints.__doc__ = (
+        OptimizationProblem.get_problem_constraints.__doc__
+    )

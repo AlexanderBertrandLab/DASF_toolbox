@@ -72,7 +72,9 @@
            <div itemprop="articleBody">
              
   <h1>Source code for dasftoolbox.utils</h1><div class="highlight"><pre>
-<span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span></span><span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Type</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 
 
 <div class="viewcode-block" id="make_symmetric">
@@ -229,6 +231,32 @@
     <span class="n">data</span> <span class="o">=</span> <span class="n">data</span> <span class="o">-</span> <span class="n">data_mean</span>
     <span class="n">data</span> <span class="o">=</span> <span class="n">scale</span> <span class="o">*</span> <span class="n">data</span> <span class="o">/</span> <span class="n">data_var</span>
     <span class="k">return</span> <span class="n">data</span></div>
+
+
+
+<div class="viewcode-block" id="is_method_overridden">
+<a class="viewcode-back" href="../../Documentation/utils.html#dasftoolbox.utils.is_method_overridden">[docs]</a>
+<span class="k">def</span> <span class="nf">is_method_overridden</span><span class="p">(</span><span class="n">instance</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="n">base_class</span><span class="p">:</span> <span class="n">Type</span><span class="p">,</span> <span class="n">method_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Check whether a method has been overridden in an instance compared to a base class.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    instance : Any</span>
+<span class="sd">        The instance to check for the overridden method.</span>
+<span class="sd">    base_class : Type</span>
+<span class="sd">        The base class to compare the method against.</span>
+<span class="sd">    method_name : str</span>
+<span class="sd">        Name of the method to check.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    bool</span>
+<span class="sd">        True if the method has been overridden in the instance, False otherwise.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">method</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">instance</span><span class="p">),</span> <span class="n">method_name</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+    <span class="n">base_method</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">base_class</span><span class="p">,</span> <span class="n">method_name</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">method</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">method</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">base_method</span></div>
 
 </pre></div>
 

@@ -11,12 +11,16 @@ from matplotlib.figure import Figure
 from matplotlib.lines import Line2D
 
 from dasftoolbox.data_retrievers.data_retriever import DataRetriever
-from dasftoolbox.optimization_problems.optimization_problem import OptimizationProblem
+from dasftoolbox.optimization_problems.optimization_problem import (
+    ConstraintType,
+    OptimizationProblem,
+)
 from dasftoolbox.problem_settings import (
     ConvergenceParameters,
     NetworkGraph,
     ProblemInputs,
 )
+from dasftoolbox.utils import is_method_overridden
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -172,6 +176,25 @@ class DASF:
         self.f_over_iterations = []
         self.X_star_over_iterations = []
         self.f_star_over_iterations = []
+        self.objective_provided = (
+            True
+            if is_method_overridden(
+                instance=self.problem,
+                base_class=OptimizationProblem,
+                method_name="evaluate_objective",
+            )
+            else False
+        )
+        self.constraints_satisfied = []
+        self.constraints_provided = (
+            True
+            if is_method_overridden(
+                instance=self.problem,
+                base_class=OptimizationProblem,
+                method_name="get_problem_constraints",
+            )
+            else False
+        )
 
         self._validate_problem()
 
@@ -262,7 +285,7 @@ class DASF:
         Returns the sequence :math:`|f(X^{i})-f(X^*)|`.
         If there are multiple variables, the variables are first stacked vertically.
         """
-        if hasattr(self.problem, "evaluate_objective"):
+        if self.objective_provided:
             if len(self.X_over_iterations) == 0:
                 logger.warning(
                     "No iterates have been computed, use the run method first."
@@ -304,7 +327,7 @@ class DASF:
             problem_inputs=problem_inputs, initial_estimate=X
         )
         self.X_star_over_iterations.append(X_star_current_window)
-        if hasattr(self.problem, "evaluate_objective"):
+        if self.objective_provided:
             f = self.problem.evaluate_objective(X=X, problem_inputs=problem_inputs)
             self.f_over_iterations.append(f)
             self.f_star_over_iterations.append(
@@ -374,13 +397,19 @@ class DASF:
             # Global variable
             X_new = Cq @ X_tilde_new
             self.X_over_iterations.append(X_new)
+            if self.constraints_provided:
+                self.constraints_satisfied.append(
+                    self.problem.X_satisfies_constraints(
+                        X=X_new, problem_inputs=problem_inputs
+                    )
+                )
             X_star_current_window = self.problem.resolve_ambiguity(
                 X_reference=X_new,
                 X_current=X_star_current_window,
                 updating_node=updating_node,
             )
             self.X_star_over_iterations.append(X_star_current_window)
-            if hasattr(self.problem, "evaluate_objective"):
+            if self.objective_provided:
                 f_new = self.problem.evaluate_objective(
                     X=X_tilde_new, problem_inputs=compressed_inputs
                 )
@@ -406,7 +435,7 @@ class DASF:
             i += 1
 
             if (
-                hasattr(self.problem, "evaluate_objective")
+                self.objective_provided
                 and (self.dasf_convergence_params.objective_tolerance is not None)
                 and (
                     np.absolute(f_new - f)
@@ -428,7 +457,7 @@ class DASF:
                 break
 
             X = X_new.copy()
-            if hasattr(self.problem, "evaluate_objective"):
+            if self.objective_provided:
                 f = f_new
 
         if self.dynamic_plot:
@@ -901,17 +930,18 @@ class DASF:
             raise ValueError(
                 "The initial estimate does not have the correct shape for the problem."
             )
-        if not hasattr(self.problem, "solve"):
+        if not is_method_overridden(
+            instance=self.problem, base_class=OptimizationProblem, method_name="solve"
+        ):
             raise ValueError("The problem does not have a solve method.")
-        if not hasattr(self.problem, "evaluate_objective"):
+        if not self.objective_provided:
             logger.warning(
                 "The problem does not have an evaluate_objective method. The objective will not be evaluated."
             )
 
     def number_of_constraints_valid_for_convergence(
         self,
-        constraints: Callable[[np.ndarray], np.ndarray]
-        | list[Callable[[np.ndarray], np.ndarray]],
+        constraints: ConstraintType,
         return_nb_constraints: bool = False,
     ) -> bool | Tuple[bool, int]:
         """
@@ -1107,6 +1137,8 @@ class DASF:
             batch_index += 1
         batch_list = batch_list[: self.total_iterations]
         df_summary["batch"] = batch_list
+        if self.constraints_provided:
+            df_summary["constraints_satisfied"] = self.constraints_satisfied
 
         return df_summary
 
@@ -1227,7 +1259,7 @@ class DASFMultiVar(DASF):
             problem_inputs=problem_inputs, initial_estimate=X
         )
         self.X_star_over_iterations.append(X_star_current_window)
-        if hasattr(self.problem, "evaluate_objective"):
+        if self.objective_provided:
             f = self.problem.evaluate_objective(X=X, problem_inputs=problem_inputs)
             self.f_over_iterations.append(f)
             self.f_star_over_iterations.append(
@@ -1321,13 +1353,19 @@ class DASFMultiVar(DASF):
             for k in range(self.nb_variables):
                 X_new.append(Cq[k] @ X_tilde_new[k])
             self.X_over_iterations.append(X_new)
+            if self.constraints_provided:
+                self.constraints_satisfied.append(
+                    self.problem.X_satisfies_constraints(
+                        X=X_new, problem_inputs=problem_inputs
+                    )
+                )
             X_star_current_window = self.problem.resolve_ambiguity(
                 X_reference=X_new,
                 X_current=X_star_current_window,
                 updating_node=updating_node,
             )
             self.X_star_over_iterations.append(X_star_current_window)
-            if hasattr(self.problem, "evaluate_objective"):
+            if self.objective_provided:
                 f_new = self.problem.evaluate_objective(
                     X=X_tilde_new, problem_inputs=compressed_inputs
                 )
@@ -1360,7 +1398,7 @@ class DASFMultiVar(DASF):
             i += 1
 
             if (
-                hasattr(self.problem, "evaluate_objective")
+                self.objective_provided
                 and (self.dasf_convergence_params.objective_tolerance is not None)
                 and (
                     np.absolute(f_new - f)
@@ -1382,7 +1420,7 @@ class DASFMultiVar(DASF):
                 break
 
             X = X_new.copy()
-            if hasattr(self.problem, "evaluate_objective"):
+            if self.objective_provided:
                 f = f_new
 
         if self.dynamic_plot:
@@ -1431,9 +1469,11 @@ class DASFMultiVar(DASF):
                 raise ValueError(
                     f"The initial estimate of the variable corresponding to input {input_id} does not have the correct shape for the problem."
                 )
-        if not hasattr(self.problem, "solve"):
+        if not is_method_overridden(
+            instance=self.problem, base_class=OptimizationProblem, method_name="solve"
+        ):
             raise ValueError("The problem does not have a solve method.")
-        if not hasattr(self.problem, "evaluate_objective"):
+        if not self.objective_provided:
             logger.warning(
                 "The problem does not have an evaluate_objective method. The objective will not be evaluated."
             )

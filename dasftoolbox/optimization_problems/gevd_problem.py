@@ -1,7 +1,10 @@
 import numpy as np
 import scipy
 
-from dasftoolbox.optimization_problems.optimization_problem import OptimizationProblem
+from dasftoolbox.optimization_problems.optimization_problem import (
+    ConstraintType,
+    OptimizationProblem,
+)
 from dasftoolbox.problem_settings import ConvergenceParameters, ProblemInputs
 from dasftoolbox.utils import autocorrelation_matrix
 
@@ -120,3 +123,16 @@ class GEVDProblem(OptimizationProblem):
                 X_current[:, col] = -X_current[:, col]
 
         return X_current
+
+    def get_problem_constraints(self, problem_inputs: ProblemInputs) -> ConstraintType:
+        V = problem_inputs.fused_signals[1]
+        Rvv = autocorrelation_matrix(V)
+
+        def equality_constraint(X: np.ndarray) -> np.ndarray:
+            return X.T @ Rvv @ X - np.eye(self.nb_filters)
+
+        return equality_constraint, None
+
+    get_problem_constraints.__doc__ = (
+        OptimizationProblem.get_problem_constraints.__doc__
+    )

@@ -85,12 +85,16 @@
 <span class="kn">from</span> <span class="nn">matplotlib.lines</span> <span class="kn">import</span> <span class="n">Line2D</span>
 
 <span class="kn">from</span> <span class="nn">dasftoolbox.data_retrievers.data_retriever</span> <span class="kn">import</span> <span class="n">DataRetriever</span>
-<span class="kn">from</span> <span class="nn">dasftoolbox.optimization_problems.optimization_problem</span> <span class="kn">import</span> <span class="n">OptimizationProblem</span>
+<span class="kn">from</span> <span class="nn">dasftoolbox.optimization_problems.optimization_problem</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">ConstraintType</span><span class="p">,</span>
+    <span class="n">OptimizationProblem</span><span class="p">,</span>
+<span class="p">)</span>
 <span class="kn">from</span> <span class="nn">dasftoolbox.problem_settings</span> <span class="kn">import</span> <span class="p">(</span>
     <span class="n">ConvergenceParameters</span><span class="p">,</span>
     <span class="n">NetworkGraph</span><span class="p">,</span>
     <span class="n">ProblemInputs</span><span class="p">,</span>
 <span class="p">)</span>
+<span class="kn">from</span> <span class="nn">dasftoolbox.utils</span> <span class="kn">import</span> <span class="n">is_method_overridden</span>
 
 <span class="n">logging</span><span class="o">.</span><span class="n">basicConfig</span><span class="p">(</span><span class="n">level</span><span class="o">=</span><span class="n">logging</span><span class="o">.</span><span class="n">INFO</span><span class="p">)</span>
 <span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
@@ -254,6 +258,25 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">f_over_iterations</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">X_star_over_iterations</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">f_star_over_iterations</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">objective_provided</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="kc">True</span>
+            <span class="k">if</span> <span class="n">is_method_overridden</span><span class="p">(</span>
+                <span class="n">instance</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">problem</span><span class="p">,</span>
+                <span class="n">base_class</span><span class="o">=</span><span class="n">OptimizationProblem</span><span class="p">,</span>
+                <span class="n">method_name</span><span class="o">=</span><span class="s2">&quot;evaluate_objective&quot;</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="k">else</span> <span class="kc">False</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">constraints_satisfied</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">constraints_provided</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="kc">True</span>
+            <span class="k">if</span> <span class="n">is_method_overridden</span><span class="p">(</span>
+                <span class="n">instance</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">problem</span><span class="p">,</span>
+                <span class="n">base_class</span><span class="o">=</span><span class="n">OptimizationProblem</span><span class="p">,</span>
+                <span class="n">method_name</span><span class="o">=</span><span class="s2">&quot;get_problem_constraints&quot;</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="k">else</span> <span class="kc">False</span>
+        <span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_validate_problem</span><span class="p">()</span>
 
@@ -347,7 +370,7 @@
 <span class="sd">        Returns the sequence :math:`|f(X^{i})-f(X^*)|`.</span>
 <span class="sd">        If there are multiple variables, the variables are first stacked vertically.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">problem</span><span class="p">,</span> <span class="s2">&quot;evaluate_objective&quot;</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">objective_provided</span><span class="p">:</span>
             <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">X_over_iterations</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
                 <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
                     <span class="s2">&quot;No iterates have been computed, use the run method first.&quot;</span>
@@ -391,7 +414,7 @@
             <span class="n">problem_inputs</span><span class="o">=</span><span class="n">problem_inputs</span><span class="p">,</span> <span class="n">initial_estimate</span><span class="o">=</span><span class="n">X</span>
         <span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">X_star_over_iterations</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">X_star_current_window</span><span class="p">)</span>
-        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">problem</span><span class="p">,</span> <span class="s2">&quot;evaluate_objective&quot;</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">objective_provided</span><span class="p">:</span>
             <span class="n">f</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">problem</span><span class="o">.</span><span class="n">evaluate_objective</span><span class="p">(</span><span class="n">X</span><span class="o">=</span><span class="n">X</span><span class="p">,</span> <span class="n">problem_inputs</span><span class="o">=</span><span class="n">problem_inputs</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">f_over_iterations</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">f_star_over_iterations</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
@@ -461,13 +484,19 @@
             <span class="c1"># Global variable</span>
             <span class="n">X_new</span> <span class="o">=</span> <span class="n">Cq</span> <span class="o">@</span> <span class="n">X_tilde_new</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">X_over_iterations</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">X_new</span><span class="p">)</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">constraints_provided</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">constraints_satisfied</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">problem</span><span class="o">.</span><span class="n">X_satisfies_constraints</span><span class="p">(</span>
+                        <span class="n">X</span><span class="o">=</span><span class="n">X_new</span><span class="p">,</span> <span class="n">problem_inputs</span><span class="o">=</span><span class="n">problem_inputs</span>
+                    <span class="p">)</span>
+                <span class="p">)</span>
             <span class="n">X_star_current_window</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">problem</span><span class="o">.</span><span class="n">resolve_ambiguity</span><span class="p">(</span>
                 <span class="n">X_reference</span><span class="o">=</span><span class="n">X_new</span><span class="p">,</span>
                 <span class="n">X_current</span><span class="o">=</span><span class="n">X_star_current_window</span><span class="p">,</span>
                 <span class="n">updating_node</span><span class="o">=</span><span class="n">updating_node</span><span class="p">,</span>
             <span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">X_star_over_iterations</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">X_star_current_window</span><span class="p">)</span>
-            <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">problem</span><span class="p">,</span> <span class="s2">&quot;evaluate_objective&quot;</span><span class="p">):</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">objective_provided</span><span class="p">:</span>
                 <span class="n">f_new</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">problem</span><span class="o">.</span><span class="n">evaluate_objective</span><span class="p">(</span>
                     <span class="n">X</span><span class="o">=</span><span class="n">X_tilde_new</span><span class="p">,</span> <span class="n">problem_inputs</span><span class="o">=</span><span class="n">compressed_inputs</span>
                 <span class="p">)</span>
@@ -493,7 +522,7 @@
             <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
 
             <span class="k">if</span> <span class="p">(</span>
-                <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">problem</span><span class="p">,</span> <span class="s2">&quot;evaluate_objective&quot;</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">objective_provided</span>
                 <span class="ow">and</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dasf_convergence_params</span><span class="o">.</span><span class="n">objective_tolerance</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">)</span>
                 <span class="ow">and</span> <span class="p">(</span>
                     <span class="n">np</span><span class="o">.</span><span class="n">absolute</span><span class="p">(</span><span class="n">f_new</span> <span class="o">-</span> <span class="n">f</span><span class="p">)</span>
@@ -515,7 +544,7 @@
                 <span class="k">break</span>
 
             <span class="n">X</span> <span class="o">=</span> <span class="n">X_new</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
-            <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">problem</span><span class="p">,</span> <span class="s2">&quot;evaluate_objective&quot;</span><span class="p">):</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">objective_provided</span><span class="p">:</span>
                 <span class="n">f</span> <span class="o">=</span> <span class="n">f_new</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">dynamic_plot</span><span class="p">:</span>
@@ -1015,9 +1044,11 @@
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
                 <span class="s2">&quot;The initial estimate does not have the correct shape for the problem.&quot;</span>
             <span class="p">)</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">problem</span><span class="p">,</span> <span class="s2">&quot;solve&quot;</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">is_method_overridden</span><span class="p">(</span>
+            <span class="n">instance</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">problem</span><span class="p">,</span> <span class="n">base_class</span><span class="o">=</span><span class="n">OptimizationProblem</span><span class="p">,</span> <span class="n">method_name</span><span class="o">=</span><span class="s2">&quot;solve&quot;</span>
+        <span class="p">):</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;The problem does not have a solve method.&quot;</span><span class="p">)</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">problem</span><span class="p">,</span> <span class="s2">&quot;evaluate_objective&quot;</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">objective_provided</span><span class="p">:</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
                 <span class="s2">&quot;The problem does not have an evaluate_objective method. The objective will not be evaluated.&quot;</span>
             <span class="p">)</span></div>
@@ -1027,8 +1058,7 @@
 <a class="viewcode-back" href="../../Documentation/dasf.html#dasftoolbox.dasf.DASF.number_of_constraints_valid_for_convergence">[docs]</a>
     <span class="k">def</span> <span class="nf">number_of_constraints_valid_for_convergence</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
-        <span class="n">constraints</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]</span>
-        <span class="o">|</span> <span class="nb">list</span><span class="p">[</span><span class="n">Callable</span><span class="p">[[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]],</span>
+        <span class="n">constraints</span><span class="p">:</span> <span class="n">ConstraintType</span><span class="p">,</span>
         <span class="n">return_nb_constraints</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span> <span class="o">|</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">bool</span><span class="p">,</span> <span class="nb">int</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
@@ -1239,6 +1269,8 @@
             <span class="n">batch_index</span> <span class="o">+=</span> <span class="mi">1</span>
         <span class="n">batch_list</span> <span class="o">=</span> <span class="n">batch_list</span><span class="p">[:</span> <span class="bp">self</span><span class="o">.</span><span class="n">total_iterations</span><span class="p">]</span>
         <span class="n">df_summary</span><span class="p">[</span><span class="s2">&quot;batch&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">batch_list</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">constraints_provided</span><span class="p">:</span>
+            <span class="n">df_summary</span><span class="p">[</span><span class="s2">&quot;constraints_satisfied&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">constraints_satisfied</span>
 
         <span class="k">return</span> <span class="n">df_summary</span></div>
 </div>
@@ -1365,7 +1397,7 @@
             <span class="n">problem_inputs</span><span class="o">=</span><span class="n">problem_inputs</span><span class="p">,</span> <span class="n">initial_estimate</span><span class="o">=</span><span class="n">X</span>
         <span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">X_star_over_iterations</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">X_star_current_window</span><span class="p">)</span>
-        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">problem</span><span class="p">,</span> <span class="s2">&quot;evaluate_objective&quot;</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">objective_provided</span><span class="p">:</span>
             <span class="n">f</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">problem</span><span class="o">.</span><span class="n">evaluate_objective</span><span class="p">(</span><span class="n">X</span><span class="o">=</span><span class="n">X</span><span class="p">,</span> <span class="n">problem_inputs</span><span class="o">=</span><span class="n">problem_inputs</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">f_over_iterations</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">f_star_over_iterations</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
@@ -1459,13 +1491,19 @@
             <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nb_variables</span><span class="p">):</span>
                 <span class="n">X_new</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Cq</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">@</span> <span class="n">X_tilde_new</span><span class="p">[</span><span class="n">k</span><span class="p">])</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">X_over_iterations</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">X_new</span><span class="p">)</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">constraints_provided</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">constraints_satisfied</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">problem</span><span class="o">.</span><span class="n">X_satisfies_constraints</span><span class="p">(</span>
+                        <span class="n">X</span><span class="o">=</span><span class="n">X_new</span><span class="p">,</span> <span class="n">problem_inputs</span><span class="o">=</span><span class="n">problem_inputs</span>
+                    <span class="p">)</span>
+                <span class="p">)</span>
             <span class="n">X_star_current_window</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">problem</span><span class="o">.</span><span class="n">resolve_ambiguity</span><span class="p">(</span>
                 <span class="n">X_reference</span><span class="o">=</span><span class="n">X_new</span><span class="p">,</span>
                 <span class="n">X_current</span><span class="o">=</span><span class="n">X_star_current_window</span><span class="p">,</span>
                 <span class="n">updating_node</span><span class="o">=</span><span class="n">updating_node</span><span class="p">,</span>
             <span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">X_star_over_iterations</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">X_star_current_window</span><span class="p">)</span>
-            <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">problem</span><span class="p">,</span> <span class="s2">&quot;evaluate_objective&quot;</span><span class="p">):</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">objective_provided</span><span class="p">:</span>
                 <span class="n">f_new</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">problem</span><span class="o">.</span><span class="n">evaluate_objective</span><span class="p">(</span>
                     <span class="n">X</span><span class="o">=</span><span class="n">X_tilde_new</span><span class="p">,</span> <span class="n">problem_inputs</span><span class="o">=</span><span class="n">compressed_inputs</span>
                 <span class="p">)</span>
@@ -1498,7 +1536,7 @@
             <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
 
             <span class="k">if</span> <span class="p">(</span>
-                <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">problem</span><span class="p">,</span> <span class="s2">&quot;evaluate_objective&quot;</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">objective_provided</span>
                 <span class="ow">and</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dasf_convergence_params</span><span class="o">.</span><span class="n">objective_tolerance</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">)</span>
                 <span class="ow">and</span> <span class="p">(</span>
                     <span class="n">np</span><span class="o">.</span><span class="n">absolute</span><span class="p">(</span><span class="n">f_new</span> <span class="o">-</span> <span class="n">f</span><span class="p">)</span>
@@ -1520,7 +1558,7 @@
                 <span class="k">break</span>
 
             <span class="n">X</span> <span class="o">=</span> <span class="n">X_new</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
-            <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">problem</span><span class="p">,</span> <span class="s2">&quot;evaluate_objective&quot;</span><span class="p">):</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">objective_provided</span><span class="p">:</span>
                 <span class="n">f</span> <span class="o">=</span> <span class="n">f_new</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">dynamic_plot</span><span class="p">:</span>
@@ -1572,9 +1610,11 @@
                 <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
                     <span class="sa">f</span><span class="s2">&quot;The initial estimate of the variable corresponding to input </span><span class="si">{</span><span class="n">input_id</span><span class="si">}</span><span class="s2"> does not have the correct shape for the problem.&quot;</span>
                 <span class="p">)</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">problem</span><span class="p">,</span> <span class="s2">&quot;solve&quot;</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">is_method_overridden</span><span class="p">(</span>
+            <span class="n">instance</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">problem</span><span class="p">,</span> <span class="n">base_class</span><span class="o">=</span><span class="n">OptimizationProblem</span><span class="p">,</span> <span class="n">method_name</span><span class="o">=</span><span class="s2">&quot;solve&quot;</span>
+        <span class="p">):</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;The problem does not have a solve method.&quot;</span><span class="p">)</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">problem</span><span class="p">,</span> <span class="s2">&quot;evaluate_objective&quot;</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">objective_provided</span><span class="p">:</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
                 <span class="s2">&quot;The problem does not have an evaluate_objective method. The objective will not be evaluated.&quot;</span>
             <span class="p">)</span></div>
