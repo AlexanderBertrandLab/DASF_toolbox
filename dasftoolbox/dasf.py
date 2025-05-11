@@ -932,21 +932,21 @@ class DASF:
         """
         nb_filters = self.problem.nb_filters
         network_graph = self.network_graph
-        dummy_X = np.empty(
-            network_graph.nb_sensors_total, nb_filters if nb_filters > 1 else None
-        )
+        dummy_X = np.empty((network_graph.nb_sensors_total, nb_filters))
         random_X = np.random.standard_normal(dummy_X.shape)
         nb_constraints = 0
         if isinstance(constraints, Callable):
             constraints = [constraints]
         for constraint in constraints:
-            contraint_dummy = constraint(dummy_X).reshape(-1, 1)
+            constraint_dummy = constraint(dummy_X)
             constraint_random = constraint(random_X)
-            nb_constraint = contraint_dummy.size
-            if contraint_dummy.shape[0] == contraint_dummy.shape[1] and np.allclose(
-                constraint_random, constraint_random.T, atol=1e-8
+            nb_constraint = constraint_dummy.size
+            if (
+                constraint_dummy.size != 1
+                and constraint_dummy.shape[0] == constraint_dummy.shape[1]
+                and np.allclose(constraint_random, constraint_random.T, atol=1e-8)
             ):
-                constraint_size = contraint_dummy.shape[0]
+                constraint_size = constraint_dummy.shape[0]
                 nb_constraint = constraint_size * (constraint_size + 1) / 2
             nb_constraints += nb_constraint
 
