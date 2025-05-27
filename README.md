@@ -24,7 +24,7 @@ A documentation is available in the link below (still under construction):
 
 [![Documentation Status](https://readthedocs.org/projects/dasf-toolbox/badge/?version=latest)](https://dasf-toolbox.readthedocs.io/en/latest/)
 
-![](https://github.com/CemMusluoglu/DASF_toolbox/blob/main/assets/dasf_gif.gif)
+<video src="assets/dasf_video.mp4" autoplay loop muted playsinline></video>
 
 **Description:**
 
