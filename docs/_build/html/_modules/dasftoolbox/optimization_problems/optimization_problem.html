@@ -90,6 +90,13 @@
     <span class="n">Callable</span><span class="p">[[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">|</span> <span class="nb">list</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]],</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]</span>
     <span class="o">|</span> <span class="nb">list</span><span class="p">[</span><span class="n">Callable</span><span class="p">[[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">|</span> <span class="nb">list</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]],</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]]</span>
 <span class="p">)</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">ConstraintType</span>
+<span class="sd">    A callable or list of callables representing constraints.</span>
+
+<span class="sd">    Each callable takes a NumPy array or list of arrays and returns a NumPy array.</span>
+<span class="sd">    This is used to represent the equality and inequality constraints of the optimization problem.</span>
+<span class="sd">&quot;&quot;&quot;</span>
 
 
 <div class="viewcode-block" id="OptimizationProblem">
@@ -232,6 +239,8 @@
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Return the constraints of the optimization problem. By convention, every ineuality constraint is given by :math:`h(X)\leq 0`.</span>
 
+<span class="sd">        If the problem is unconstrained, the method should return None.</span>
+
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
 <span class="sd">        problem_inputs : ProblemInputs or list of ProblemInputs</span>
@@ -271,7 +280,6 @@
         <span class="n">tolerance</span> <span class="o">=</span> <span class="mf">1e-8</span>
         <span class="n">all_constraints</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_problem_constraints</span><span class="p">(</span><span class="n">problem_inputs</span><span class="o">=</span><span class="n">problem_inputs</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">all_constraints</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Problem is unconstrained.&quot;</span><span class="p">)</span>
             <span class="k">return</span> <span class="kc">True</span>
         <span class="n">equality_constraints</span><span class="p">,</span> <span class="n">inequality_constraints</span> <span class="o">=</span> <span class="n">all_constraints</span>
         <span class="k">if</span> <span class="n">equality_constraints</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">inequality_constraints</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>

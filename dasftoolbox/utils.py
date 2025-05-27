@@ -119,7 +119,7 @@ def cross_covariance_matrix(
     )
 
 
-def normalize(data: np.ndarray, scale: float = 1):
+def normalize(data: np.ndarray, scale: float = 1) -> np.ndarray:
     """
     Normalize the data to be zero-mean and of specified variance.
 

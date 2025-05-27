@@ -16,6 +16,13 @@ ConstraintType = (
     Callable[[np.ndarray | list[np.ndarray]], np.ndarray]
     | list[Callable[[np.ndarray | list[np.ndarray]], np.ndarray]]
 )
+"""
+ConstraintType
+    A callable or list of callables representing constraints.
+
+    Each callable takes a NumPy array or list of arrays and returns a NumPy array.
+    This is used to represent the equality and inequality constraints of the optimization problem.
+"""
 
 
 class OptimizationProblem(ABC):
@@ -145,6 +152,8 @@ class OptimizationProblem(ABC):
         """
         Return the constraints of the optimization problem. By convention, every ineuality constraint is given by :math:`h(X)\leq 0`.
 
+        If the problem is unconstrained, the method should return None.
+
         Parameters
         ----------
         problem_inputs : ProblemInputs or list of ProblemInputs
@@ -181,7 +190,6 @@ class OptimizationProblem(ABC):
         tolerance = 1e-8
         all_constraints = self.get_problem_constraints(problem_inputs=problem_inputs)
         if all_constraints is None:
-            logger.info("Problem is unconstrained.")
             return True
         equality_constraints, inequality_constraints = all_constraints
         if equality_constraints is None and inequality_constraints is None:
