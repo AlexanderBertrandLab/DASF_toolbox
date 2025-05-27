@@ -28,7 +28,7 @@ A documentation is available in the link below (still under construction):
 
 **Description:**
 
-Formally,  DASF framework is built to solve optimization problems of the following form:
+Formally, the DASF framework is built to solve optimization problems of the following form:
 
         P: min_X f_hat ( X'*y(t), X'*B) = f(X)
            s.t.  h_j ( X'*y(t), X'*B) <= 0 for inequalities j,
